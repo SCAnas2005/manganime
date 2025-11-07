@@ -1,14 +1,26 @@
 import 'dart:convert';
-
 import 'package:flutter_application_1/anime.dart';
 import 'package:flutter_application_1/animeDetail.dart';
 import 'package:flutter_application_1/services/ApiService.dart';
 import 'package:http/http.dart' as http;
 
+/// Service d’accès à l’API **Jikan (MyAnimeList)**.
+///
+/// Fournit des méthodes pour :
+/// — Récupérer la liste des animes populaires.
+/// — Obtenir les détails complets d’un anime.
+///
+/// Cette classe implémente [ApiService].
 class JikanService extends ApiService {
+  /// URL de base de l’API Jikan.
   @override
   final String baseUrl = "https://api.jikan.moe/v4";
 
+  /// Récupère une liste d’animes les plus populaires depuis Jikan.
+  ///
+  /// [page] : numéro de page à charger (par défaut `1`).
+  ///
+  /// Retourne une liste d’objets [Anime].
   @override
   Future<List<Anime>> getTopAnime({int page = 1}) async {
     final url = Uri.parse('$baseUrl/top/anime?page=$page');
@@ -18,6 +30,7 @@ class JikanService extends ApiService {
       final jsonData = json.decode(response.body);
       final List<dynamic> animeList = jsonData['data'];
 
+      // Conversion du JSON en liste d’objets Anime
       final List<Anime> animes = animeList
           .map<Anime>((anime) {
             return jsonToAnime(anime);
@@ -31,6 +44,9 @@ class JikanService extends ApiService {
     }
   }
 
+  /// Récupère les informations détaillées d’un anime via son [id MAL].
+  ///
+  /// Retourne un objet [AnimeDetail].
   @override
   Future<AnimeDetail> getFullDetailAnime(int id) async {
     final url = Uri.parse('$baseUrl/anime/$id');
@@ -46,6 +62,7 @@ class JikanService extends ApiService {
     }
   }
 
+  /// Convertit un objet JSON (anime basique) en instance de [Anime].
   @override
   Anime jsonToAnime(Map<String, dynamic> json) {
     return Anime(
@@ -56,6 +73,7 @@ class JikanService extends ApiService {
     );
   }
 
+  /// Convertit un objet JSON détaillé en instance de [AnimeDetail].
   @override
   AnimeDetail jsonToAnimeDetail(Map<String, dynamic> json) {
     return AnimeDetail(

@@ -5,13 +5,20 @@ import 'package:flutter_application_1/animeDetail.dart';
 import 'package:flutter_application_1/services/ApiService.dart';
 import 'package:http/http.dart' as http;
 
+/// Service d’accès à l’API **AniList** via GraphQL.
+///
+/// Permet de récupérer la liste des animes populaires
+/// et les informations détaillées d’un anime spécifique.
+/// Implémente l’interface [ApiService].
 class AniListService implements ApiService {
+  /// URL de base pour les requêtes GraphQL AniList.
   @override
   String get baseUrl => "https://graphql.anilist.co";
 
-  // -------------------
-  // Récupérer les animes populaires
-  // -------------------
+  /// Récupère une liste paginée des animes les plus populaires.
+  ///
+  /// [page] : numéro de page (par défaut 1)
+  /// [perPage] : nombre d’éléments par page (par défaut 20)
   @override
   Future<List<Anime>> getTopAnime({int page = 1, perPage = 20}) async {
     final query = r'''
@@ -55,9 +62,7 @@ class AniListService implements ApiService {
     }).toList();
   }
 
-  // -------------------
-  // Récupérer le détail complet d’un anime
-  // -------------------
+  /// Récupère les informations détaillées d’un anime à partir de son [id].
   @override
   Future<AnimeDetail> getFullDetailAnime(int id) async {
     const query = r'''
@@ -98,6 +103,7 @@ class AniListService implements ApiService {
     return jsonToAnimeDetail(json);
   }
 
+  /// Convertit un JSON d’anime simple en objet [Anime].
   @override
   Anime jsonToAnime(Map<String, dynamic> json) {
     final title =
@@ -111,6 +117,7 @@ class AniListService implements ApiService {
     return Anime(id: json["id"], title: title, imageUrl: imageUrl, score: 0);
   }
 
+  /// Convertit un JSON détaillé d’un anime en objet [AnimeDetail].
   @override
   AnimeDetail jsonToAnimeDetail(Map<String, dynamic> json) {
     return AnimeDetail(
