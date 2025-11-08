@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/anime.dart';
+import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/animeDetail.dart';
 import 'package:flutter_application_1/services/JikanService.dart';
 import 'package:flutter_application_1/services/translator.dart';

@@ -1,4 +1,4 @@
-import 'package:flutter_application_1/anime.dart';
+import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/animeDetail.dart';
 
 /// Interface abstraite définissant la structure de base pour tout service d’API
