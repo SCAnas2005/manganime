@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/views/animeView/animeViewModel.dart';
+import 'package:flutter_application_1/viewmodels/animeViewModel.dart';
 import 'package:flutter_application_1/widgets/animeCard.dart';
 import 'package:provider/provider.dart';
 
