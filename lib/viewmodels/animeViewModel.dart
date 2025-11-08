@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/services/JikanService.dart';
+import 'package:flutter_application_1/views/AnimeInfo.dart';
 
 class AnimeViewModel extends ChangeNotifier {
   final JikanService _service = JikanService();
@@ -46,4 +47,36 @@ class AnimeViewModel extends ChangeNotifier {
     _hasMore = true;
     fetchAnimes();
   }
+
+  void openAnimePage(BuildContext context, Anime anime) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AnimeInfoView(anime)),
+    );
+  }
 }
+
+// class AnimeViewModel extends ChangeNotifier {
+//   final JikanService service = JikanService();
+
+//   List<Anime> popular = [];
+//   List<Anime> trending = [];
+//   List<Anime> mostViewed = [];
+//   bool isLoading = false;
+
+//   AnimeViewModel() {
+//     fetchAll();
+//   }
+
+//   Future<void> fetchAll() async {
+//     isLoading = true;
+//     notifyListeners();
+
+//     popular = await service.getTopAnime(page: 1);
+//     trending = await service.getTopAnime(page: 2);
+//     mostViewed = await service.getTopAnime(page: 3);
+
+//     isLoading = false;
+//     notifyListeners();
+//   }
+// }
