@@ -1,55 +1,17 @@
-// lib/widgets/like_animation_widget.dart
 import 'package:flutter/material.dart';
 
-class LikeAnimationWidget extends StatefulWidget {
-  final String imageUrl;
-  final VoidCallback? onLiked;
+class LikeAnimationWidget extends StatelessWidget {
+  final bool show;
+  final double size;
 
-  const LikeAnimationWidget({super.key, required this.imageUrl, this.onLiked});
-
-  @override
-  State<LikeAnimationWidget> createState() => LikeAnimationWidgetState();
-}
-
-class LikeAnimationWidgetState extends State<LikeAnimationWidget> {
-  bool showHeart = false;
-
-  void handleDoubleTap() {
-    setState(() {
-      showHeart = true;
-    });
-
-    widget.onLiked?.call();
-
-    Future.delayed(const Duration(milliseconds: 700), () {
-      if (mounted) {
-        setState(() {
-          showHeart = false;
-        });
-      }
-    });
-  }
+  const LikeAnimationWidget({super.key, required this.show, this.size = 80});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onDoubleTap: handleDoubleTap,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Image.network(widget.imageUrl),
-          AnimatedOpacity(
-            opacity: showHeart ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 200),
-            child: AnimatedScale(
-              scale: showHeart ? 1.5 : 0.5,
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeOutCubic,
-              child: const Icon(Icons.favorite, color: Colors.red, size: 100),
-            ),
-          ),
-        ],
-      ),
+    return AnimatedOpacity(
+      opacity: show ? 1.0 : 0.0,
+      duration: const Duration(milliseconds: 300),
+      child: Icon(Icons.favorite, color: Colors.red, size: size),
     );
   }
 }
