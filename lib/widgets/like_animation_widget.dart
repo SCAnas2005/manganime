@@ -8,13 +8,13 @@ class LikeAnimationWidget extends StatefulWidget {
   const LikeAnimationWidget({super.key, required this.imageUrl, this.onLiked});
 
   @override
-  State<LikeAnimationWidget> createState() => _LikeAnimationWidgetState();
+  State<LikeAnimationWidget> createState() => LikeAnimationWidgetState();
 }
 
-class _LikeAnimationWidgetState extends State<LikeAnimationWidget> {
+class LikeAnimationWidgetState extends State<LikeAnimationWidget> {
   bool showHeart = false;
 
-  void _handleDoubleTap() {
+  void handleDoubleTap() {
     setState(() {
       showHeart = true;
     });
@@ -33,7 +33,7 @@ class _LikeAnimationWidgetState extends State<LikeAnimationWidget> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onDoubleTap: _handleDoubleTap,
+      onDoubleTap: handleDoubleTap,
       child: Stack(
         alignment: Alignment.center,
         children: [
