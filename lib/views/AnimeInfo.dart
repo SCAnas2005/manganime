@@ -33,6 +33,9 @@ class AnimeInfoViewState extends State<AnimeInfoView> {
   /// Future contenant la traduction française du synopsis.
   late Future<String> _translatedSynopsisFuture;
 
+  /// État du bouton like
+  bool isLiked = false;
+
   /// Initialisation du chargement des données et de la traduction.
   @override
   void initState() {
@@ -97,6 +100,28 @@ class AnimeInfoViewState extends State<AnimeInfoView> {
                 // Statut
                 Text("Status : ${detail.status}"),
                 const SizedBox(height: 8),
+                // Bouton like
+                Transform.translate(
+                  offset: const Offset(0, -60),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          Icons.favorite,
+                          color: isLiked ? Colors.red : Colors.grey,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            isLiked = !isLiked;
+                          });
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      Text(isLiked ? "Vous avez aimé" : "Like"),
+                    ],
+                  ),
+                ),
 
                 // Synopsis traduit
                 FutureBuilder<String>(
