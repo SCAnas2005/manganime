@@ -82,6 +82,7 @@ class AnimeInfoViewState extends State<AnimeInfoView> {
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+
               children: [
                 Image.network(detail.imageUrl),
                 const SizedBox(height: 16),
