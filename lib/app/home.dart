@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/bottom_nav/bottomNavView.dart';
-import 'package:flutter_application_1/views/animeView.dart';
+import 'package:flutter_application_1/views/anime_view.dart';
 
 class HomePage extends StatefulWidget {
   final String title;

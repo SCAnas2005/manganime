@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
-import 'package:flutter_application_1/viewmodels/animeViewModel.dart';
-import 'package:flutter_application_1/widgets/animeCard.dart';
+import 'package:flutter_application_1/viewmodels/anime_view_model.dart';
+import 'package:flutter_application_1/widgets/anime_card.dart';
 import 'package:provider/provider.dart';
 
 class AnimeView extends StatelessWidget {
