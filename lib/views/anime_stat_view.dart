@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter_application_1/viewmodels/AnimeStatModel.dart';
-import 'package:flutter_application_1/widgets/animeStatCard.dart';
+import 'package:flutter_application_1/viewmodels/anime_stat_model.dart';
+import 'package:flutter_application_1/widgets/anime_stat_card.dart';
 
 class AnimeStatView extends StatefulWidget {
   @override
