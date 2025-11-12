@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/bottom_nav/bottomNavView.dart';
 import 'package:flutter_application_1/views/animeView.dart';
+import 'package:flutter_application_1/views/animeStatView.dart';
 
 class HomePage extends StatefulWidget {
   final String title;
@@ -115,7 +116,7 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [const AnimeView()];
+  final List<Widget> _pages = [const AnimeView(), Container(), Container(), AnimeStatView()];
 
   @override
   Widget build(BuildContext context) {
