@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class LikeAnimationWidget extends StatelessWidget {
+class LikeAnimation extends StatelessWidget {
   final bool show;
   final double size;
 
-  const LikeAnimationWidget({super.key, required this.show, this.size = 80});
+  const LikeAnimation({super.key, required this.show, this.size = 80});
 
   @override
   Widget build(BuildContext context) {

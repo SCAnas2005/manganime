@@ -11,7 +11,7 @@ class AnimeViewModel extends ChangeNotifier {
   bool _isLoading = false;
   bool _hasMore = true;
 
-  bool isLiked = false;
+  // bool isLiked = false;
 
   bool get isLoading => _isLoading;
   bool get hasMore => _hasMore;
@@ -57,20 +57,20 @@ class AnimeViewModel extends ChangeNotifier {
     );
   }
 
-  void toggleLike() {
-    isLiked = !isLiked;
-    notifyListeners();
-  }
+  // void toggleLike() {
+  //   isLiked = !isLiked;
+  //   notifyListeners();
+  // }
 
-  void likeAnimeOnDoubleTap({Duration duration = const Duration(seconds: 1)}) {
-    isLiked = true;
-    notifyListeners();
+  // void likeAnimeOnDoubleTap({Duration duration = const Duration(seconds: 1)}) {
+  //   isLiked = true;
+  //   notifyListeners();
 
-    Future.delayed(duration, () {
-      isLiked = false;
-      notifyListeners();
-    });
-  }
+  //   Future.delayed(duration, () {
+  //     isLiked = false;
+  //     notifyListeners();
+  //   });
+  // }
 }
 
 // class AnimeViewModel extends ChangeNotifier {

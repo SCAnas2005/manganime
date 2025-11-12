@@ -12,6 +12,7 @@ class AnimeInfoViewModel extends ChangeNotifier {
   bool hasError = false;
 
   bool isLiked = false;
+  bool showLikeAnimation = false;
 
   Future<void> loadAnimeDetail(int animeId) async {
     isLoading = true;
@@ -37,11 +38,12 @@ class AnimeInfoViewModel extends ChangeNotifier {
   }
 
   void likeAnimeOnDoubleTap({Duration duration = const Duration(seconds: 1)}) {
-    isLiked = true;
+    showLikeAnimation = true;
     notifyListeners();
+    isLiked = true;
 
     Future.delayed(duration, () {
-      isLiked = false;
+      showLikeAnimation = false;
       notifyListeners();
     });
   }
