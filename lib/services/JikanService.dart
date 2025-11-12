@@ -22,8 +22,31 @@ class JikanService extends ApiService {
   ///
   /// Retourne une liste d’objets [Anime].
   @override
-  Future<List<Anime>> getTopAnime({int page = 1}) async {
-    final url = Uri.parse('$baseUrl/top/anime?page=$page');
+  Future<List<Anime>> getTopAnime({
+    int page = 1,
+    String? filter, // popular, trending, upcoming, etc.
+    String? type, // tv, movie, ova, etc.
+    String? status, // airing, finished, etc.
+    String? season, // winter, spring, summer, fall
+    int? year,
+    int? month,
+    bool sfw = true,
+  }) async {
+    // Construction dynamique des paramètres de la query
+    final queryParameters = <String, String>{
+      'page': page.toString(),
+      if (filter != null) 'filter': filter,
+      if (type != null) 'type': type,
+      if (status != null) 'status': status,
+      if (season != null) 'season': season,
+      if (year != null) 'year': year.toString(),
+      if (month != null) 'month': month.toString(),
+      'sfw': sfw.toString(),
+    };
+
+    final url = Uri.parse(
+      '$baseUrl/top/anime',
+    ).replace(queryParameters: queryParameters);
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -69,7 +92,8 @@ class JikanService extends ApiService {
       id: json["mal_id"],
       title: json['title_english']?.toString() ?? '',
       imageUrl: json['images']?['jpg']?['image_url']?.toString() ?? '',
-      score: 0,
+      status: json["status"] ?? "",
+      score: (json["score"] ?? 0).toDouble(),
     );
   }
 
