@@ -69,7 +69,7 @@ class JikanService extends ApiService {
       id: json["mal_id"],
       title: json['title_english']?.toString() ?? '',
       imageUrl: json['images']?['jpg']?['image_url']?.toString() ?? '',
-      score: 0,
+      score: (json["score"] ?? 0).toDouble(),
     );
   }
 

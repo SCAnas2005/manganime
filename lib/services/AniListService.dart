@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_application_1/models/AnimeDetail.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/services/ApiService.dart';
+import 'package:flutter_application_1/services/JikanService.dart';
 import 'package:http/http.dart' as http;
 
 /// Service d’accès à l’API **AniList** via GraphQL.
