@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/services/JikanService.dart';
-import 'package:flutter_application_1/views/AnimeInfo.dart';
+import 'package:flutter_application_1/views/anime_info_view.dart';
 
 class AnimeViewModel extends ChangeNotifier {
   final JikanService _service = JikanService();
@@ -145,6 +145,21 @@ class AnimeViewModel extends ChangeNotifier {
       MaterialPageRoute(builder: (context) => AnimeInfoView(anime)),
     );
   }
+
+  // void toggleLike() {
+  //   isLiked = !isLiked;
+  //   notifyListeners();
+  // }
+
+  // void likeAnimeOnDoubleTap({Duration duration = const Duration(seconds: 1)}) {
+  //   isLiked = true;
+  //   notifyListeners();
+
+  //   Future.delayed(duration, () {
+  //     isLiked = false;
+  //     notifyListeners();
+  //   });
+  // }
 }
 
 // class AnimeViewModel extends ChangeNotifier {
