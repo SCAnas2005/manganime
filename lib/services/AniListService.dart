@@ -15,16 +15,70 @@ class AniListService implements ApiService {
   @override
   String get baseUrl => "https://graphql.anilist.co";
 
-  /// Récupère une liste paginée des animes les plus populaires.
+  /// Récupère une liste paginée des animes depuis AniList.
   ///
-  /// [page] : numéro de page (par défaut 1)
-  /// [perPage] : nombre d’éléments par page (par défaut 20)
+  /// Permet de filtrer et trier les résultats selon différents critères.
+  ///
+  /// [page] : numéro de page à charger (par défaut `1`).
+  /// [filter] : type de tri (`popular`, `trending`, `upcoming`, etc.).
+  /// [type] : type d’anime (`TV`, `MOVIE`, `OVA`, etc.).
+  /// [status] : statut de diffusion (`RELEASING`, `FINISHED`, etc.).
+  /// [season] : saison (`WINTER`, `SPRING`, `SUMMER`, `FALL`).
+  /// [year] : année de diffusion.
+  /// [month] : mois de diffusion (non utilisé par AniList, présent pour compatibilité avec ApiService).
+  /// [sfw] : `true` pour exclure le contenu adulte, `false` pour inclure.
+  /// [perPage] : nombre d’éléments par page (par défaut `20`, utilisé uniquement par AniList).
+  ///
+  /// Retourne une liste d’objets [Anime].
   @override
-  Future<List<Anime>> getTopAnime({int page = 1, perPage = 20}) async {
-    final query = r'''
-    query($page: Int, $perPage: Int) {
-      Page(page: $page, perPage: $perPage) {
-        media(sort: POPULARITY_DESC, type: ANIME) {
+  Future<List<Anime>> getTopAnime({
+    int page = 1,
+    String? filter,
+    String? type,
+    String? status,
+    String? season,
+    int? year,
+    int? month, // Obligatoire pour correspondre à la classe mère
+    bool sfw = true,
+    int perPage = 20,
+  }) async {
+    // Construction du tri
+    final filters = <String>[];
+    if (filter != null) {
+      switch (filter.toLowerCase()) {
+        case 'popular':
+          filters.add('POPULARITY_DESC');
+          break;
+        case 'trending':
+          filters.add('TRENDING_DESC');
+          break;
+        case 'upcoming':
+          filters.add('UPCOMING_DESC');
+          break;
+        default:
+          filters.add('POPULARITY_DESC');
+      }
+    } else {
+      filters.add('POPULARITY_DESC');
+    }
+
+    final mediaFilters = <String>[];
+    if (type != null) mediaFilters.add('type: $type');
+    if (status != null) mediaFilters.add('status: $status');
+    if (season != null) mediaFilters.add('season: $season');
+    if (year != null) mediaFilters.add('seasonYear: $year');
+    // AniList n'a pas de month, on ignore ce paramètre
+    if (!sfw) mediaFilters.add('isAdult: false');
+
+    final mediaFilterString = mediaFilters.isNotEmpty
+        ? mediaFilters.join(', ')
+        : '';
+
+    final query =
+        '''
+    query(\$page: Int, \$perPage: Int) {
+      Page(page: \$page, perPage: \$perPage) {
+        media(sort: [${filters.join(', ')}]${mediaFilterString.isNotEmpty ? ', $mediaFilterString' : ''}) {
           id
           title { romaji english native }
           coverImage { large }
@@ -47,19 +101,7 @@ class AniListService implements ApiService {
     }
 
     final data = jsonDecode(response.body)['data']['Page']['media'] as List;
-    return data.map((json) {
-      final title =
-          json['title']['english'] ??
-          json['title']['romaji'] ??
-          json['title']['native'] ??
-          '';
-      return Anime(
-        id: json['id'],
-        title: title,
-        imageUrl: json['coverImage']['large'] ?? '',
-        score: 0,
-      );
-    }).toList();
+    return data.map((json) => jsonToAnime(json)).toList();
   }
 
   /// Récupère les informations détaillées d’un anime à partir de son [id].
@@ -114,7 +156,13 @@ class AniListService implements ApiService {
 
     final imageUrl = json['coverImage']['large'] ?? '';
 
-    return Anime(id: json["id"], title: title, imageUrl: imageUrl, score: 0);
+    return Anime(
+      id: json["id"],
+      title: title,
+      imageUrl: imageUrl,
+      score: 0,
+      status: json["status"] ?? "",
+    );
   }
 
   /// Convertit un JSON détaillé d’un anime en objet [AnimeDetail].

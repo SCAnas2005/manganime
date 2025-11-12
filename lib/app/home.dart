@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/bottom_nav/bottomNavView.dart';
+import 'package:flutter_application_1/viewmodels/anime_view_model.dart';
 import 'package:flutter_application_1/views/anime_view.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   final String title;
@@ -115,7 +117,12 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [const AnimeView()];
+  final List<Widget> _pages = [
+    ChangeNotifierProvider(
+      create: (_) => AnimeViewModel(),
+      child: const AnimeView(),
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {

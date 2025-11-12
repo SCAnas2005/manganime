@@ -15,6 +15,8 @@ class Anime {
   /// Note moyenne de l'anime, si disponible.
   final double? score;
 
+  final String status;
+
   /// Constructeur de la classe Anime.
   ///
   /// Tous les champs sauf [score] sont obligatoires.
@@ -22,6 +24,7 @@ class Anime {
     required this.id,
     required this.title,
     required this.imageUrl,
+    required this.status,
     this.score,
   });
 }
