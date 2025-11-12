@@ -63,22 +63,30 @@ class AnimeInfoView extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
 
-                  // Score
-                  Text("Score : ${detail.score}"),
-                  const SizedBox(height: 8),
-
-                  // Statut
-                  Text("Statut : ${detail.status}"),
-                  const SizedBox(height: 16),
-
-                  // Bouton like
+                  // Bloc Score, Statut et Like
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      LikeButton(isLiked: vm.isLiked, onTap: vm.toggleLike),
-                      Text(vm.isLiked ? "Vous avez aimé" : "Like"),
+                      // Colonne Score + Statut
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Score : ${detail.score}"),
+                          Text("Statut : ${detail.status}"),
+                        ],
+                      ),
+
+                      const Spacer(),
+                      // Bouton Like
+                      LikeButton(
+                        isLiked: vm.isLiked,
+                        onTap: vm.toggleLike,
+                        iconSize: 30,
+                      ),
                     ],
                   ),
+
+                  const SizedBox(height: 16),
 
                   const SizedBox(height: 16),
 
