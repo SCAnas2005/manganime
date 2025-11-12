@@ -27,7 +27,16 @@ abstract class ApiService {
   ///
   /// Retourne une [Future] contenant une liste d’objets [Anime].
   /// En cas d’erreur réseau ou d’erreur JSON, une exception doit être levée.
-  Future<List<Anime>> getTopAnime();
+  Future<List<Anime>> getTopAnime({
+    int page = 1,
+    String? filter, // popular, trending, upcoming, etc.
+    String? type, // tv, movie, ova, etc.
+    String? status, // airing, finished, etc.
+    String? season, // winter, spring, summer, fall
+    int? year,
+    int? month,
+    bool sfw = true,
+  });
 
   /// Récupère toutes les informations détaillées concernant un anime spécifique.
   ///

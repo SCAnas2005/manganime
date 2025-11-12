@@ -6,48 +6,139 @@ import 'package:flutter_application_1/views/AnimeInfo.dart';
 class AnimeViewModel extends ChangeNotifier {
   final JikanService _service = JikanService();
 
-  List<Anime> animes = [];
-  int _currentPage = 1;
-  bool _isLoading = false;
-  bool _hasMore = true;
+  List<Anime> popular = [];
+  List<Anime> airing = [];
+  List<Anime> mostLiked = [];
 
-  bool get isLoading => _isLoading;
-  bool get hasMore => _hasMore;
+  int _popularPage = 1;
+  int _airingPage = 1;
+  int _mostLikedPage = 1;
+
+  bool _isLoadingPopular = false;
+  bool _isLoadingAiring = false;
+  bool _isLoadingMostLiked = false;
+
+  bool get isLoadingPopular => _isLoadingPopular;
+  bool get isLoadingAiring => _isLoadingAiring;
+  bool get isLoadingMostLiked => _isLoadingMostLiked;
+
+  bool _hasMorePopular = true;
+  bool _hasMoreAiring = true;
+  bool _hasMoreMostLiked = true;
+
+  bool get hasMorePopular => _hasMorePopular;
+  bool get hasMoreAiring => _hasMoreAiring;
+  bool get hasMoreMostLiked => _hasMoreMostLiked;
 
   AnimeViewModel() {
-    fetchAnimes(); // Charger dès la création du ViewModel
+    fetchPopular();
+    fetchAiring();
+    fetchMostLiked();
   }
 
-  Future<void> fetchAnimes() async {
-    if (_isLoading || !_hasMore) return;
+  // ---------------- POPULAR ----------------
+  Future<void> fetchPopular() async {
+    if (_isLoadingPopular || !_hasMorePopular) return;
 
-    _isLoading = true;
+    _isLoadingPopular = true;
     notifyListeners();
 
     try {
-      final newAnimes = await _service.getTopAnime(page: _currentPage);
-
+      final newAnimes = await _service.getTopAnime(
+        page: _popularPage,
+        filter: "bypopularity",
+      );
       if (newAnimes.isEmpty) {
-        _hasMore = false;
+        _hasMorePopular = false;
       } else {
-        animes.addAll(newAnimes);
-        _currentPage++;
+        popular.addAll(newAnimes);
+        _popularPage++;
       }
     } catch (e) {
-      debugPrint('Erreur: $e');
+      debugPrint('Erreur fetchPopular: $e');
     }
 
-    _isLoading = false;
+    _isLoadingPopular = false;
     notifyListeners();
   }
 
-  void refresh() {
-    animes.clear();
-    _currentPage = 1;
-    _hasMore = true;
-    fetchAnimes();
+  void refreshPopular() {
+    popular.clear();
+    _popularPage = 1;
+    _hasMorePopular = true;
+    fetchPopular();
   }
 
+  // ---------------- AIRING ----------------
+  Future<void> fetchAiring() async {
+    if (_isLoadingAiring || !_hasMoreAiring) return;
+
+    _isLoadingAiring = true;
+    notifyListeners();
+
+    try {
+      final newAnimes = await _service.getTopAnime(
+        page: _airingPage,
+        season: "winter",
+        year: 2025,
+        filter: "airing",
+      );
+
+      if (newAnimes.isEmpty) {
+        _hasMoreAiring = false;
+      } else {
+        airing.addAll(newAnimes);
+        _airingPage++;
+      }
+    } catch (e) {
+      debugPrint('Erreur fetchAiring: $e');
+    }
+
+    _isLoadingAiring = false;
+    notifyListeners();
+  }
+
+  void refreshAiring() {
+    airing.clear();
+    _airingPage = 1;
+    _hasMoreAiring = true;
+    fetchAiring();
+  }
+
+  // ---------------- MOST LIKED ----------------
+  Future<void> fetchMostLiked() async {
+    if (_isLoadingMostLiked || !_hasMoreMostLiked) return;
+
+    _isLoadingMostLiked = true;
+    notifyListeners();
+
+    try {
+      final newAnimes = await _service.getTopAnime(
+        page: _mostLikedPage,
+        filter: "favorite",
+      );
+      if (newAnimes.isEmpty) {
+        _hasMoreMostLiked = false;
+      } else {
+        mostLiked.addAll(newAnimes);
+        _mostLikedPage++;
+      }
+    } catch (e) {
+      debugPrint('Erreur fetchMostLiked: $e');
+    }
+
+    _isLoadingMostLiked = false;
+    notifyListeners();
+  }
+
+  void refreshMostLiked() {
+    mostLiked.clear();
+    _mostLikedPage = 1;
+    _hasMoreMostLiked = true;
+    fetchMostLiked();
+  }
+
+  // ---------------- NAVIGATION ----------------
   void openAnimePage(BuildContext context, Anime anime) {
     Navigator.push(
       context,
