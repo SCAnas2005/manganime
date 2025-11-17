@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/providers/like_storage.dart';
 import 'package:flutter_application_1/widgets/like_widget/like_animation.dart';
 
 class AnimeCard extends StatefulWidget {
@@ -39,7 +40,7 @@ class _AnimeCardState extends State<AnimeCard> {
       onDoubleTap: () {
         triggerLikeAnimation();
         // Tu peux aussi activer ton système de like Hive ici :
-        // LikeStorage.toggleAnimeLike(widget.anime.id);
+        LikeStorage.toggleAnimeLike(widget.anime.id);
       },
       child: Container(
         width: 150,

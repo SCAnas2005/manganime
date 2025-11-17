@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter_application_1/models/anime_detail.dart';
 import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/models/manga.dart';
+import 'package:flutter_application_1/models/manga_detail.dart';
 import 'package:flutter_application_1/services/api_service.dart';
 import 'package:http/http.dart' as http;
 
@@ -182,5 +184,17 @@ class AniListService implements ApiService {
       status: json['status'] ?? '',
       genres: List<String>.from(json['genres'] ?? []),
     );
+  }
+
+  @override
+  Manga jsonToManga(Map<String, dynamic> json) {
+    // TODO: implement jsonToManga
+    throw UnimplementedError();
+  }
+
+  @override
+  MangaDetail jsonToMangaDetail(Map<String, dynamic> json) {
+    // TODO: implement jsonToMangaDetail
+    throw UnimplementedError();
   }
 }
