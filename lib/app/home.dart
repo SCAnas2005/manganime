@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/app/bottom_nav/bottomNavView.dart';
+import 'package:flutter_application_1/app/bottom_nav/bottom_nav_view.dart';
 import 'package:flutter_application_1/viewmodels/anime_view_model.dart';
 import 'package:flutter_application_1/views/anime_view.dart';
 import 'package:provider/provider.dart';
