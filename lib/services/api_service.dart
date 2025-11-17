@@ -1,5 +1,7 @@
 import 'package:flutter_application_1/models/anime_detail.dart';
 import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/models/manga.dart';
+import 'package:flutter_application_1/models/manga_detail.dart';
 
 /// Interface abstraite définissant la structure de base pour tout service d’API
 /// utilisé pour récupérer et convertir les données d’animes.
@@ -54,4 +56,15 @@ abstract class ApiService {
   ///
   /// Utilisée pour le parsing des résultats d’un appel détaillé (`getFullDetailAnime`).
   AnimeDetail jsonToAnimeDetail(Map<String, dynamic> json);
+
+  // Convertit une réponse JSON d’un anime basique (liste, recherche, top, etc.)
+  /// en un objet [Manga].
+  ///
+  /// Doit être implémentée de manière spécifique à chaque API.
+  Manga jsonToManga(Map<String, dynamic> json);
+
+  /// Convertit une réponse JSON détaillée d’un anime en un objet [MangaDetail].
+  ///
+  /// Utilisée pour le parsing des résultats d’un appel détaillé (`getFullDetailAnime`).
+  MangaDetail jsonToMangaDetail(Map<String, dynamic> json);
 }

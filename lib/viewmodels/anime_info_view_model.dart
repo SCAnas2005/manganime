@@ -34,8 +34,8 @@ class AnimeInfoViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void toggleLike() {
-    isLiked = !isLiked;
+  void toggleLike({bool? value}) {
+    isLiked = value ?? !isLiked;
     if (animeDetail != null) {
       LikeStorage.toggleAnimeLike(animeDetail!.id);
     }
@@ -44,8 +44,7 @@ class AnimeInfoViewModel extends ChangeNotifier {
 
   void likeAnimeOnDoubleTap({Duration duration = const Duration(seconds: 1)}) {
     showLikeAnimation = true;
-    notifyListeners();
-    isLiked = true;
+    toggleLike(value: true);
 
     Future.delayed(duration, () {
       showLikeAnimation = false;
