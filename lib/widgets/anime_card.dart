@@ -1,59 +1,8 @@
-// import 'package:flutter/material.dart';
-// import 'package:flutter_application_1/models/anime.dart';
-// import 'package:flutter_application_1/views/AnimeInfo.dart';
-
-// class AnimeCard extends StatelessWidget {
-//   final Anime anime;
-
-//   const AnimeCard({super.key, required this.anime});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return InkWell(
-//       borderRadius: BorderRadius.circular(16),
-//       onTap: () {
-//         // Navigue vers la page de détails
-//         Navigator.push(
-//           context,
-//           MaterialPageRoute(builder: (context) => AnimeInfoView(anime)),
-//         );
-//       },
-//       child: Card(
-//         elevation: 4,
-//         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-//         clipBehavior: Clip.hardEdge,
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.stretch,
-//           children: [
-//             Expanded(
-//               child: anime.imageUrl.isNotEmpty
-//                   ? Image.network(anime.imageUrl, fit: BoxFit.cover)
-//                   : Container(color: Colors.grey[300]),
-//             ),
-//             Padding(
-//               padding: const EdgeInsets.all(8.0),
-//               child: Text(
-//                 anime.title,
-//                 textAlign: TextAlign.center,
-//                 maxLines: 2,
-//                 overflow: TextOverflow.ellipsis,
-//                 style: const TextStyle(
-//                   fontWeight: FontWeight.bold,
-//                   fontSize: 14,
-//                 ),
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/widgets/like_widget/like_animation.dart';
 
-class AnimeCard extends StatelessWidget {
+class AnimeCard extends StatefulWidget {
   final Anime anime;
   final bool showEpisode;
   final Function(Anime anime)? onTap;
@@ -66,21 +15,49 @@ class AnimeCard extends StatelessWidget {
   });
 
   @override
+  State<AnimeCard> createState() => _AnimeCardState();
+}
+
+class _AnimeCardState extends State<AnimeCard> {
+  bool showHeart = false;
+
+  void triggerLikeAnimation() {
+    setState(() => showHeart = true);
+
+    // Après 600ms, on cache l'animation
+    Future.delayed(const Duration(milliseconds: 600), () {
+      if (mounted) {
+        setState(() => showHeart = false);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => {onTap?.call(anime)},
+      onTap: () => widget.onTap?.call(widget.anime),
+      onDoubleTap: () {
+        triggerLikeAnimation();
+        // Tu peux aussi activer ton système de like Hive ici :
+        // LikeStorage.toggleAnimeLike(widget.anime.id);
+      },
       child: Container(
         width: 150,
         decoration: BoxDecoration(
           color: Colors.black.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(12),
           image: DecorationImage(
-            image: NetworkImage(anime.imageUrl),
+            image: NetworkImage(widget.anime.imageUrl),
             fit: BoxFit.cover,
           ),
         ),
         child: Stack(
+          alignment: Alignment.center,
           children: [
+            // ⭐ Animation du cœur au centre
+            LikeAnimation(show: showHeart, size: 90),
+
+            // ⭐ NOTE: Le reste inchangé
             Positioned(
               top: 8,
               right: 8,
@@ -94,14 +71,14 @@ class AnimeCard extends StatelessWidget {
                   children: [
                     const Icon(Icons.star, color: Colors.yellow, size: 14),
                     Text(
-                      anime.score.toString(),
+                      widget.anime.score.toString(),
                       style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
                   ],
                 ),
               ),
             ),
-            if (showEpisode)
+            if (widget.showEpisode)
               Positioned(
                 bottom: 8,
                 left: 8,
@@ -125,7 +102,7 @@ class AnimeCard extends StatelessWidget {
               left: 8,
               right: 8,
               child: Text(
-                anime.title,
+                widget.anime.title,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(

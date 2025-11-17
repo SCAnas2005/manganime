@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime_detail.dart';
-import 'package:flutter_application_1/services/JikanService.dart';
+import 'package:flutter_application_1/providers/like_storage.dart';
+import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:flutter_application_1/services/translator.dart';
 
 class AnimeInfoViewModel extends ChangeNotifier {
@@ -28,12 +29,16 @@ class AnimeInfoViewModel extends ChangeNotifier {
       hasError = true;
     }
 
+    isLiked = LikeStorage.getIdAnimeLiked().contains(animeDetail?.id);
     isLoading = false;
     notifyListeners();
   }
 
   void toggleLike() {
     isLiked = !isLiked;
+    if (animeDetail != null) {
+      LikeStorage.toggleAnimeLike(animeDetail!.id);
+    }
     notifyListeners();
   }
 
