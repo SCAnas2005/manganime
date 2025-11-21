@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/bottom_nav/bottom_nav_view.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/viewmodels/anime_view_model.dart';
+import 'package:flutter_application_1/viewmodels/manga_view_model.dart';
 import 'package:flutter_application_1/views/anime_view.dart';
 import 'package:flutter_application_1/views/favorite_anime_view.dart';
+import 'package:flutter_application_1/views/manga_view.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_application_1/views/anime_stat_view.dart';
 
@@ -26,70 +28,78 @@ class HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  // final List<Widget> _pages = [
-  //   ChangeNotifierProvider(
-  //     create: (_) => AnimeViewModel(),
-  //     child: const AnimeView(),
-  //   ),
-  // ];
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   return Scaffold(
-  //     body: _currentIndex >= _pages.length
-  //         ? Container()
-  //         : _pages[_currentIndex],
-  //     bottomNavigationBar: BottomNavView(
-  //       currentIndex: _currentIndex,
-  //       onTap: (index) => setState(() => _currentIndex = index),
-  //     ),
-  //   );
-  // }
-
-  void _updateAllAnimesUnique(AnimeViewModel animeVM) {
-    final Map<int, Anime> animeMap = {};
-    for (var anime in [
-      ...animeVM.popular,
-      ...animeVM.airing,
-      ...animeVM.mostLiked,
-    ]) {
-      animeMap[anime.id] = anime;
-    }
-    _allAnimesUnique = animeMap.values.toList();
-  }
+  final List<Widget> _pages = [
+    ChangeNotifierProvider(
+      create: (_) => AnimeViewModel(),
+      child: const AnimeView(),
+    ),
+    ChangeNotifierProvider(
+      create: (_) => MangaViewModel(),
+      child: const MangaView(),
+    ),
+    FavoriteAnimeView(allAnimes: []),
+    AnimeStatView(),
+    Container(),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    return ChangeNotifierProvider(
-      create: (_) => AnimeViewModel(),
-      child: Consumer<AnimeViewModel>(
-        builder: (context, animeVM, _) {
-          _updateAllAnimesUnique(animeVM);
-          final pages = [
-            AnimeView(),
-            Container(),
-            FavoriteAnimeView(allAnimes: _allAnimesUnique),
-            AnimeStatView(),
-            Container(),
-          ];
-
-          return Scaffold(
-            body: PageView(
-              controller: _pageController,
-              physics: const NeverScrollableScrollPhysics(),
-              children: pages,
-            ),
-            bottomNavigationBar: BottomNavView(
-              currentIndex: _currentIndex,
-              onTap: (index) {
-                _pageController.jumpToPage(index);
-                setState(() => _currentIndex = index);
-              },
-            ),
-          );
-        },
+    return Scaffold(
+      body: _currentIndex >= _pages.length
+          ? Container()
+          : _pages[_currentIndex],
+      bottomNavigationBar: BottomNavView(
+        currentIndex: _currentIndex,
+        onTap: (index) => setState(() => _currentIndex = index),
       ),
     );
   }
 }
+
+//   void _updateAllAnimesUnique(AnimeViewModel animeVM) {
+//     final Map<int, Anime> animeMap = {};
+//     for (var anime in [
+//       ...animeVM.popular,
+//       ...animeVM.airing,
+//       ...animeVM.mostLiked,
+//     ]) {
+//       animeMap[anime.id] = anime;
+//     }
+//     _allAnimesUnique = animeMap.values.toList();
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     // TODO: implement build
+//     return ChangeNotifierProvider(
+//       create: (_) => AnimeViewModel(),
+//       child: Consumer<AnimeViewModel>(
+//         builder: (context, animeVM, _) {
+//           _updateAllAnimesUnique(animeVM);
+//           final pages = [
+//             AnimeView(),
+//             MangaView(),
+//             FavoriteAnimeView(allAnimes: _allAnimesUnique),
+//             AnimeStatView(),
+//             Container(),
+//           ];
+
+//           return Scaffold(
+//             body: PageView(
+//               controller: _pageController,
+//               physics: const NeverScrollableScrollPhysics(),
+//               children: pages,
+//             ),
+//             bottomNavigationBar: BottomNavView(
+//               currentIndex: _currentIndex,
+//               onTap: (index) {
+//                 _pageController.jumpToPage(index);
+//                 setState(() => _currentIndex = index);
+//               },
+//             ),
+//           );
+//         },
+//       ),
+//     );
+//   }
+// }
