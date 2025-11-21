@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/app/bottom_nav/bottomNavView.dart';
+import 'package:flutter_application_1/app/bottom_nav/bottom_nav_view.dart';
 import 'package:flutter_application_1/viewmodels/anime_view_model.dart';
+import 'package:flutter_application_1/viewmodels/manga_view_model.dart';
 import 'package:flutter_application_1/views/anime_view.dart';
+import 'package:flutter_application_1/views/manga_view.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -117,22 +119,59 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [
+  late final List<Widget> _pages = [
     ChangeNotifierProvider(
       create: (_) => AnimeViewModel(),
       child: const AnimeView(),
+    ),
+    ChangeNotifierProvider(
+      create: (_) => MangaViewModel(),
+      child: const MangaView(),
+    ),
+    const _PlaceholderPage(
+      title: "Favoris",
+      description: "La section favoris arrive bientôt.",
+    ),
+    const _PlaceholderPage(
+      title: "Statistiques",
+      description: "Les statistiques seront disponibles plus tard.",
+    ),
+    const _PlaceholderPage(
+      title: "Paramètres",
+      description: "Personnalisez l'app prochainement.",
     ),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _currentIndex >= _pages.length
-          ? Container()
-          : _pages[_currentIndex],
+      body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavView(
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
+      ),
+    );
+  }
+}
+
+class _PlaceholderPage extends StatelessWidget {
+  final String title;
+  final String description;
+
+  const _PlaceholderPage({required this.title, required this.description});
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(title, style: Theme.of(context).textTheme.headlineSmall),
+            const SizedBox(height: 8),
+            Text(description, textAlign: TextAlign.center),
+          ],
+        ),
       ),
     );
   }
