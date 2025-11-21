@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
-import 'package:flutter_application_1/providers/like_storage.dart';
 import 'package:flutter_application_1/widgets/like_widget/like_animation.dart';
 
 class AnimeCard extends StatefulWidget {
   final Anime anime;
   final bool showEpisode;
   final Function(Anime anime)? onTap;
+  final Function(Anime anime)? onLikeDoubleTap;
 
   const AnimeCard({
     super.key,
     required this.anime,
     this.showEpisode = false,
     this.onTap,
+    this.onLikeDoubleTap,
   });
 
   @override
@@ -39,7 +40,7 @@ class _AnimeCardState extends State<AnimeCard> {
       onTap: () => widget.onTap?.call(widget.anime),
       onDoubleTap: () {
         triggerLikeAnimation();
-        LikeStorage.toggleAnimeLike(widget.anime.id);
+        widget.onLikeDoubleTap?.call(widget.anime);
       },
       child: Container(
         width: 150,

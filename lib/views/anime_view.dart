@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/providers/like_storage.dart';
 import 'package:flutter_application_1/viewmodels/anime_view_model.dart';
 import 'package:flutter_application_1/widgets/anime_card.dart';
 import 'package:provider/provider.dart';
@@ -168,6 +169,9 @@ class _AnimeViewState extends State<AnimeView> {
             child: AnimeCard(
               anime: anime,
               onTap: (anime) => onTap?.call(anime),
+              onLikeDoubleTap: (anime) => {
+                LikeStorage.toggleAnimeLike(anime.id),
+              },
             ),
           );
         },
