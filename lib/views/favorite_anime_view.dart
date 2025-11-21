@@ -1,46 +1,39 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/models/anime.dart';
-import 'package:flutter_application_1/widgets/anime_list_item.dart';
+import 'package:flutter_application_1/viewmodels/favorite_view_model.dart';
+import 'package:flutter_application_1/widgets/like_widget/like_button.dart';
 import 'package:provider/provider.dart';
-import '../viewmodels/favorite_view_model.dart';
 
 class FavoriteAnimeView extends StatelessWidget {
-  final List<Anime> allAnimes;
-  const FavoriteAnimeView({super.key, required this.allAnimes});
+  const FavoriteAnimeView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => FavoriteViewModel(allAnimes: allAnimes)..loadFavorites(),
-      child: Consumer<FavoriteViewModel>(
-        builder: (context, viewModel, child) {
-          if (viewModel.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+    final vm = context.watch<FavoriteViewModel>();
 
-          if (viewModel.favoriteAnimes.isEmpty) {
-            return const Center(
-              child: Text(
-                "Aucun anime en favoris",
-                style: TextStyle(fontSize: 18),
-              ),
-            );
-          }
+    if (vm.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(12),
-            itemCount: viewModel.favoriteAnimes.length,
-            itemBuilder: (context, index) {
-              final item = viewModel.favoriteAnimes[index];
+    if (vm.favoris.isEmpty) {
+      return const Center(child: Text("Aucun favori pour le moment"));
+    }
 
-              return AnimeListItem(
-                anime: item.toAnime(),
-                onLikeToggle: () => viewModel.removeFavorite(item),
-              );
-            },
-          );
-        },
-      ),
+    return ListView.builder(
+      itemCount: vm.favoris.length,
+      itemBuilder: (context, index) {
+        final anime = vm.favoris[index];
+
+        return ListTile(
+          leading: Image.network(anime.imageUrl),
+          title: Text(anime.title),
+          subtitle: Text("Score : ${anime.score}"),
+          trailing: LikeButton(
+            isLiked: true,
+            onTap: () => vm.removeFavoris(anime.id),
+            iconSize: 30,
+          ),
+        );
+      },
     );
   }
 }
