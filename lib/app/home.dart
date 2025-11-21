@@ -5,6 +5,7 @@ import 'package:flutter_application_1/viewmodels/anime_view_model.dart';
 import 'package:flutter_application_1/views/anime_view.dart';
 import 'package:flutter_application_1/views/favorite_anime_view.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_application_1/views/anime_stat_view.dart';
 
 class HomePage extends StatefulWidget {
   final String title;
@@ -17,7 +18,6 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   final PageController _pageController = PageController();
-
   List<Anime> _allAnimesUnique = [];
 
   @override
@@ -70,7 +70,7 @@ class HomePageState extends State<HomePage> {
             AnimeView(),
             Container(),
             FavoriteAnimeView(allAnimes: _allAnimesUnique),
-            Container(),
+            AnimeStatView(),
             Container(),
           ];
 
