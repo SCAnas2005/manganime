@@ -3,6 +3,7 @@ import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/viewmodels/anime_view_model.dart';
 import 'package:flutter_application_1/widgets/anime_card.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_application_1/widgets/search_widget/search_button.dart';
 
 class AnimeView extends StatefulWidget {
   const AnimeView({super.key});
@@ -68,8 +69,12 @@ class _AnimeViewState extends State<AnimeView> {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [ Padding(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: miniSearchBar(context),
+              ),
+
               // Onglets ou titre principal
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
