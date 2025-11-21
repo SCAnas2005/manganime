@@ -1,49 +1,39 @@
 import 'package:flutter/material.dart';
-import '../models/favorite_item.dart';
-import '../models/anime.dart';
+import 'package:flutter_application_1/models/anime_detail.dart';
+import 'package:flutter_application_1/services/jikan_service.dart';
 import '../providers/like_storage.dart';
 
 class FavoriteViewModel extends ChangeNotifier {
-  final List<Anime> allAnimes;
+  final JikanService _jikan = JikanService();
+  List<AnimeDetail> favoris = [];
+  bool isLoading = true;
 
-  FavoriteViewModel({required this.allAnimes});
-
-  List<FavoriteItem> _favoriteAnimes = [];
-  bool _isLoading = false;
-
-  List<FavoriteItem> get favoriteAnimes => List.unmodifiable(_favoriteAnimes);
-  bool get isLoading => _isLoading;
-
-  Future<void> loadFavorites() async {
-    _setLoading(true);
-
-    final likedIds = LikeStorage.getIdAnimeLiked();
-    _favoriteAnimes = allAnimes
-        .where((anime) => likedIds.contains(anime.id))
-        .map(
-          (anime) => FavoriteItem(
-            id: anime.id,
-            title: anime.title,
-            imageUrl: anime.imageUrl,
-            score: anime.score,
-            status: anime.status,
-          ),
-        )
-        .toList();
-
-    _setLoading(false);
+  FavoriteViewModel() {
+    loadFavoris();
   }
 
-  Future<void> removeFavorite(FavoriteItem item) async {
-    _favoriteAnimes.removeWhere((f) => f.id == item.id);
-    await LikeStorage.toggleAnimeLike(item.id);
+  Future<void> loadFavoris() async {
+    isLoading = true;
+    notifyListeners();
+
+    final ids = LikeStorage.getIdAnimeLiked();
+    final List<AnimeDetail> loaded = [];
+
+    for (int id in ids) {
+      // test pour voir la latence dans la page fav
+      //await Future.delayed(const Duration(milliseconds: 200));
+      final anime = await _jikan.getFullDetailAnime(id);
+      loaded.add(anime);
+    }
+
+    favoris = loaded;
+    isLoading = false;
     notifyListeners();
   }
 
-  bool isEmpty() => _favoriteAnimes.isEmpty;
-
-  void _setLoading(bool value) {
-    _isLoading = value;
+  void removeFavoris(int id) {
+    LikeStorage.toggleAnimeLike(id);
+    favoris.removeWhere((a) => a.id == id);
     notifyListeners();
   }
 }
