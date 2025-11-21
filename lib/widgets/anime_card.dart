@@ -39,7 +39,6 @@ class _AnimeCardState extends State<AnimeCard> {
       onTap: () => widget.onTap?.call(widget.anime),
       onDoubleTap: () {
         triggerLikeAnimation();
-        // Tu peux aussi activer ton système de like Hive ici :
         LikeStorage.toggleAnimeLike(widget.anime.id);
       },
       child: Container(

@@ -197,4 +197,24 @@ class AniListService implements ApiService {
     // TODO: implement jsonToMangaDetail
     throw UnimplementedError();
   }
+
+  @override
+  Future<MangaDetail> getFullDetailManga(int id) {
+    // TODO: implement getFullDetailManga
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List<Manga>> getTopManga({
+    int page = 1,
+    String? filter,
+    String? type,
+    String? status,
+    int? year,
+    int? month,
+    bool sfw = true,
+  }) {
+    // TODO: implement getTopManga
+    throw UnimplementedError();
+  }
 }

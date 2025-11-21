@@ -40,11 +40,23 @@ abstract class ApiService {
     bool sfw = true,
   });
 
+  Future<List<Manga>> getTopManga({
+    int page = 1,
+    String? filter, // popular, favorite, etc.
+    String? type, // manga, novel, one_shot, doujin, manhwa, manhua
+    String? status, // publishing, finished
+    int? year,
+    int? month,
+    bool sfw = true,
+  });
+
   /// Récupère toutes les informations détaillées concernant un anime spécifique.
   ///
   /// [id] correspond à l’identifiant unique de l’anime dans l’API.
   /// Retourne un objet [AnimeDetail] contenant les informations complètes.
   Future<AnimeDetail> getFullDetailAnime(int id);
+
+  Future<MangaDetail> getFullDetailManga(int id);
 
   /// Convertit une réponse JSON d’un anime basique (liste, recherche, top, etc.)
   /// en un objet [Anime].
