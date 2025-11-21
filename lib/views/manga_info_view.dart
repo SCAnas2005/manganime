@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/models/anime.dart';
-import 'package:flutter_application_1/viewmodels/anime_info_view_model.dart';
+import 'package:flutter_application_1/models/manga.dart';
+import 'package:flutter_application_1/viewmodels/manga_info_view_model.dart';
 import 'package:flutter_application_1/widgets/like_widget/like_animation.dart';
 import 'package:flutter_application_1/widgets/like_widget/like_button.dart';
 import 'package:provider/provider.dart';
 
-class AnimeInfoView extends StatelessWidget {
-  final Anime anime;
+class MangaInfoView extends StatelessWidget {
+  final Manga manga;
 
-  const AnimeInfoView(this.anime, {super.key});
+  const MangaInfoView(this.manga, {super.key});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      // Initialise le ViewModel et charge les données
-      create: (_) => AnimeInfoViewModel()..loadAnimeDetail(anime.id),
-      child: Consumer<AnimeInfoViewModel>(
+      create: (_) => MangaInfoViewModel()..loadMangaDetail(manga.id),
+      child: Consumer<MangaInfoViewModel>(
         builder: (context, vm, _) {
           if (vm.isLoading) {
             return const Scaffold(
@@ -23,16 +22,16 @@ class AnimeInfoView extends StatelessWidget {
             );
           }
 
-          // Erreur
-          if (vm.hasError || vm.animeDetail == null) {
+          if (vm.hasError || vm.mangaDetail == null) {
             return Scaffold(
-              appBar: AppBar(title: Text(anime.title)),
+              appBar: AppBar(title: Text(manga.title)),
               body: const Center(
                 child: Text("Erreur lors du chargement des données"),
               ),
             );
           }
-          final detail = vm.animeDetail!;
+
+          final detail = vm.mangaDetail!;
 
           return Scaffold(
             appBar: AppBar(title: Text(detail.title)),
@@ -41,9 +40,8 @@ class AnimeInfoView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Image + animation du like au double tap
                   GestureDetector(
-                    onDoubleTap: vm.likeAnimeOnDoubleTap,
+                    onDoubleTap: vm.likeMangaOnDoubleTap,
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
@@ -52,31 +50,24 @@ class AnimeInfoView extends StatelessWidget {
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 16),
-
-                  // Titre
                   Text(
                     detail.title,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 8),
-
-                  // Bloc Score, Statut et Like
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Colonne Score + Statut
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text("Score : ${detail.score}"),
                           Text("Statut : ${detail.status}"),
+                          Text("Type : ${detail.type}"),
                         ],
                       ),
-
                       const Spacer(),
-                      // Bouton Like
                       LikeButton(
                         isLiked: vm.isLiked,
                         onTap: vm.toggleLike,
@@ -84,12 +75,12 @@ class AnimeInfoView extends StatelessWidget {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 16),
-
+                  Text(
+                    detail.genres.join(", "),
+                    style: const TextStyle(fontStyle: FontStyle.italic),
+                  ),
                   const SizedBox(height: 16),
-
-                  // Synopsis traduit
                   Text(
                     vm.translatedSynopsis.isNotEmpty
                         ? vm.translatedSynopsis

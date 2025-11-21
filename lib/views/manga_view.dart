@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/models/anime.dart';
-import 'package:flutter_application_1/providers/like_storage.dart';
-import 'package:flutter_application_1/viewmodels/anime_view_model.dart';
-import 'package:flutter_application_1/widgets/anime_card.dart';
+import 'package:flutter_application_1/models/manga.dart';
+import 'package:flutter_application_1/viewmodels/manga_view_model.dart';
+import 'package:flutter_application_1/widgets/manga_card.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_application_1/widgets/search_widget/search_button.dart';
 
-class AnimeView extends StatefulWidget {
-  const AnimeView({super.key});
+class MangaView extends StatefulWidget {
+  const MangaView({super.key});
 
   @override
-  State<AnimeView> createState() => _AnimeViewState();
+  State<MangaView> createState() => _MangaViewState();
 }
 
-class _AnimeViewState extends State<AnimeView> {
+class _MangaViewState extends State<MangaView> {
   late ScrollController _popularController;
-  late ScrollController _airingController;
+  late ScrollController _publishingController;
   late ScrollController _mostLikedController;
 
   @override
@@ -23,12 +21,11 @@ class _AnimeViewState extends State<AnimeView> {
     super.initState();
 
     _popularController = ScrollController();
-    _airingController = ScrollController();
+    _publishingController = ScrollController();
     _mostLikedController = ScrollController();
 
-    // On attend que le BuildContext soit disponible
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final vm = context.read<AnimeViewModel>();
+      final vm = context.read<MangaViewModel>();
 
       _popularController.addListener(() {
         if (_popularController.position.pixels >=
@@ -37,10 +34,10 @@ class _AnimeViewState extends State<AnimeView> {
         }
       });
 
-      _airingController.addListener(() {
-        if (_airingController.position.pixels >=
-            _airingController.position.maxScrollExtent - 200) {
-          vm.fetchAiring();
+      _publishingController.addListener(() {
+        if (_publishingController.position.pixels >=
+            _publishingController.position.maxScrollExtent - 200) {
+          vm.fetchPublishing();
         }
       });
 
@@ -56,14 +53,14 @@ class _AnimeViewState extends State<AnimeView> {
   @override
   void dispose() {
     _popularController.dispose();
-    _airingController.dispose();
+    _publishingController.dispose();
     _mostLikedController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<AnimeViewModel>();
+    final vm = context.watch<MangaViewModel>();
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -72,33 +69,20 @@ class _AnimeViewState extends State<AnimeView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: miniSearchBar(context),
-              ),
-
-              // Onglets ou titre principal
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
                   Text(
-                    "Pour toi",
+                    "Mangas pour toi",
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),
-                  SizedBox(width: 20),
-                  Text(
-                    "Tendances",
-                    style: TextStyle(fontSize: 18, color: Colors.white70),
-                  ),
                 ],
               ),
               const SizedBox(height: 20),
-
-              // SECTION 1 : Les plus populaires
               const Text(
                 "Les plus populaires",
                 style: TextStyle(
@@ -111,14 +95,11 @@ class _AnimeViewState extends State<AnimeView> {
               _buildHorizontalList(
                 vm.popular,
                 controller: _popularController,
-                onTap: (anime) => vm.openAnimePage(context, anime),
+                onTap: vm.openMangaPage,
               ),
-
               const SizedBox(height: 20),
-
-              // SECTION 2 : Les sorties
               const Text(
-                "En diffusion",
+                "En publication",
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -127,14 +108,11 @@ class _AnimeViewState extends State<AnimeView> {
               ),
               const SizedBox(height: 10),
               _buildHorizontalList(
-                vm.airing,
-                controller: _airingController,
-                onTap: (anime) => vm.openAnimePage(context, anime),
+                vm.publishing,
+                controller: _publishingController,
+                onTap: vm.openMangaPage,
               ),
-
               const SizedBox(height: 20),
-
-              // SECTION 3 : Les plus vues
               const Text(
                 "Les plus aimés",
                 style: TextStyle(
@@ -147,7 +125,7 @@ class _AnimeViewState extends State<AnimeView> {
               _buildHorizontalList(
                 vm.mostLiked,
                 controller: _mostLikedController,
-                onTap: (anime) => vm.openAnimePage(context, anime),
+                onTap: vm.openMangaPage,
               ),
             ],
           ),
@@ -157,9 +135,8 @@ class _AnimeViewState extends State<AnimeView> {
   }
 
   Widget _buildHorizontalList(
-    List<Anime> animes, {
-    bool showEpisode = false,
-    Function(Anime anime)? onTap,
+    List<Manga> mangas, {
+    Function(BuildContext context, Manga manga)? onTap,
     ScrollController? controller,
   }) {
     return SizedBox(
@@ -167,17 +144,14 @@ class _AnimeViewState extends State<AnimeView> {
       child: ListView.builder(
         controller: controller,
         scrollDirection: Axis.horizontal,
-        itemCount: animes.length,
+        itemCount: mangas.length,
         itemBuilder: (context, index) {
-          final anime = animes[index];
+          final manga = mangas[index];
           return Padding(
             padding: const EdgeInsets.only(right: 10),
-            child: AnimeCard(
-              anime: anime,
-              onTap: (anime) => onTap?.call(anime),
-              onLikeDoubleTap: (anime) => {
-                LikeStorage.toggleAnimeLike(anime.id),
-              },
+            child: MangaCard(
+              manga: manga,
+              onTap: (item) => onTap?.call(context, item),
             ),
           );
         },
