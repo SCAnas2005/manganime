@@ -42,7 +42,6 @@ class AnimeInfoView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Image + animation du like au double tap
-                  // Image + animation du like au double tap
                   GestureDetector(
                     onDoubleTap: vm.likeAnimeOnDoubleTap,
                     child: Stack(
