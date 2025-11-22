@@ -1,3 +1,5 @@
+import 'package:flutter_application_1/models/anime_detail.dart';
+
 /// Représente un anime dans l'application.
 ///
 /// Cette classe contient les informations principales nécessaires
@@ -27,4 +29,14 @@ class Anime {
     required this.status,
     this.score,
   });
+
+  factory Anime.fromDetail(AnimeDetail d) {
+    return Anime(
+      id: d.id,
+      title: d.title,
+      imageUrl: d.imageUrl,
+      status: d.status,
+      score: d.score,
+    );
+  }
 }
