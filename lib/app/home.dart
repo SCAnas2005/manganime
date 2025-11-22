@@ -35,7 +35,12 @@ class HomePageState extends State<HomePage> {
     ),
 
     AnimeStatView(),
-    Container(),
+    Center(
+      child: Text(
+        "Page en construction",
+        style: TextStyle(fontSize: 24, color: Colors.grey),
+      ),
+    ),
   ];
 
   @override
