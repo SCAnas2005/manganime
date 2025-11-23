@@ -5,7 +5,9 @@ import 'package:flutter_application_1/widgets/like_widget/like_animation.dart';
 class AnimeCard extends StatefulWidget {
   final Anime anime;
   final bool showEpisode;
+  // Fonction appelée quand on appuie sur l'anime
   final Function(Anime anime)? onTap;
+  // Fonction appelé quand on double appuie sur l'anime
   final Function(Anime anime)? onLikeDoubleTap;
 
   const AnimeCard({
@@ -55,10 +57,10 @@ class _AnimeCardState extends State<AnimeCard> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // ⭐ Animation du cœur au centre
+            // Animation du coeur
             LikeAnimation(show: showHeart, size: 90),
 
-            // ⭐ NOTE: Le reste inchangé
+            // La note
             Positioned(
               top: 8,
               right: 8,
