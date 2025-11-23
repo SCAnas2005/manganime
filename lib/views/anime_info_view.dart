@@ -1,14 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/providers/user_stats_provider.dart';
 import 'package:flutter_application_1/viewmodels/anime_info_view_model.dart';
 import 'package:flutter_application_1/widgets/like_widget/like_animation.dart';
 import 'package:flutter_application_1/widgets/like_widget/like_button.dart';
 import 'package:provider/provider.dart';
 
-class AnimeInfoView extends StatelessWidget {
+class AnimeInfoView extends StatefulWidget {
   final Anime anime;
 
-  const AnimeInfoView(this.anime, {super.key});
+  const AnimeInfoView({super.key, required this.anime});
+
+  @override
+  State<AnimeInfoView> createState() => _AnimeInfoViewState();
+}
+
+class _AnimeInfoViewState extends State<AnimeInfoView> {
+  late Anime anime;
+  @override
+  void initState() {
+    super.initState();
+    anime = widget.anime;
+
+    // Ajouter la vue à l’ouverture de la page
+    UserStatsProvider.addAnimeView(anime.id);
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -16,7 +16,7 @@ class AnimeView extends StatefulWidget {
 }
 
 class _AnimeViewState extends State<AnimeView> {
-  int selectedTab = 0;
+  int selectedTab = 1;
 
   late ScrollController _popularController;
   late ScrollController _airingController;
@@ -86,69 +86,16 @@ class _AnimeViewState extends State<AnimeView> {
                 selectedIndex: selectedTab,
                 onChanged: (index) {
                   setState(() {
-                    selectedTab = index;
+                    if (selectedTab != index) selectedTab = index;
                   });
                 },
                 isEnabled: [
                   true,
-                  false,
+                  true,
                 ], // mettre [true,true] quand la page tendance sera faite
               ),
               const SizedBox(height: 20),
-
-              _buildForYou(vm),
-
-              // SECTION 1 : Les plus populaires
-              // const Text(
-              //   "Les plus populaires",
-              //   style: TextStyle(
-              //     fontSize: 18,
-              //     fontWeight: FontWeight.bold,
-              //     color: Colors.white,
-              //   ),
-              // ),
-              // const SizedBox(height: 10),
-              // _buildHorizontalList(
-              //   vm.popular,
-              //   controller: _popularController,
-              //   onTap: (anime) => vm.openAnimePage(context, anime),
-              // ),
-
-              // const SizedBox(height: 20),
-
-              // SECTION 2 : Les sorties
-              //         const Text(
-              //           "En diffusion",
-              //           style: TextStyle(
-              //             fontSize: 18,
-              //             fontWeight: FontWeight.bold,
-              //             color: Colors.white,
-              //           ),
-              //         ),
-              //         const SizedBox(height: 10),
-              //         _buildHorizontalList(
-              //           vm.airing,
-              //           controller: _airingController,
-              //           onTap: (anime) => vm.openAnimePage(context, anime),
-              //         ),
-
-              //         const SizedBox(height: 20),
-
-              //         // SECTION 3 : Les plus vues
-              //         const Text(
-              //           "Les plus aimés",
-              //           style: TextStyle(
-              //             fontSize: 18,
-              //             fontWeight: FontWeight.bold,
-              //             color: Colors.white,
-              //           ),
-              //         ),
-              //         const SizedBox(height: 10),
-              //         _buildHorizontalList(
-              //           vm.mostLiked,
-              //           controller: _mostLikedController,
-              //           onTap: (anime) => vm.openAnimePage(context, anime),
-              //         ),
+              selectedTab == 0 ? _buildForYou(vm) : _buildTendences(vm),
             ],
           ),
         ),
@@ -157,7 +104,7 @@ class _AnimeViewState extends State<AnimeView> {
   }
 
   // Onglet 1 : Pour toi
-  Widget _buildForYou(AnimeViewModel vm) {
+  Widget _buildTendences(AnimeViewModel vm) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -197,6 +144,10 @@ class _AnimeViewState extends State<AnimeView> {
         ),
       ],
     );
+  }
+
+  Widget _buildForYou(AnimeViewModel vm) {
+    return Column();
   }
 
   // Widget _buildHorizontalList(
