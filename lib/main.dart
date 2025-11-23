@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/app.dart';
+import 'package:flutter_application_1/providers/like_storage.dart';
+import 'package:flutter_application_1/providers/user_stats_provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 Future<void> main() async {
@@ -7,6 +9,9 @@ Future<void> main() async {
 
   await Hive.initFlutter();
   // Ouvre une box pour les likes
-  await Hive.openBox<List>('likes_box');
+  LikeStorage.init();
+  // Ouvre une box pour les vues
+  UserStatsProvider.init();
+
   runApp(const App());
 }

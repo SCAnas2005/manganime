@@ -1,6 +1,7 @@
 import 'package:hive/hive.dart';
 
 class LikeStorage {
+  static const String LIKES_BOX_KEY = "likes_box";
   static const String LIKED_ANIMES_KEY = "liked_animes";
   static const String LIKED_MANGAS_KEY = "liked_mangas";
   // <<<<<<< HEAD
@@ -29,6 +30,10 @@ class LikeStorage {
   // =======
 
   static final Box<List> _box = Hive.box<List>("likes_box");
+
+  static void init() async {
+    await Hive.openBox<List>(LIKES_BOX_KEY);
+  }
 
   static List<int> _getIds(String key) {
     final list = _box.get(key, defaultValue: [])!;
