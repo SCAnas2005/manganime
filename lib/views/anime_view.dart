@@ -3,6 +3,8 @@ import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/providers/like_storage.dart';
 import 'package:flutter_application_1/viewmodels/anime_view_model.dart';
 import 'package:flutter_application_1/widgets/anime_card.dart';
+import 'package:flutter_application_1/widgets/ui/tab_section.dart';
+import 'package:flutter_application_1/widgets/ui/tab_switcher.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_application_1/widgets/search_widget/search_button.dart';
 
@@ -14,6 +16,8 @@ class AnimeView extends StatefulWidget {
 }
 
 class _AnimeViewState extends State<AnimeView> {
+  int selectedTab = 0;
+
   late ScrollController _popularController;
   late ScrollController _airingController;
   late ScrollController _mostLikedController;
@@ -77,78 +81,74 @@ class _AnimeViewState extends State<AnimeView> {
                 child: miniSearchBar(context),
               ),
 
-              // Onglets ou titre principal
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Text(
-                    "Pour toi",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  SizedBox(width: 20),
-                  Text(
-                    "Tendances",
-                    style: TextStyle(fontSize: 18, color: Colors.white70),
-                  ),
-                ],
+              TabSwitcher(
+                tabs: ["Pour toi", "Tendances"],
+                selectedIndex: selectedTab,
+                onChanged: (index) {
+                  setState(() {
+                    selectedTab = index;
+                  });
+                },
+                isEnabled: [
+                  true,
+                  false,
+                ], // mettre [true,true] quand la page tendance sera faite
               ),
               const SizedBox(height: 20),
+
+              _buildForYou(vm),
 
               // SECTION 1 : Les plus populaires
-              const Text(
-                "Les plus populaires",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 10),
-              _buildHorizontalList(
-                vm.popular,
-                controller: _popularController,
-                onTap: (anime) => vm.openAnimePage(context, anime),
-              ),
+              // const Text(
+              //   "Les plus populaires",
+              //   style: TextStyle(
+              //     fontSize: 18,
+              //     fontWeight: FontWeight.bold,
+              //     color: Colors.white,
+              //   ),
+              // ),
+              // const SizedBox(height: 10),
+              // _buildHorizontalList(
+              //   vm.popular,
+              //   controller: _popularController,
+              //   onTap: (anime) => vm.openAnimePage(context, anime),
+              // ),
 
-              const SizedBox(height: 20),
+              // const SizedBox(height: 20),
 
               // SECTION 2 : Les sorties
-              const Text(
-                "En diffusion",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 10),
-              _buildHorizontalList(
-                vm.airing,
-                controller: _airingController,
-                onTap: (anime) => vm.openAnimePage(context, anime),
-              ),
+              //         const Text(
+              //           "En diffusion",
+              //           style: TextStyle(
+              //             fontSize: 18,
+              //             fontWeight: FontWeight.bold,
+              //             color: Colors.white,
+              //           ),
+              //         ),
+              //         const SizedBox(height: 10),
+              //         _buildHorizontalList(
+              //           vm.airing,
+              //           controller: _airingController,
+              //           onTap: (anime) => vm.openAnimePage(context, anime),
+              //         ),
 
-              const SizedBox(height: 20),
+              //         const SizedBox(height: 20),
 
-              // SECTION 3 : Les plus vues
-              const Text(
-                "Les plus aimés",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 10),
-              _buildHorizontalList(
-                vm.mostLiked,
-                controller: _mostLikedController,
-                onTap: (anime) => vm.openAnimePage(context, anime),
-              ),
+              //         // SECTION 3 : Les plus vues
+              //         const Text(
+              //           "Les plus aimés",
+              //           style: TextStyle(
+              //             fontSize: 18,
+              //             fontWeight: FontWeight.bold,
+              //             color: Colors.white,
+              //           ),
+              //         ),
+              //         const SizedBox(height: 10),
+              //         _buildHorizontalList(
+              //           vm.mostLiked,
+              //           controller: _mostLikedController,
+              //           onTap: (anime) => vm.openAnimePage(context, anime),
+              //         ),
             ],
           ),
         ),
@@ -156,32 +156,74 @@ class _AnimeViewState extends State<AnimeView> {
     );
   }
 
-  Widget _buildHorizontalList(
-    List<Anime> animes, {
-    bool showEpisode = false,
-    Function(Anime anime)? onTap,
-    ScrollController? controller,
-  }) {
-    return SizedBox(
-      height: 250,
-      child: ListView.builder(
-        controller: controller,
-        scrollDirection: Axis.horizontal,
-        itemCount: animes.length,
-        itemBuilder: (context, index) {
-          final anime = animes[index];
-          return Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: AnimeCard(
-              anime: anime,
-              onTap: (anime) => onTap?.call(anime),
-              onLikeDoubleTap: (anime) => {
-                LikeStorage.toggleAnimeLike(anime.id),
-              },
-            ),
-          );
-        },
-      ),
+  // Onglet 1 : Pour toi
+  Widget _buildForYou(AnimeViewModel vm) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TabSection<Anime>(
+          title: "Les plus populaires",
+          items: vm.popular,
+          controller: _popularController,
+          onTap: (anime) => vm.openAnimePage(context, anime),
+          itemBuilder: (anime) => AnimeCard(
+            anime: anime,
+            onTap: (a) => vm.openAnimePage(context, a),
+            onLikeDoubleTap: (a) => LikeStorage.toggleAnimeLike(a.id),
+          ),
+        ),
+        const SizedBox(height: 20),
+        TabSection<Anime>(
+          title: "En diffusion",
+          items: vm.airing,
+          controller: _airingController,
+          onTap: (anime) => vm.openAnimePage(context, anime),
+          itemBuilder: (anime) => AnimeCard(
+            anime: anime,
+            onTap: (a) => vm.openAnimePage(context, a),
+            onLikeDoubleTap: (a) => LikeStorage.toggleAnimeLike(a.id),
+          ),
+        ),
+        TabSection<Anime>(
+          title: "Les plus aimés",
+          items: vm.mostLiked,
+          controller: _mostLikedController,
+          onTap: (anime) => vm.openAnimePage(context, anime),
+          itemBuilder: (anime) => AnimeCard(
+            anime: anime,
+            onTap: (a) => vm.openAnimePage(context, a),
+            onLikeDoubleTap: (a) => LikeStorage.toggleAnimeLike(a.id),
+          ),
+        ),
+      ],
     );
   }
+
+  // Widget _buildHorizontalList(
+  //   List<Anime> animes, {
+  //   bool showEpisode = false,
+  //   Function(Anime anime)? onTap,
+  //   ScrollController? controller,
+  // }) {
+  //   return SizedBox(
+  //     height: 250,
+  //     child: ListView.builder(
+  //       controller: controller,
+  //       scrollDirection: Axis.horizontal,
+  //       itemCount: animes.length,
+  //       itemBuilder: (context, index) {
+  //         final anime = animes[index];
+  //         return Padding(
+  //           padding: const EdgeInsets.only(right: 10),
+  //           child: AnimeCard(
+  //             anime: anime,
+  //             onTap: (anime) => onTap?.call(anime),
+  //             onLikeDoubleTap: (anime) => {
+  //               LikeStorage.toggleAnimeLike(anime.id),
+  //             },
+  //           ),
+  //         );
+  //       },
+  //     ),
+  //   );
 }
