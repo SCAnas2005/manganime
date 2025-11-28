@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/widgets/like_widget/like_button.dart';
 
-class AnimeListItem extends StatelessWidget {
+class AnimeList extends StatelessWidget {
   final Anime anime;
   final VoidCallback? onTap;
   final bool isLiked;
   final VoidCallback? onLikeToggle;
 
-  const AnimeListItem({
+  const AnimeList({
     super.key,
     required this.anime,
     this.onTap,
