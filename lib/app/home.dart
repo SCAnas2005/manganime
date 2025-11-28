@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/bottom_nav/bottom_nav_view.dart';
 import 'package:flutter_application_1/viewmodels/anime_view_model.dart';
-import 'package:flutter_application_1/viewmodels/favorite_view_model.dart';
+import 'package:flutter_application_1/viewmodels/favorite_anime_view_model.dart';
+import 'package:flutter_application_1/viewmodels/favorite_manga_view_model.dart';
 import 'package:flutter_application_1/viewmodels/manga_view_model.dart';
 import 'package:flutter_application_1/views/anime_view.dart';
-import 'package:flutter_application_1/views/favorite_anime_view.dart';
+import 'package:flutter_application_1/views/favorite_view.dart';
 import 'package:flutter_application_1/views/manga_view.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_application_1/views/anime_stat_view.dart';
@@ -29,10 +30,15 @@ class HomePageState extends State<HomePage> {
       create: (_) => MangaViewModel(),
       child: const MangaView(),
     ),
-    ChangeNotifierProvider(
-      create: (_) => FavoriteViewModel(),
-      child: const FavoriteAnimeView(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => FavoriteAnimeViewModel()),
+        ChangeNotifierProvider(create: (_) => FavoriteMangaViewModel()),
+      ],
+      child: const FavoriteView(),
     ),
+    AnimeStatView(),
+    Container(),
 
     AnimeStatView(),
     Container(),
