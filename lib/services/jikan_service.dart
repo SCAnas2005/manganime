@@ -186,6 +186,40 @@ class JikanService extends ApiService {
       throw Exception('Erreur ${response.statusCode}');
     }
   }
+  // =======
+  //   Future<List<Anime>> searchAnime({
+  //     String query =""
+  //     }) async {
+
+  //       final queryParameters = <String, String>{
+  //         'q': query,
+  //          };
+
+  //        final url = Uri.parse(
+  //         '$baseUrl/anime',
+  //       ).replace(queryParameters: queryParameters);
+
+  //       final response = await http.get(url);
+
+  //       if (response.statusCode == 200) {
+  //         final jsonData = json.decode(response.body);
+  //         final List<dynamic> animeList = jsonData['data'];
+
+  //         // Conversion du JSON en liste d’objets Anime
+  //         final List<Anime> animes = animeList
+  //             .map<Anime>((anime) {
+  //               return jsonToAnime(anime);
+  //             })
+  //             .where((anime) => anime.title.isNotEmpty)
+  //             .toList();
+
+  //         return animes;
+  //       } else {
+  //         throw Exception('Erreur ${response.statusCode}');
+  //       }
+  //     }
+
+  // >>>>>>> d736284cb48dda01c35ea0580f4e23f912b35d19
 
   /// Récupère les informations détaillées d’un anime via son [id MAL].
   ///
@@ -261,7 +295,7 @@ class JikanService extends ApiService {
     if (json['genres'] != null && (json['genres'] as List).isNotEmpty) {
       genre = json['genres'][0]['name']?.toString();
     }
-    
+
     return Manga(
       id: json["mal_id"],
       title:
