@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/manga_detail.dart';
-import 'package:flutter_application_1/providers/like_storage.dart';
+import 'package:flutter_application_1/providers/like_storage_provider.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:flutter_application_1/services/translator.dart';
 
@@ -38,17 +38,12 @@ class MangaInfoViewModel extends ChangeNotifier {
 
   void toggleLike({bool? value}) {
     isLiked = value ?? !isLiked;
-
-    if (mangaDetail != null) {
-      LikeStorage.toggleMangaLike(mangaDetail!.id);
-    }
-
     notifyListeners();
   }
 
   void likeMangaOnDoubleTap({Duration duration = const Duration(seconds: 1)}) {
     showLikeAnimation = true;
-    toggleLike(value: true);
+    toggleLike();
 
     Future.delayed(duration, () {
       showLikeAnimation = false;

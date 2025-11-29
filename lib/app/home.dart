@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/bottom_nav/bottom_nav_view.dart';
 import 'package:flutter_application_1/viewmodels/anime_view_model.dart';
-import 'package:flutter_application_1/viewmodels/favorite_anime_view_model.dart';
-import 'package:flutter_application_1/viewmodels/favorite_manga_view_model.dart';
 import 'package:flutter_application_1/viewmodels/manga_view_model.dart';
 import 'package:flutter_application_1/views/anime_view.dart';
 import 'package:flutter_application_1/views/favorite_view.dart';
@@ -22,24 +20,9 @@ class HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    ChangeNotifierProvider(
-      create: (_) => AnimeViewModel(),
-      child: const AnimeView(),
-    ),
-    ChangeNotifierProvider(
-      create: (_) => MangaViewModel(),
-      child: const MangaView(),
-    ),
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => FavoriteAnimeViewModel()),
-        ChangeNotifierProvider(create: (_) => FavoriteMangaViewModel()),
-      ],
-      child: const FavoriteView(),
-    ),
-    AnimeStatView(),
-    Container(),
-
+    ChangeNotifierProvider(create: (_) => AnimeViewModel(), child: AnimeView()),
+    ChangeNotifierProvider(create: (_) => MangaViewModel(), child: MangaView()),
+    const FavoriteView(),
     AnimeStatView(),
     Center(
       child: Text(
@@ -52,12 +35,12 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _currentIndex >= _pages.length
-          ? Container()
-          : _pages[_currentIndex],
+      body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: BottomNavView(
         currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
+        onTap: (index) {
+          setState(() => _currentIndex = index);
+        },
       ),
     );
   }

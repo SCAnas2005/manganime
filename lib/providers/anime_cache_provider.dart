@@ -1,0 +1,61 @@
+import 'package:flutter_application_1/models/anime.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+
+class AnimeCache {
+  static final AnimeCache instance = AnimeCache();
+
+  static final String ANIME_CACHE_KEY = "anime_cache";
+  final Map<int, Anime> _memory = {}; // cache rapide (RAM)
+  late final Box _box; // cache persistant
+
+  Future<void> init() async {
+    _box = await Hive.openBox(ANIME_CACHE_KEY);
+  }
+
+  /// Récupère un anime déjà en cache (RAM ou Hive)
+  Future<Anime?> get(int id) async {
+    // 1. Cache mémoire
+    if (_memory.containsKey(id)) {
+      return _memory[id];
+    }
+
+    // 2. Cache local (Hive)
+    final data = _box.get(id);
+    if (data != null) {
+      final anime = Anime.fromJson(Map<String, dynamic>.from(data));
+      _memory[id] = anime; // on recharge en mémoire
+      return anime;
+    }
+
+    // 3. Pas trouvé
+    return null;
+  }
+
+  /// Sauvegarde un anime dans le cache mémoire + Hive
+  Future<void> save(Anime anime) async {
+    final id = anime.id;
+    // 1. En mémoire
+    _memory[id] = anime;
+    // 2. En local
+    await _box.put(id, anime.toJson());
+  }
+
+  /// Vérifie si l’anime est en cache
+  bool exists(int id) {
+    return _memory.containsKey(id) || _box.containsKey(id);
+  }
+
+  /// Vide toute la cache (rarement utile)
+  Future<void> clear() async {
+    clearMemory();
+    await clearLocalCache();
+  }
+
+  void clearMemory() {
+    _memory.clear();
+  }
+
+  Future<void> clearLocalCache() async {
+    await _box.clear();
+  }
+}

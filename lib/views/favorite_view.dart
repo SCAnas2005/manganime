@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
+import 'package:flutter_application_1/providers/global_manga_favorites_provider.dart';
 import 'package:flutter_application_1/widgets/anime_list.dart';
 import 'package:flutter_application_1/widgets/display_mode/adaptative_display.dart';
 import 'package:flutter_application_1/widgets/display_mode/display_mode.dart';
 import 'package:flutter_application_1/widgets/display_mode/display_mode_toggle.dart';
 import 'package:provider/provider.dart';
-import '../viewmodels/favorite_anime_view_model.dart';
-import '../viewmodels/favorite_manga_view_model.dart';
 import '../widgets/ui/tab_switcher.dart';
 import '../widgets/anime_card.dart';
 import '../widgets/manga_card.dart';
@@ -27,8 +27,8 @@ class _FavoriteViewState extends State<FavoriteView> {
 
   @override
   Widget build(BuildContext context) {
-    final animeVM = context.watch<FavoriteAnimeViewModel>();
-    final mangaVM = context.watch<FavoriteMangaViewModel>();
+    final animeVM = context.watch<GlobalAnimeFavoritesProvider>();
+    final mangaVM = context.watch<GlobalMangaFavoritesProvider>();
 
     return SafeArea(
       child: Column(
@@ -75,8 +75,8 @@ class _FavoriteViewState extends State<FavoriteView> {
     );
   }
 
-  Widget _buildAnimeFavorites(FavoriteAnimeViewModel vm) {
-    final items = vm.favoris.map((d) => Anime.fromDetail(d)).toList();
+  Widget _buildAnimeFavorites(GlobalAnimeFavoritesProvider vm) {
+    final items = vm.loadedFavoriteAnimes;
     if (items.isEmpty) {
       return const Center(
         child: Text(
@@ -92,19 +92,19 @@ class _FavoriteViewState extends State<FavoriteView> {
       gridBuilder: (anime) => AnimeCard(
         anime: anime,
         onTap: (_) {},
-        onLikeDoubleTap: (_) => vm.removeFavoris(anime.id),
+        onLikeDoubleTap: (_) => vm.toggleFavorite(anime),
       ),
       listbuilder: (anime) => AnimeList(
         anime: anime,
         isLiked: true,
         onTap: () {},
-        onLikeToggle: () => vm.removeFavoris(anime.id),
+        onLikeToggle: () => vm.toggleFavorite(anime),
       ),
     );
   }
 
-  Widget _buildMangaFavorites(FavoriteMangaViewModel vm) {
-    final items = vm.favoris.map((d) => Manga.fromDetail(d)).toList();
+  Widget _buildMangaFavorites(GlobalMangaFavoritesProvider vm) {
+    final items = vm.loadedFavoriteMangas;
     if (items.isEmpty) {
       return const Center(
         child: Text(
@@ -123,6 +123,7 @@ class _FavoriteViewState extends State<FavoriteView> {
         return ListTile(
           leading: Image.network(manga.imageUrl, width: 55),
           title: Text(manga.title),
+          onTap: () => {},
         );
       },
     );

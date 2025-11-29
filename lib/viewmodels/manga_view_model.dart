@@ -23,12 +23,18 @@ class MangaViewModel extends ChangeNotifier {
   bool _hasMoreMostLiked = true;
 
   MangaViewModel() {
-    fetchPopular();
-    fetchPublishing();
-    fetchMostLiked();
+    _init();
   }
 
-  Future<void> fetchPopular() async {
+  void _init() async {
+    await fetchPopular();
+    await Future.delayed(Duration(milliseconds: 500));
+    await fetchPublishing();
+    await Future.delayed(Duration(milliseconds: 500));
+    await fetchMostLiked();
+  }
+
+  Future<void> fetchPopular({int retries = 3}) async {
     if (_isLoadingPopular || !_hasMorePopular) return;
 
     _isLoadingPopular = true;
@@ -48,13 +54,18 @@ class MangaViewModel extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('Erreur fetchPopularManga: $e');
+
+      if (retries > 0) {
+        await Future.delayed(Duration(seconds: 1));
+        return await fetchPopular();
+      }
     }
 
     _isLoadingPopular = false;
     notifyListeners();
   }
 
-  Future<void> fetchPublishing() async {
+  Future<void> fetchPublishing({int retries = 3}) async {
     if (_isLoadingPublishing || !_hasMorePublishing) return;
 
     _isLoadingPublishing = true;
@@ -74,13 +85,18 @@ class MangaViewModel extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('Erreur fetchPublishingManga: $e');
+
+      if (retries > 0) {
+        await Future.delayed(Duration(seconds: 1));
+        return await fetchPublishing();
+      }
     }
 
     _isLoadingPublishing = false;
     notifyListeners();
   }
 
-  Future<void> fetchMostLiked() async {
+  Future<void> fetchMostLiked({int retries = 3}) async {
     if (_isLoadingMostLiked || !_hasMoreMostLiked) return;
 
     _isLoadingMostLiked = true;
@@ -100,6 +116,11 @@ class MangaViewModel extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('Erreur fetchMostLikedManga: $e');
+
+      if (retries > 0) {
+        await Future.delayed(Duration(seconds: 1));
+        return await fetchMostLiked();
+      }
     }
 
     _isLoadingMostLiked = false;

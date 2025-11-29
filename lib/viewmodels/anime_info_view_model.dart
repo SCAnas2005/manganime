@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime_detail.dart';
-import 'package:flutter_application_1/providers/like_storage.dart';
+import 'package:flutter_application_1/providers/like_storage_provider.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:flutter_application_1/services/translator.dart';
 
@@ -18,7 +18,6 @@ class AnimeInfoViewModel extends ChangeNotifier {
   Future<void> loadAnimeDetail(int animeId) async {
     isLoading = true;
     hasError = false;
-    notifyListeners();
 
     try {
       animeDetail = await _service.getFullDetailAnime(animeId);
@@ -36,15 +35,12 @@ class AnimeInfoViewModel extends ChangeNotifier {
 
   void toggleLike({bool? value}) {
     isLiked = value ?? !isLiked;
-    if (animeDetail != null) {
-      LikeStorage.toggleAnimeLike(animeDetail!.id);
-    }
     notifyListeners();
   }
 
   void likeAnimeOnDoubleTap({Duration duration = const Duration(seconds: 1)}) {
     showLikeAnimation = true;
-    toggleLike(value: true);
+    toggleLike();
 
     Future.delayed(duration, () {
       showLikeAnimation = false;

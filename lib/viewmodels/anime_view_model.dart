@@ -31,17 +31,25 @@ class AnimeViewModel extends ChangeNotifier {
   bool get hasMoreMostLiked => _hasMoreMostLiked;
 
   AnimeViewModel() {
-    fetchPopular();
-    fetchAiring();
-    fetchMostLiked();
+    _init();
+  }
+
+  Future<void> _init() async {
+    await fetchPopular();
+    await Future.delayed(
+      Duration(milliseconds: 500),
+    ); // évite les req simultanées
+    await fetchAiring();
+    await Future.delayed(Duration(milliseconds: 500));
+    await fetchMostLiked();
   }
 
   // ---------------- POPULAR ----------------
-  Future<void> fetchPopular() async {
+  Future<void> fetchPopular({int retries = 3}) async {
     if (_isLoadingPopular || !_hasMorePopular) return;
 
     _isLoadingPopular = true;
-    notifyListeners();
+    bool hasNewItems = true;
 
     try {
       final newAnimes = await _service.getTopAnime(
@@ -53,13 +61,19 @@ class AnimeViewModel extends ChangeNotifier {
       } else {
         popular.addAll(newAnimes);
         _popularPage++;
+        hasNewItems = true;
       }
     } catch (e) {
       debugPrint('Erreur fetchPopular: $e');
+
+      if (retries > 0) {
+        await Future.delayed(Duration(seconds: 1));
+        return await fetchPopular();
+      }
     }
 
     _isLoadingPopular = false;
-    notifyListeners();
+    if (hasNewItems) notifyListeners();
   }
 
   void refreshPopular() {
@@ -70,11 +84,11 @@ class AnimeViewModel extends ChangeNotifier {
   }
 
   // ---------------- AIRING ----------------
-  Future<void> fetchAiring() async {
+  Future<void> fetchAiring({int retries = 3}) async {
     if (_isLoadingAiring || !_hasMoreAiring) return;
 
     _isLoadingAiring = true;
-    notifyListeners();
+    bool hasNewItems = false;
 
     try {
       final newAnimes = await _service.getTopAnime(
@@ -89,13 +103,20 @@ class AnimeViewModel extends ChangeNotifier {
       } else {
         airing.addAll(newAnimes);
         _airingPage++;
+        hasNewItems = true;
       }
     } catch (e) {
       debugPrint('Erreur fetchAiring: $e');
+
+      if (retries > 0) {
+        debugPrint('Retry fetchMostLiked, retries left: ${retries - 1}');
+        await Future.delayed(Duration(seconds: 1));
+        return await fetchAiring();
+      }
     }
 
     _isLoadingAiring = false;
-    notifyListeners();
+    if (hasNewItems) notifyListeners();
   }
 
   void refreshAiring() {
@@ -106,11 +127,11 @@ class AnimeViewModel extends ChangeNotifier {
   }
 
   // ---------------- MOST LIKED ----------------
-  Future<void> fetchMostLiked() async {
+  Future<void> fetchMostLiked({int retries = 3}) async {
     if (_isLoadingMostLiked || !_hasMoreMostLiked) return;
 
     _isLoadingMostLiked = true;
-    notifyListeners();
+    bool hasNewItems = false;
 
     try {
       final newAnimes = await _service.getTopAnime(
@@ -122,13 +143,20 @@ class AnimeViewModel extends ChangeNotifier {
       } else {
         mostLiked.addAll(newAnimes);
         _mostLikedPage++;
+        hasNewItems = true;
       }
     } catch (e) {
       debugPrint('Erreur fetchMostLiked: $e');
+
+      if (retries > 0) {
+        debugPrint('Retry fetchMostLiked, retries left: ${retries - 1}');
+        await Future.delayed(Duration(seconds: 1));
+        await fetchMostLiked();
+      }
     }
 
     _isLoadingMostLiked = false;
-    notifyListeners();
+    if (hasNewItems) notifyListeners();
   }
 
   void refreshMostLiked() {
@@ -142,47 +170,7 @@ class AnimeViewModel extends ChangeNotifier {
   void openAnimePage(BuildContext context, Anime anime) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => AnimeInfoView(anime)),
+      MaterialPageRoute(builder: (context) => AnimeInfoView(anime: anime)),
     );
   }
-
-  // void toggleLike() {
-  //   isLiked = !isLiked;
-  //   notifyListeners();
-  // }
-
-  // void likeAnimeOnDoubleTap({Duration duration = const Duration(seconds: 1)}) {
-  //   isLiked = true;
-  //   notifyListeners();
-
-  //   Future.delayed(duration, () {
-  //     isLiked = false;
-  //     notifyListeners();
-  //   });
-  // }
 }
-
-// class AnimeViewModel extends ChangeNotifier {
-//   final JikanService service = JikanService();
-
-//   List<Anime> popular = [];
-//   List<Anime> trending = [];
-//   List<Anime> mostViewed = [];
-//   bool isLoading = false;
-
-//   AnimeViewModel() {
-//     fetchAll();
-//   }
-
-//   Future<void> fetchAll() async {
-//     isLoading = true;
-//     notifyListeners();
-
-//     popular = await service.getTopAnime(page: 1);
-//     trending = await service.getTopAnime(page: 2);
-//     mostViewed = await service.getTopAnime(page: 3);
-
-//     isLoading = false;
-//     notifyListeners();
-//   }
-// }
