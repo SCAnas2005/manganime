@@ -9,8 +9,6 @@ Widget miniSearchBar(BuildContext context) {
         MaterialPageRoute(builder: (context) => Search()),
       );
     },
-    child: Icon(Icons.search,
-        color: Colors.grey[600]
-    ),
+    child: Icon(Icons.search, color: Colors.grey[600]),
   );
 }

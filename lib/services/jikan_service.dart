@@ -261,7 +261,7 @@ class JikanService extends ApiService {
     if (json['genres'] != null && (json['genres'] as List).isNotEmpty) {
       genre = json['genres'][0]['name']?.toString();
     }
-    
+
     return Manga(
       id: json["mal_id"],
       title:
