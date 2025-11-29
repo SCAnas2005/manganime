@@ -1,3 +1,5 @@
+import 'package:flutter_application_1/models/manga_detail.dart';
+
 /// Représente un manga dans l'application.
 ///
 /// Cette classe contient les informations principales nécessaires
@@ -31,4 +33,14 @@ class Manga {
     this.score,
     this.genre,
   });
+
+  factory Manga.fromDetail(MangaDetail d) {
+    return Manga(
+      id: d.id,
+      title: d.title,
+      imageUrl: d.imageUrl,
+      status: d.status,
+      score: d.score,
+    );
+  }
 }
