@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
-import 'package:flutter_application_1/providers/like_storage.dart';
+import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
 import 'package:flutter_application_1/viewmodels/anime_view_model.dart';
 import 'package:flutter_application_1/widgets/anime_card.dart';
 import 'package:flutter_application_1/widgets/ui/tab_section.dart';
@@ -116,7 +116,11 @@ class _AnimeViewState extends State<AnimeView> {
           itemBuilder: (anime) => AnimeCard(
             anime: anime,
             onTap: (a) => vm.openAnimePage(context, a),
-            onLikeDoubleTap: (a) => LikeStorage.toggleAnimeLike(a.id),
+            onLikeDoubleTap: (a) {
+              context.read<GlobalAnimeFavoritesProvider>().toggleFavorite(
+                anime,
+              );
+            },
           ),
         ),
         const SizedBox(height: 20),
@@ -128,7 +132,11 @@ class _AnimeViewState extends State<AnimeView> {
           itemBuilder: (anime) => AnimeCard(
             anime: anime,
             onTap: (a) => vm.openAnimePage(context, a),
-            onLikeDoubleTap: (a) => LikeStorage.toggleAnimeLike(a.id),
+            onLikeDoubleTap: (a) {
+              context.read<GlobalAnimeFavoritesProvider>().toggleFavorite(
+                anime,
+              );
+            },
           ),
         ),
         TabSection<Anime>(
@@ -139,7 +147,11 @@ class _AnimeViewState extends State<AnimeView> {
           itemBuilder: (anime) => AnimeCard(
             anime: anime,
             onTap: (a) => vm.openAnimePage(context, a),
-            onLikeDoubleTap: (a) => LikeStorage.toggleAnimeLike(a.id),
+            onLikeDoubleTap: (a) {
+              context.read<GlobalAnimeFavoritesProvider>().toggleFavorite(
+                anime,
+              );
+            },
           ),
         ),
       ],
@@ -149,32 +161,4 @@ class _AnimeViewState extends State<AnimeView> {
   Widget _buildForYou(AnimeViewModel vm) {
     return Column();
   }
-
-  // Widget _buildHorizontalList(
-  //   List<Anime> animes, {
-  //   bool showEpisode = false,
-  //   Function(Anime anime)? onTap,
-  //   ScrollController? controller,
-  // }) {
-  //   return SizedBox(
-  //     height: 250,
-  //     child: ListView.builder(
-  //       controller: controller,
-  //       scrollDirection: Axis.horizontal,
-  //       itemCount: animes.length,
-  //       itemBuilder: (context, index) {
-  //         final anime = animes[index];
-  //         return Padding(
-  //           padding: const EdgeInsets.only(right: 10),
-  //           child: AnimeCard(
-  //             anime: anime,
-  //             onTap: (anime) => onTap?.call(anime),
-  //             onLikeDoubleTap: (anime) => {
-  //               LikeStorage.toggleAnimeLike(anime.id),
-  //             },
-  //           ),
-  //         );
-  //       },
-  //     ),
-  //   );
 }

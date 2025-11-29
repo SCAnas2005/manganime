@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/manga.dart';
+import 'package:flutter_application_1/providers/global_manga_favorites_provider.dart';
 import 'package:flutter_application_1/viewmodels/manga_view_model.dart';
 import 'package:flutter_application_1/widgets/manga_card.dart';
 import 'package:flutter_application_1/widgets/ui/tab_section.dart';
@@ -179,6 +180,11 @@ class _MangaViewState extends State<MangaView> {
           itemBuilder: (manga) => MangaCard(
             manga: manga,
             onTap: (m) => vm.openMangaPage(context, m),
+            onLikeDoubleTap: (manga) {
+              context.read<GlobalMangaFavoritesProvider>().toggleFavorite(
+                manga,
+              );
+            },
           ),
         ),
         const SizedBox(height: 20),
@@ -190,6 +196,11 @@ class _MangaViewState extends State<MangaView> {
           itemBuilder: (manga) => MangaCard(
             manga: manga,
             onTap: (m) => vm.openMangaPage(context, m),
+            onLikeDoubleTap: (manga) {
+              context.read<GlobalMangaFavoritesProvider>().toggleFavorite(
+                manga,
+              );
+            },
           ),
         ),
         TabSection<Manga>(
@@ -200,6 +211,11 @@ class _MangaViewState extends State<MangaView> {
           itemBuilder: (manga) => MangaCard(
             manga: manga,
             onTap: (m) => vm.openMangaPage(context, m),
+            onLikeDoubleTap: (manga) {
+              context.read<GlobalMangaFavoritesProvider>().toggleFavorite(
+                manga,
+              );
+            },
           ),
         ),
       ],

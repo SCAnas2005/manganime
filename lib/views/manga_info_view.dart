@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/manga.dart';
+import 'package:flutter_application_1/providers/global_manga_favorites_provider.dart';
 import 'package:flutter_application_1/viewmodels/manga_info_view_model.dart';
 import 'package:flutter_application_1/widgets/like_widget/like_animation.dart';
 import 'package:flutter_application_1/widgets/like_widget/like_button.dart';
@@ -41,7 +42,12 @@ class MangaInfoView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   GestureDetector(
-                    onDoubleTap: vm.likeMangaOnDoubleTap,
+                    onDoubleTap: () {
+                      vm.likeMangaOnDoubleTap();
+                      context
+                          .read<GlobalMangaFavoritesProvider>()
+                          .toggleFavorite(manga);
+                    },
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
@@ -70,7 +76,12 @@ class MangaInfoView extends StatelessWidget {
                       const Spacer(),
                       LikeButton(
                         isLiked: vm.isLiked,
-                        onTap: vm.toggleLike,
+                        onTap: () {
+                          vm.toggleLike();
+                          context
+                              .read<GlobalMangaFavoritesProvider>()
+                              .toggleFavorite(manga);
+                        },
                         iconSize: 30,
                       ),
                     ],

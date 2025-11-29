@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
 import 'package:flutter_application_1/providers/user_stats_provider.dart';
 import 'package:flutter_application_1/viewmodels/anime_info_view_model.dart';
 import 'package:flutter_application_1/widgets/like_widget/like_animation.dart';
@@ -59,7 +60,12 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
                 children: [
                   // Image + animation du like au double tap
                   GestureDetector(
-                    onDoubleTap: vm.likeAnimeOnDoubleTap,
+                    onDoubleTap: () {
+                      vm.likeAnimeOnDoubleTap();
+                      context
+                          .read<GlobalAnimeFavoritesProvider>()
+                          .toggleFavorite(anime);
+                    },
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
@@ -95,7 +101,12 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
                       // Bouton Like
                       LikeButton(
                         isLiked: vm.isLiked,
-                        onTap: vm.toggleLike,
+                        onTap: () {
+                          vm.toggleLike();
+                          context
+                              .read<GlobalAnimeFavoritesProvider>()
+                              .toggleFavorite(anime);
+                        },
                         iconSize: 30,
                       ),
                     ],

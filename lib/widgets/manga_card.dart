@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/manga.dart';
-import 'package:flutter_application_1/providers/like_storage.dart';
 import 'package:flutter_application_1/widgets/like_widget/like_animation.dart';
 
 /// Clipper personnalisé pour créer des coins légèrement irréguliers
@@ -10,24 +9,24 @@ class IrregularBorderClipper extends CustomClipper<Path> {
   Path getClip(Size size) {
     final path = Path();
     final random = math.Random(42); // Seed fixe pour cohérence
-    
+
     // Coin supérieur gauche - légèrement irrégulier
     final topLeftVariation = random.nextDouble() * 3 - 1.5;
     path.moveTo(2 + topLeftVariation, 0);
-    
+
     // Coin supérieur droit - légèrement irrégulier
     final topRightVariation = random.nextDouble() * 3 - 1.5;
     path.lineTo(size.width - 2 - topRightVariation, 0);
-    
+
     // Coin inférieur droit - légèrement irrégulier
     final bottomRightVariation = random.nextDouble() * 3 - 1.5;
     path.lineTo(size.width, size.height - 2 - bottomRightVariation);
-    
+
     // Coin inférieur gauche - légèrement irrégulier
     final bottomLeftVariation = random.nextDouble() * 3 - 1.5;
     path.lineTo(2 + bottomLeftVariation, size.height);
     path.close();
-    
+
     return path;
   }
 
@@ -38,7 +37,7 @@ class IrregularBorderClipper extends CustomClipper<Path> {
 /// Widget pour la bulle de dialogue du score
 class SpeechBubbleScore extends StatelessWidget {
   final String score;
-  
+
   const SpeechBubbleScore({super.key, required this.score});
 
   @override
@@ -79,7 +78,7 @@ class SpeechBubblePainter extends CustomPainter {
     final radius = 8.0;
     final tailWidth = 6.0;
     final tailHeight = 4.0;
-    
+
     // Corps de la bulle (rectangle arrondi)
     path.moveTo(radius, 0);
     path.lineTo(size.width - radius, 0);
@@ -91,18 +90,26 @@ class SpeechBubblePainter extends CustomPainter {
       size.width - radius,
       size.height - tailHeight,
     );
-    
+
     // Queue de la bulle (triangle pointant vers le bas)
     path.lineTo(size.width - radius - tailWidth, size.height - tailHeight);
     path.lineTo(size.width - radius - tailWidth / 2, size.height);
-    path.lineTo(size.width - radius - tailWidth * 1.5, size.height - tailHeight);
-    
+    path.lineTo(
+      size.width - radius - tailWidth * 1.5,
+      size.height - tailHeight,
+    );
+
     path.lineTo(radius, size.height - tailHeight);
-    path.quadraticBezierTo(0, size.height - tailHeight, 0, size.height - radius - tailHeight);
+    path.quadraticBezierTo(
+      0,
+      size.height - tailHeight,
+      0,
+      size.height - radius - tailHeight,
+    );
     path.lineTo(0, radius);
     path.quadraticBezierTo(0, 0, radius, 0);
     path.close();
-    
+
     canvas.drawPath(path, paint);
   }
 
@@ -113,7 +120,7 @@ class SpeechBubblePainter extends CustomPainter {
 /// Widget pour le badge de genre vertical
 class VerticalGenreBadge extends StatelessWidget {
   final String genre;
-  
+
   const VerticalGenreBadge({super.key, required this.genre});
 
   @override
@@ -153,10 +160,7 @@ class ScreentoneOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: ScreentonePainter(),
-      child: Container(),
-    );
+    return CustomPaint(painter: ScreentonePainter(), child: Container());
   }
 }
 
@@ -170,17 +174,14 @@ class ScreentonePainter extends CustomPainter {
 
     // Créer un gradient radial pour la trame (plus dense sur les bords)
     final gradient = RadialGradient(
-      colors: [
-        Colors.transparent,
-        Colors.black.withOpacity(0.15),
-      ],
+      colors: [Colors.transparent, Colors.black.withOpacity(0.15)],
       stops: const [0.7, 1.0],
     );
 
     // Dessiner la trame sur les bords avec un motif de points
     final dotSize = 2.0;
     final spacing = 4.0;
-    
+
     for (double y = 0; y < size.height; y += spacing) {
       for (double x = 0; x < size.width; x += spacing) {
         // Calculer la distance au bord le plus proche
@@ -192,7 +193,7 @@ class ScreentonePainter extends CustomPainter {
           math.min(distToLeft, distToRight),
           math.min(distToTop, distToBottom),
         );
-        
+
         // Dessiner uniquement près des bords (dans les 20 premiers pixels)
         if (minDist < 20) {
           final opacity = (1 - minDist / 20) * 0.15;
@@ -213,8 +214,14 @@ class ScreentonePainter extends CustomPainter {
 class MangaCard extends StatefulWidget {
   final Manga manga;
   final Function(Manga manga)? onTap;
+  final Function(Manga manga)? onLikeDoubleTap;
 
-  const MangaCard({super.key, required this.manga, this.onTap});
+  const MangaCard({
+    super.key,
+    required this.manga,
+    this.onTap,
+    this.onLikeDoubleTap,
+  });
 
   @override
   State<MangaCard> createState() => _MangaCardState();
@@ -230,7 +237,9 @@ class _MangaCardState extends State<MangaCard>
   void initState() {
     super.initState();
     _flipController = AnimationController(
-      duration: const Duration(milliseconds: 180), // Durée augmentée pour effet plus visible
+      duration: const Duration(
+        milliseconds: 180,
+      ), // Durée augmentée pour effet plus visible
       vsync: this,
     );
     _flipAnimation = Tween<double>(begin: 0, end: 1).animate(
@@ -270,20 +279,26 @@ class _MangaCardState extends State<MangaCard>
       onTap: () => widget.onTap?.call(widget.manga),
       onDoubleTap: () {
         _triggerLikeAnimation();
-        LikeStorage.toggleMangaLike(widget.manga.id);
+        widget.onLikeDoubleTap?.call(widget.manga);
       },
       child: AnimatedBuilder(
         animation: _flipAnimation,
         builder: (context, child) {
           // Calcul de l'angle de rotation pour l'effet flip page (augmenté pour effet plus marquant)
-          final rotationAngle = (_flipAnimation.value - 0.5) * 0.25; // ~14° en radians (plus marquant)
-          
+          final rotationAngle =
+              (_flipAnimation.value - 0.5) *
+              0.25; // ~14° en radians (plus marquant)
+
           // Légère échelle pour renforcer l'effet de profondeur
           final scale = 1.0 + (_flipAnimation.value - 0.5).abs() * 0.03;
-          
+
           return Transform(
             transform: Matrix4.identity()
-              ..setEntry(3, 2, 0.002) // Perspective augmentée pour effet plus prononcé
+              ..setEntry(
+                3,
+                2,
+                0.002,
+              ) // Perspective augmentée pour effet plus prononcé
               ..rotateY(rotationAngle)
               ..scale(scale),
             alignment: Alignment.center,
@@ -320,18 +335,16 @@ class _MangaCardState extends State<MangaCard>
                         },
                       ),
                     ),
-                    
+
                     // Overlay de trame sur les bords
-                    Positioned.fill(
-                      child: ScreentoneOverlay(),
-                    ),
-                    
+                    Positioned.fill(child: ScreentoneOverlay()),
+
                     // Animation du cœur
                     if (showHeart)
                       Positioned.fill(
                         child: LikeAnimation(show: showHeart, size: 90),
                       ),
-                    
+
                     // Badge de genre vertical (en haut à gauche)
                     if (widget.manga.genre != null)
                       Positioned(
@@ -339,14 +352,14 @@ class _MangaCardState extends State<MangaCard>
                         left: 8,
                         child: VerticalGenreBadge(genre: genre),
                       ),
-                    
+
                     // Badge de score en bulle de dialogue (en haut à droite)
                     Positioned(
                       top: 8,
                       right: 8,
                       child: SpeechBubbleScore(score: scoreLabel),
                     ),
-                    
+
                     // Titre vertical sur le côté gauche
                     Positioned(
                       left: 0,
@@ -354,7 +367,8 @@ class _MangaCardState extends State<MangaCard>
                       bottom: 0,
                       child: Center(
                         child: RotatedBox(
-                          quarterTurns: 1, // Rotation 90° pour texte vertical de haut en bas
+                          quarterTurns:
+                              1, // Rotation 90° pour texte vertical de haut en bas
                           child: Container(
                             constraints: const BoxConstraints(maxHeight: 150),
                             padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -364,7 +378,8 @@ class _MangaCardState extends State<MangaCard>
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
-                                fontFamily: 'serif', // Police serif pour effet imprimé
+                                fontFamily:
+                                    'serif', // Police serif pour effet imprimé
                                 shadows: [
                                   const Shadow(
                                     color: Colors.black,

@@ -9,7 +9,7 @@ class UserStatsProvider {
   static final Box<List> _box = Hive.box<List>(STATS_BOX_KEY);
 
   // Initialisation
-  static void init() async {
+  static Future<void> init() async {
     await Hive.openBox<List>(STATS_BOX_KEY);
   }
 
