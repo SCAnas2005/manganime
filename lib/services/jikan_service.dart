@@ -289,4 +289,31 @@ class JikanService extends ApiService {
           .toList(),
     );
   }
+
+  Future<List<Anime>> searchAnime({String query = ""}) async {
+    final queryParameters = <String, String>{'q': query};
+
+    final url = Uri.parse(
+      '$baseUrl/anime',
+    ).replace(queryParameters: queryParameters);
+
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      final List<dynamic> animeList = jsonData['data'];
+
+      // Conversion du JSON en liste d’objets Anime
+      final List<Anime> animes = animeList
+          .map<Anime>((anime) {
+            return jsonToAnime(anime);
+          })
+          .where((anime) => anime.title.isNotEmpty)
+          .toList();
+
+      return animes;
+    } else {
+      throw Exception('Erreur ${response.statusCode}');
+    }
+  }
 }
