@@ -256,6 +256,12 @@ class JikanService extends ApiService {
   /// Convertit un objet JSON (manga basique) en instance de [Manga].
   @override
   Manga jsonToManga(Map<String, dynamic> json) {
+    // Extraire le premier genre si disponible
+    String? genre;
+    if (json['genres'] != null && (json['genres'] as List).isNotEmpty) {
+      genre = json['genres'][0]['name']?.toString();
+    }
+    
     return Manga(
       id: json["mal_id"],
       title:
@@ -263,6 +269,7 @@ class JikanService extends ApiService {
       imageUrl: json['images']?['jpg']?['image_url']?.toString() ?? '',
       status: json["status"] ?? "",
       score: (json["score"] ?? 0).toDouble(),
+      genre: genre,
     );
   }
 

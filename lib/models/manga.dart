@@ -17,14 +17,18 @@ class Manga {
 
   final String status;
 
+  /// Genre principal du manga (ex: Shonen, Seinen, Shojo).
+  final String? genre;
+
   /// Constructeur de la classe Manga.
   ///
-  /// Tous les champs sauf [score] sont obligatoires.
+  /// Tous les champs sauf [score] et [genre] sont obligatoires.
   Manga({
     required this.id,
     required this.title,
     required this.imageUrl,
     required this.status,
     this.score,
+    this.genre,
   });
 }
