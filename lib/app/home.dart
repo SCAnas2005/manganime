@@ -5,7 +5,7 @@ import 'package:flutter_application_1/viewmodels/anime_view_model.dart';
 import 'package:flutter_application_1/views/anime_view.dart';
 import 'package:flutter_application_1/views/favorite_anime_view.dart';
 import 'package:provider/provider.dart';
-
+import 'package:flutter_application_1/viewmodels/search_view_model.dart';
 class HomePage extends StatefulWidget {
   final String title;
   const HomePage({super.key, required this.title});
@@ -61,8 +61,11 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return ChangeNotifierProvider(
-      create: (_) => AnimeViewModel(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AnimeViewModel()),
+        ChangeNotifierProvider(create: (_) => SearchViewModel()),
+      ],
       child: Consumer<AnimeViewModel>(
         builder: (context, animeVM, _) {
           _updateAllAnimesUnique(animeVM);
