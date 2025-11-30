@@ -1,3 +1,5 @@
+import 'package:flutter_application_1/models/anime_enums.dart';
+
 /// Représente les informations détaillées d’un anime.
 ///
 /// Cet objet contient toutes les données retournées par l’API Jikan
@@ -25,7 +27,7 @@ class AnimeDetail {
   final String status;
 
   /// Liste des genres associés à l’anime (Action, Drama, etc.).
-  final List<String> genres;
+  final List<AnimeGenre> genres;
 
   /// Constructeur principal.
   AnimeDetail({

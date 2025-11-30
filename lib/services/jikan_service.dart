@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_application_1/models/anime_detail.dart';
 import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/models/anime_enums.dart';
 import 'package:flutter_application_1/models/manga.dart';
 import 'package:flutter_application_1/models/manga_detail.dart';
 import 'package:flutter_application_1/services/api_service.dart';
@@ -17,6 +18,76 @@ class JikanService extends ApiService {
   /// URL de base de l’API Jikan.
   @override
   final String baseUrl = "https://api.jikan.moe/v4";
+
+  @override
+  Future<List<Anime>> fetchAnimeList(Uri uri) async {
+    final response = await http.get(uri);
+
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      final List<dynamic> animeList = jsonData['data'];
+
+      // Conversion du JSON en liste d’objets Anime
+      final List<Anime> animes = animeList
+          .map<Anime>((anime) {
+            return jsonToAnime(anime);
+          })
+          .where((anime) => anime.title.isNotEmpty)
+          .toList();
+
+      return animes;
+    } else {
+      throw Exception('Erreur ${response.statusCode}');
+    }
+  }
+
+  @override
+  Future<List<Anime>> search({
+    int page = 1,
+    required String query,
+    int? limit,
+    AnimeType? type,
+    int? score,
+    int? minScore,
+    int? maxScore,
+    AnimeStatus? status,
+    AnimeRating? rating,
+    bool sfw = false,
+    List<AnimeGenre>? genres,
+    String? genresExclude,
+    AnimeOrderBy? orderBy,
+    AnimeSortBy? sort,
+    String? letter,
+    String? producers,
+    String? startDate,
+    String? endDate,
+  }) async {
+    final queryParameters = <String, String>{
+      'page': page.toString(),
+      'q': query,
+      if (limit != null) 'limit': limit.toString(),
+      if (type != null) 'type': type.toString(),
+      if (score != null) 'score': score.toString(),
+      if (minScore != null) 'min_score': minScore.toString(),
+      if (maxScore != null) 'max_score': maxScore.toString(),
+      if (status != null) 'status': status.toString(),
+      if (rating != null) 'rating': rating.toString(),
+      'sfw': sfw.toString(),
+      if (genres != null)
+        'genres': genres.map((g) => g.toReadableString()).join(','),
+      if (genresExclude != null) 'genres_exclude': genresExclude.toString(),
+      if (orderBy != null) 'order_by': orderBy.toString(),
+      if (sort != null) 'sort': sort.toString(),
+      if (letter != null) 'letter': letter.toString(),
+      if (producers != null) 'producers': producers.toString(),
+      if (startDate != null) 'start_date': startDate.toString(),
+      if (endDate != null) 'end_date': endDate.toString(),
+    };
+    var url = Uri.parse(
+      "$baseUrl/anime",
+    ).replace(queryParameters: queryParameters);
+    return fetchAnimeList(url);
+  }
 
   /// Récupère une liste d’animes les plus populaires depuis Jikan.
   ///
@@ -116,6 +187,40 @@ class JikanService extends ApiService {
       throw Exception('Erreur ${response.statusCode}');
     }
   }
+  // =======
+  //   Future<List<Anime>> searchAnime({
+  //     String query =""
+  //     }) async {
+
+  //       final queryParameters = <String, String>{
+  //         'q': query,
+  //          };
+
+  //        final url = Uri.parse(
+  //         '$baseUrl/anime',
+  //       ).replace(queryParameters: queryParameters);
+
+  //       final response = await http.get(url);
+
+  //       if (response.statusCode == 200) {
+  //         final jsonData = json.decode(response.body);
+  //         final List<dynamic> animeList = jsonData['data'];
+
+  //         // Conversion du JSON en liste d’objets Anime
+  //         final List<Anime> animes = animeList
+  //             .map<Anime>((anime) {
+  //               return jsonToAnime(anime);
+  //             })
+  //             .where((anime) => anime.title.isNotEmpty)
+  //             .toList();
+
+  //         return animes;
+  //       } else {
+  //         throw Exception('Erreur ${response.statusCode}');
+  //       }
+  //     }
+
+  // >>>>>>> d736284cb48dda01c35ea0580f4e23f912b35d19
 
   /// Récupère les informations détaillées d’un anime via son [id MAL].
   ///
@@ -163,6 +268,13 @@ class JikanService extends ApiService {
       imageUrl: json['images']?['jpg']?['image_url']?.toString() ?? '',
       status: json["status"] ?? "",
       score: (json["score"] ?? 0).toDouble(),
+      genres: (json["genres"] != null)
+          ? (json["genres"] as List)
+                .map((genreJson) => AnimeGenreX.fromString(genreJson["name"]))
+                .where((g) => g != null)
+                .map((g) => g!)
+                .toList()
+          : [],
     );
   }
 
@@ -177,15 +289,25 @@ class JikanService extends ApiService {
       score: (json['score'] ?? 0).toDouble(),
       type: json['type'] ?? '',
       status: json['status'] ?? '',
-      genres: (json['genres'] as List<dynamic>)
-          .map((g) => g['name'].toString())
-          .toList(),
+      genres: (json["genres"] != null)
+          ? (json["genres"] as List)
+                .map((genreJson) => AnimeGenreX.fromString(genreJson["name"]))
+                .where((g) => g != null)
+                .map((g) => g!)
+                .toList()
+          : [],
     );
   }
 
   /// Convertit un objet JSON (manga basique) en instance de [Manga].
   @override
   Manga jsonToManga(Map<String, dynamic> json) {
+    // Extraire le premier genre si disponible
+    String? genre;
+    if (json['genres'] != null && (json['genres'] as List).isNotEmpty) {
+      genre = json['genres'][0]['name']?.toString();
+    }
+
     return Manga(
       id: json["mal_id"],
       title:
@@ -193,6 +315,7 @@ class JikanService extends ApiService {
       imageUrl: json['images']?['jpg']?['image_url']?.toString() ?? '',
       status: json["status"] ?? "",
       score: (json["score"] ?? 0).toDouble(),
+      genre: genre,
     );
   }
 

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_application_1/models/anime_detail.dart';
 import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/models/anime_enums.dart';
 import 'package:flutter_application_1/models/manga.dart';
 import 'package:flutter_application_1/models/manga_detail.dart';
 import 'package:flutter_application_1/services/api_service.dart';
@@ -16,6 +17,12 @@ class AniListService implements ApiService {
   /// URL de base pour les requêtes GraphQL AniList.
   @override
   String get baseUrl => "https://graphql.anilist.co";
+
+  @override
+  Future<List<Anime>> fetchAnimeList(Uri uri) {
+    // TODO: implement fetchAnimeList
+    throw UnimplementedError();
+  }
 
   /// Récupère une liste paginée des animes depuis AniList.
   ///
@@ -164,6 +171,13 @@ class AniListService implements ApiService {
       imageUrl: imageUrl,
       score: 0,
       status: json["status"] ?? "",
+      genres: (json["genres"] != null)
+          ? (json["genres"] as List)
+                .map((genreJson) => AnimeGenreX.fromString(genreJson["name"]))
+                .where((g) => g != null)
+                .map((g) => g!)
+                .toList()
+          : [],
     );
   }
 
@@ -182,7 +196,13 @@ class AniListService implements ApiService {
       score: (json['averageScore'] ?? 0).toDouble(),
       type: json['type'] ?? '',
       status: json['status'] ?? '',
-      genres: List<String>.from(json['genres'] ?? []),
+      genres: (json["genres"] != null)
+          ? (json["genres"] as List)
+                .map((genreJson) => AnimeGenreX.fromString(genreJson["name"]))
+                .where((g) => g != null)
+                .map((g) => g!)
+                .toList()
+          : [],
     );
   }
 
@@ -215,6 +235,31 @@ class AniListService implements ApiService {
     bool sfw = true,
   }) {
     // TODO: implement getTopManga
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List<Anime>> search({
+    int page = 1,
+    required String query,
+    int? limit,
+    AnimeType? type,
+    int? score,
+    int? minScore,
+    int? maxScore,
+    AnimeStatus? status,
+    AnimeRating? rating,
+    bool sfw = false,
+    List<AnimeGenre>? genres,
+    String? genresExclude,
+    AnimeOrderBy? orderBy,
+    AnimeSortBy? sort,
+    String? letter,
+    String? producers,
+    String? startDate,
+    String? endDate,
+  }) {
+    // TODO: implement search
     throw UnimplementedError();
   }
 }

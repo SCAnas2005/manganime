@@ -1,5 +1,6 @@
 import 'package:flutter_application_1/models/anime_detail.dart';
 import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/models/anime_enums.dart';
 import 'package:flutter_application_1/models/manga.dart';
 import 'package:flutter_application_1/models/manga_detail.dart';
 
@@ -24,6 +25,29 @@ import 'package:flutter_application_1/models/manga_detail.dart';
 abstract class ApiService {
   /// URL de base de l’API (exemple : `https://api.jikan.moe/v4`).
   String get baseUrl;
+
+  Future<List<Anime>> fetchAnimeList(Uri uri);
+
+  Future<List<Anime>> search({
+    int page = 1,
+    required String query,
+    int? limit,
+    AnimeType? type, // le type d'anime (film, serie, ect)
+    int? score,
+    int? minScore,
+    int? maxScore,
+    AnimeStatus? status,
+    AnimeRating? rating,
+    bool sfw = false,
+    List<AnimeGenre>? genres,
+    String? genresExclude,
+    AnimeOrderBy? orderBy,
+    AnimeSortBy? sort,
+    String? letter,
+    String? producers,
+    String? startDate,
+    String? endDate,
+  });
 
   /// Récupère la liste des animes les plus populaires depuis l’API.
   ///
