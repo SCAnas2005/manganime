@@ -93,6 +93,7 @@ class _FavoriteViewState extends State<FavoriteView> {
         anime: anime,
         onTap: (_) {},
         onLikeDoubleTap: (_) => vm.toggleFavorite(anime),
+        isLiked: vm.isAnimeLiked(anime.id),
       ),
       listbuilder: (anime) => AnimeList(
         anime: anime,

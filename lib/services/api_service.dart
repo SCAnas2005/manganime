@@ -39,7 +39,7 @@ abstract class ApiService {
     AnimeStatus? status,
     AnimeRating? rating,
     bool sfw = false,
-    String? genres,
+    List<AnimeGenre>? genres,
     String? genresExclude,
     AnimeOrderBy? orderBy,
     AnimeSortBy? sort,
