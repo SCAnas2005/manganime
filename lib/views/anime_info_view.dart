@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/models/anime_enums.dart';
 import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
 import 'package:flutter_application_1/providers/user_stats_provider.dart';
 import 'package:flutter_application_1/viewmodels/anime_info_view_model.dart';
@@ -92,6 +93,9 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Text(
+                            "Genre : ${detail.genres.map((g) => {if (g != AnimeGenre.None) g.toReadableString()}).toList()}",
+                          ),
                           Text("Score : ${detail.score}"),
                           Text("Statut : ${detail.status}"),
                         ],

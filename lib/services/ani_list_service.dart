@@ -171,6 +171,13 @@ class AniListService implements ApiService {
       imageUrl: imageUrl,
       score: 0,
       status: json["status"] ?? "",
+      genres: (json["genres"] != null)
+          ? (json["genres"] as List)
+                .map((genreJson) => AnimeGenreX.fromString(genreJson["name"]))
+                .where((g) => g != null)
+                .map((g) => g!)
+                .toList()
+          : [],
     );
   }
 
@@ -189,7 +196,13 @@ class AniListService implements ApiService {
       score: (json['averageScore'] ?? 0).toDouble(),
       type: json['type'] ?? '',
       status: json['status'] ?? '',
-      genres: List<String>.from(json['genres'] ?? []),
+      genres: (json["genres"] != null)
+          ? (json["genres"] as List)
+                .map((genreJson) => AnimeGenreX.fromString(genreJson["name"]))
+                .where((g) => g != null)
+                .map((g) => g!)
+                .toList()
+          : [],
     );
   }
 
@@ -237,7 +250,7 @@ class AniListService implements ApiService {
     AnimeStatus? status,
     AnimeRating? rating,
     bool sfw = false,
-    String? genres,
+    List<AnimeGenre>? genres,
     String? genresExclude,
     AnimeOrderBy? orderBy,
     AnimeSortBy? sort,

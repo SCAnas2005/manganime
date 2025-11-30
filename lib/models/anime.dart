@@ -1,4 +1,5 @@
 import 'package:flutter_application_1/models/anime_detail.dart';
+import 'package:flutter_application_1/models/anime_enums.dart';
 import 'package:flutter_application_1/models/identifiable.dart';
 
 /// Représente un anime dans l'application.
@@ -19,7 +20,11 @@ class Anime extends Identifiable {
   /// Note moyenne de l'anime, si disponible.
   final double? score;
 
+  /// Le status de l'anime
   final String status;
+
+  /// Genre de l'anime (action, aventure, ect)
+  final List<AnimeGenre> genres;
 
   /// Constructeur de la classe Anime.
   ///
@@ -29,6 +34,7 @@ class Anime extends Identifiable {
     required this.title,
     required this.imageUrl,
     required this.status,
+    required this.genres,
     this.score,
   });
 
@@ -39,6 +45,7 @@ class Anime extends Identifiable {
       imageUrl: d.imageUrl,
       status: d.status,
       score: d.score,
+      genres: d.genres,
     );
   }
 
@@ -49,6 +56,13 @@ class Anime extends Identifiable {
       imageUrl: json['imageUrl'] as String,
       status: json['status'] as String,
       score: (json['score'] != null) ? (json['score'] as num).toDouble() : null,
+      genres: (json["genres"] != null)
+          ? (json["genres"] as List)
+                .map((genreJson) => AnimeGenreX.fromString(genreJson["name"]))
+                .where((g) => g != null)
+                .map((g) => g!)
+                .toList()
+          : [],
     );
   }
 
@@ -59,6 +73,7 @@ class Anime extends Identifiable {
       'imageUrl': imageUrl,
       'status': status,
       'score': score,
+      "genres": genres,
     };
   }
 }

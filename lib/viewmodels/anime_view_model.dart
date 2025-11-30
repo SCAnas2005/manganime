@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
+import 'package:flutter_application_1/providers/user_profile_provider.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:flutter_application_1/views/anime_info_view.dart';
 
@@ -10,25 +12,37 @@ class AnimeViewModel extends ChangeNotifier {
   List<Anime> airing = [];
   List<Anime> mostLiked = [];
 
+  List<Anime> forYou = [];
+
   int _popularPage = 1;
   int _airingPage = 1;
   int _mostLikedPage = 1;
+
+  int forYouPage = 1;
 
   bool _isLoadingPopular = false;
   bool _isLoadingAiring = false;
   bool _isLoadingMostLiked = false;
 
+  bool _isLoadingForYou = false;
+
   bool get isLoadingPopular => _isLoadingPopular;
   bool get isLoadingAiring => _isLoadingAiring;
   bool get isLoadingMostLiked => _isLoadingMostLiked;
+
+  bool get isLoadingForYou => _isLoadingForYou;
 
   bool _hasMorePopular = true;
   bool _hasMoreAiring = true;
   bool _hasMoreMostLiked = true;
 
+  bool _hasMoreForYou = true;
+
   bool get hasMorePopular => _hasMorePopular;
   bool get hasMoreAiring => _hasMoreAiring;
   bool get hasMoreMostLiked => _hasMoreMostLiked;
+
+  bool get hasMoreForYou => _hasMoreForYou;
 
   AnimeViewModel() {
     _init();
@@ -164,6 +178,38 @@ class AnimeViewModel extends ChangeNotifier {
     _mostLikedPage = 1;
     _hasMoreMostLiked = true;
     fetchMostLiked();
+  }
+
+  // ---------------- FOR YOU    ----------------
+  Future<void> fetchForYou(GlobalAnimeFavoritesProvider provider) async {
+    // Récupération des animes liékes
+    final liked = provider.loadedFavoriteAnimes;
+
+    // Calcul du profil utilisateur
+    final userProfile = UserprofileProvider.fromLikedAnimes(liked);
+
+    // Le top genres
+    final topGenres = userProfile.getTopGenres(3);
+
+    // Recherche Api
+    try {
+      final animes = await _service.search(
+        page: forYouPage,
+        query: "",
+        genres: topGenres,
+      );
+      if (animes.isEmpty) {
+        _hasMoreForYou = false;
+      } else {
+        forYou.addAll(animes);
+        forYouPage++;
+      }
+    } catch (e) {
+      debugPrint("Erreur de fetchForYou : $e");
+    }
+
+    _isLoadingForYou = false;
+    notifyListeners();
   }
 
   // ---------------- NAVIGATION ----------------
