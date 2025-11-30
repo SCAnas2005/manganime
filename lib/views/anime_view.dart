@@ -34,6 +34,8 @@ class _AnimeViewState extends State<AnimeView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final vm = context.read<AnimeViewModel>();
 
+      vm.fetchForYou(context.read<GlobalAnimeFavoritesProvider>());
+
       _popularController.addListener(() {
         if (_popularController.position.pixels >=
             _popularController.position.maxScrollExtent - 200) {
@@ -120,7 +122,11 @@ class _AnimeViewState extends State<AnimeView> {
               context.read<GlobalAnimeFavoritesProvider>().toggleFavorite(
                 anime,
               );
+              setState(() {});
             },
+            isLiked: context.watch<GlobalAnimeFavoritesProvider>().isAnimeLiked(
+              anime.id,
+            ),
           ),
         ),
         const SizedBox(height: 20),
@@ -137,6 +143,9 @@ class _AnimeViewState extends State<AnimeView> {
                 anime,
               );
             },
+            isLiked: context.watch<GlobalAnimeFavoritesProvider>().isAnimeLiked(
+              anime.id,
+            ),
           ),
         ),
         TabSection<Anime>(
@@ -152,6 +161,9 @@ class _AnimeViewState extends State<AnimeView> {
                 anime,
               );
             },
+            isLiked: context.watch<GlobalAnimeFavoritesProvider>().isAnimeLiked(
+              anime.id,
+            ),
           ),
         ),
       ],
@@ -159,6 +171,31 @@ class _AnimeViewState extends State<AnimeView> {
   }
 
   Widget _buildForYou(AnimeViewModel vm) {
-    return Column();
+    return GridView.builder(
+      shrinkWrap: true, // prend uniquement la hauteur nécessaire
+      physics:
+          const NeverScrollableScrollPhysics(), // désactive le scroll interne
+
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 0.62,
+      ),
+      itemBuilder: (context, index) {
+        final anime = vm.forYou[index];
+        return AnimeCard(
+          anime: anime,
+          onTap: (a) => vm.openAnimePage(context, a),
+          onLikeDoubleTap: (a) {
+            context.read<GlobalAnimeFavoritesProvider>().toggleFavorite(anime);
+          },
+          isLiked: context.watch<GlobalAnimeFavoritesProvider>().isAnimeLiked(
+            anime.id,
+          ),
+        );
+      },
+      itemCount: vm.forYou.length,
+    );
   }
 }

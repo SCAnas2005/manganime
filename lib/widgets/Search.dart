@@ -77,6 +77,9 @@ class _SearchState extends State<Search> {
                           .read<GlobalAnimeFavoritesProvider>()
                           .toggleFavorite(anime),
                     },
+                    isLiked: context
+                        .read<GlobalAnimeFavoritesProvider>()
+                        .isAnimeLiked(anime.id),
                   );
                 },
               ),
