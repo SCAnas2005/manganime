@@ -1,14 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/models/anime_enums.dart';
+import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
+import 'package:flutter_application_1/providers/user_stats_provider.dart';
 import 'package:flutter_application_1/viewmodels/anime_info_view_model.dart';
 import 'package:flutter_application_1/widgets/like_widget/like_animation.dart';
 import 'package:flutter_application_1/widgets/like_widget/like_button.dart';
 import 'package:provider/provider.dart';
 
-class AnimeInfoView extends StatelessWidget {
+class AnimeInfoView extends StatefulWidget {
   final Anime anime;
 
-  const AnimeInfoView(this.anime, {super.key});
+  const AnimeInfoView({super.key, required this.anime});
+
+  @override
+  State<AnimeInfoView> createState() => _AnimeInfoViewState();
+}
+
+class _AnimeInfoViewState extends State<AnimeInfoView> {
+  late Anime anime;
+  @override
+  void initState() {
+    super.initState();
+    anime = widget.anime;
+
+    // Ajouter la vue à l’ouverture de la page
+    UserStatsProvider.addAnimeView(anime.id);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +61,12 @@ class AnimeInfoView extends StatelessWidget {
                 children: [
                   // Image + animation du like au double tap
                   GestureDetector(
-                    onDoubleTap: vm.likeAnimeOnDoubleTap,
+                    onDoubleTap: () {
+                      vm.likeAnimeOnDoubleTap();
+                      context
+                          .read<GlobalAnimeFavoritesProvider>()
+                          .toggleFavorite(anime);
+                    },
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
@@ -70,6 +93,9 @@ class AnimeInfoView extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Text(
+                            "Genre : ${detail.genres.map((g) => {if (g != AnimeGenre.None) g.toReadableString()}).toList()}",
+                          ),
                           Text("Score : ${detail.score}"),
                           Text("Statut : ${detail.status}"),
                         ],
@@ -79,7 +105,12 @@ class AnimeInfoView extends StatelessWidget {
                       // Bouton Like
                       LikeButton(
                         isLiked: vm.isLiked,
-                        onTap: vm.toggleLike,
+                        onTap: () {
+                          vm.toggleLike();
+                          context
+                              .read<GlobalAnimeFavoritesProvider>()
+                              .toggleFavorite(anime);
+                        },
                         iconSize: 30,
                       ),
                     ],
