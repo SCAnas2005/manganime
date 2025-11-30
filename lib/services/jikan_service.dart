@@ -53,7 +53,7 @@ class JikanService extends ApiService {
     AnimeStatus? status,
     AnimeRating? rating,
     bool sfw = false,
-    String? genres,
+    List<AnimeGenre>? genres,
     String? genresExclude,
     AnimeOrderBy? orderBy,
     AnimeSortBy? sort,
@@ -73,7 +73,8 @@ class JikanService extends ApiService {
       if (status != null) 'status': status.toString(),
       if (rating != null) 'rating': rating.toString(),
       'sfw': sfw.toString(),
-      if (genres != null) 'genres': genres.toString(),
+      if (genres != null)
+        'genres': genres.map((g) => g.toReadableString()).join(','),
       if (genresExclude != null) 'genres_exclude': genresExclude.toString(),
       if (orderBy != null) 'order_by': orderBy.toString(),
       if (sort != null) 'sort': sort.toString(),
@@ -186,6 +187,40 @@ class JikanService extends ApiService {
       throw Exception('Erreur ${response.statusCode}');
     }
   }
+  // =======
+  //   Future<List<Anime>> searchAnime({
+  //     String query =""
+  //     }) async {
+
+  //       final queryParameters = <String, String>{
+  //         'q': query,
+  //          };
+
+  //        final url = Uri.parse(
+  //         '$baseUrl/anime',
+  //       ).replace(queryParameters: queryParameters);
+
+  //       final response = await http.get(url);
+
+  //       if (response.statusCode == 200) {
+  //         final jsonData = json.decode(response.body);
+  //         final List<dynamic> animeList = jsonData['data'];
+
+  //         // Conversion du JSON en liste d’objets Anime
+  //         final List<Anime> animes = animeList
+  //             .map<Anime>((anime) {
+  //               return jsonToAnime(anime);
+  //             })
+  //             .where((anime) => anime.title.isNotEmpty)
+  //             .toList();
+
+  //         return animes;
+  //       } else {
+  //         throw Exception('Erreur ${response.statusCode}');
+  //       }
+  //     }
+
+  // >>>>>>> d736284cb48dda01c35ea0580f4e23f912b35d19
 
   /// Récupère les informations détaillées d’un anime via son [id MAL].
   ///
@@ -233,6 +268,13 @@ class JikanService extends ApiService {
       imageUrl: json['images']?['jpg']?['image_url']?.toString() ?? '',
       status: json["status"] ?? "",
       score: (json["score"] ?? 0).toDouble(),
+      genres: (json["genres"] != null)
+          ? (json["genres"] as List)
+                .map((genreJson) => AnimeGenreX.fromString(genreJson["name"]))
+                .where((g) => g != null)
+                .map((g) => g!)
+                .toList()
+          : [],
     );
   }
 
@@ -247,9 +289,13 @@ class JikanService extends ApiService {
       score: (json['score'] ?? 0).toDouble(),
       type: json['type'] ?? '',
       status: json['status'] ?? '',
-      genres: (json['genres'] as List<dynamic>)
-          .map((g) => g['name'].toString())
-          .toList(),
+      genres: (json["genres"] != null)
+          ? (json["genres"] as List)
+                .map((genreJson) => AnimeGenreX.fromString(genreJson["name"]))
+                .where((g) => g != null)
+                .map((g) => g!)
+                .toList()
+          : [],
     );
   }
 

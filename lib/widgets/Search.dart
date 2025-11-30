@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart'
     show SearchAnchor, SearchController, SearchBar;
+import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
 import 'package:flutter_application_1/widgets/anime_card.dart';
 import 'package:flutter_application_1/viewmodels/search_view_model.dart';
 import 'package:flutter_application_1/viewmodels/anime_view_model.dart';
@@ -67,12 +68,17 @@ class _SearchState extends State<Search> {
                 itemCount: suggestions.length,
                 itemBuilder: (context, i) {
                   final anime = suggestions[i];
-                  return GestureDetector(
-                    onTap: () => vm.openAnimePage(context, anime),
-                    child: AnimeCard(
-                      anime: anime,
-                      onTap: (anime) => vm.openAnimePage(context, anime),
-                    ),
+                  return AnimeCard(
+                    anime: anime,
+                    onTap: (anime) => vm.openAnimePage(context, anime),
+                    onLikeDoubleTap: (anime) => {
+                      context
+                          .read<GlobalAnimeFavoritesProvider>()
+                          .toggleFavorite(anime),
+                    },
+                    isLiked: context
+                        .read<GlobalAnimeFavoritesProvider>()
+                        .isAnimeLiked(anime.id),
                   );
                 },
               ),
