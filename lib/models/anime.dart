@@ -56,13 +56,12 @@ class Anime extends Identifiable {
       imageUrl: json['imageUrl'] as String,
       status: json['status'] as String,
       score: (json['score'] != null) ? (json['score'] as num).toDouble() : null,
-      genres: (json["genres"] != null)
-          ? (json["genres"] as List)
-                .map((genreJson) => AnimeGenreX.fromString(genreJson["name"]))
-                .where((g) => g != null)
-                .map((g) => g!)
-                .toList()
-          : [],
+      genres:
+          (json["genres"] as List<dynamic>?)
+              ?.map((g) => AnimeGenreX.fromString(g.toString()))
+              .whereType<AnimeGenre>() // <-- filtre les null
+              .toList() ??
+          [],
     );
   }
 
@@ -73,7 +72,7 @@ class Anime extends Identifiable {
       'imageUrl': imageUrl,
       'status': status,
       'score': score,
-      "genres": genres,
+      "genres": genres.map((g) => g.toReadableString()).toList(),
     };
   }
 }

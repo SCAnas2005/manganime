@@ -40,6 +40,7 @@ class GlobalAnimeFavoritesProvider extends ChangeNotifier {
 
     isLoading = false;
     notifyListeners();
+    debugPrint("_initialLoad() : Loading favorites animes $_likedIds");
   }
 
   // Méthode séparée pour charger les détails (pour la page favoris)
