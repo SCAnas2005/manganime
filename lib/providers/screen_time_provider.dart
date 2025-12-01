@@ -11,7 +11,7 @@ class ScreenTimeProvider with WidgetsBindingObserver {
   Timer? _timer;
   int _sessionSeconds = 0;
 
-  // Singleton pattern to ensure only one instance handles the observer
+  // Modèle singleton pour garantir qu'une seule instance gère l'observateur
   static final ScreenTimeProvider _instance = ScreenTimeProvider._internal();
   factory ScreenTimeProvider() => _instance;
   ScreenTimeProvider._internal();
@@ -32,10 +32,10 @@ class ScreenTimeProvider with WidgetsBindingObserver {
   }
 
   void _startTimer() {
-    _stopTimer(); // Ensure no existing timer
+    _stopTimer(); // Assurez-vous qu'aucun minuteur existant n'est en cours
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       _sessionSeconds++;
-      // Optional: Save periodically (e.g., every minute) to avoid data loss on crash
+      // Optionnel : Enregistrer périodiquement (par exemple, chaque minute) pour éviter la perte de données en cas de plantage
       if (_sessionSeconds % 60 == 0) {
         _saveTime();
       }
@@ -51,7 +51,7 @@ class ScreenTimeProvider with WidgetsBindingObserver {
     if (_sessionSeconds > 0) {
       final currentTotal = getTotalScreenTime();
       await _box.put(TOTAL_TIME_KEY, currentTotal + _sessionSeconds);
-      _sessionSeconds = 0; // Reset session counter after save
+      _sessionSeconds = 0; // Réinitialiser le compteur de session après l'enregistrement
     }
   }
 
