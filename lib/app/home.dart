@@ -6,6 +6,7 @@ import 'package:flutter_application_1/viewmodels/search_view_model.dart';
 import 'package:flutter_application_1/views/anime_view.dart';
 import 'package:flutter_application_1/views/favorite_view.dart';
 import 'package:flutter_application_1/views/manga_view.dart';
+
 import 'package:provider/provider.dart';
 import 'package:flutter_application_1/views/anime_stat_view.dart';
 
