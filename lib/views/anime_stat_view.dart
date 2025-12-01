@@ -57,7 +57,7 @@ class AnimeStatViewState extends  State<AnimeStatView>{
                 StatCard(
                   icon: Icons.access_time,
                   label: 'Temps total',
-                  value: _animeStatModel.timeNumber.toString(),
+                  value: _animeStatModel.timeFormatted,
                   color: const Color(0xFFC7F141),
                 ),
                 StatCard(
