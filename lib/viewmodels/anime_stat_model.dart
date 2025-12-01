@@ -1,4 +1,9 @@
+import 'package:flutter_application_1/providers/user_stats_provider.dart';
+import 'package:flutter_application_1/providers/like_storage_provider.dart';
+
 class AnimeStatModel {
+  late int viewsNumber;
+
   late int rankNumber;
 
   late int likesNumber;
@@ -11,8 +16,8 @@ class AnimeStatModel {
 
   void init() {
     rankNumber = 12;
-    likesNumber = 1230;
-    viewNumber = 2300;
+    likesNumber = LikeStorage.getIdAnimeLiked().length;
+    viewNumber = UserStatsProvider.getAnimeViewsCount();
     timeNumber = 32;
     categoryPercentage = {"Action":35, "Shonen":28,"Romance":18,"Fantaisie":12,"Seinen":7};
   } 
