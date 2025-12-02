@@ -31,11 +31,18 @@ class ScreenTimeProvider with WidgetsBindingObserver {
     _saveTime();
   }
 
+  final _timeController = StreamController<int>.broadcast();
+  Stream<int> get timeStream => _timeController.stream;
+
   void _startTimer() {
-    _stopTimer(); // Assurez-vous qu'aucun minuteur existant n'est en cours
+    _stopTimer(); // on s'assure qu'aucun minuteur existant n'est en cours
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       _sessionSeconds++;
-      // Optionnel : Enregistrer périodiquement (par exemple, chaque minute) pour éviter la perte de données en cas de plantage
+      
+      // on met à jour le temps total actuel (enregistré + session)
+      _timeController.add(getTotalScreenTime() + _sessionSeconds);
+
+      // on enregistre périodiquement (par exemple, chaque minute) pour éviter la perte de données en cas de plantage
       if (_sessionSeconds % 60 == 0) {
         _saveTime();
       }
@@ -51,7 +58,7 @@ class ScreenTimeProvider with WidgetsBindingObserver {
     if (_sessionSeconds > 0) {
       final currentTotal = getTotalScreenTime();
       await _box.put(TOTAL_TIME_KEY, currentTotal + _sessionSeconds);
-      _sessionSeconds = 0; // Réinitialiser le compteur de session après l'enregistrement
+      _sessionSeconds = 0; // on réinitialise le compteur de session après l'enregistrement
     }
   }
 
@@ -67,5 +74,10 @@ class ScreenTimeProvider with WidgetsBindingObserver {
       _stopTimer();
       _saveTime();
     }
+  }
+  
+  void dispose() {
+    _timeController.close();
+    WidgetsBinding.instance.removeObserver(this);
   }
 }
