@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/widgets/animated_counter.dart';
 
 class BlurCard extends StatelessWidget {
   final Widget child;
@@ -13,7 +14,7 @@ class BlurCard extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(16),
@@ -31,6 +32,7 @@ class StatCard extends StatelessWidget {
   final String label;
   final String value;
   final String? subtitle;
+  final double? progress;
   final Color color;
 
   const StatCard({
@@ -39,12 +41,26 @@ class StatCard extends StatelessWidget {
     required this.label,
     required this.value,
     this.subtitle,
+    this.progress,
     required this.color,
   });
 
   @override
   Widget build(BuildContext context) {
-    return BlurCard(
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeOut,
+      builder: (context, value, child) {
+        return Transform.translate(
+          offset: Offset(0, 20 * (1 - value)),
+          child: Opacity(
+            opacity: value,
+            child: child,
+          ),
+        );
+      },
+      child: BlurCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -60,19 +76,35 @@ class StatCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Text(value,
-              style: const TextStyle(
-                fontSize: 24,
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-              )),
+          AnimatedCounter(
+            value: value,
+            style: const TextStyle(
+              fontSize: 36,
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           if (subtitle != null)
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(subtitle!,
                   style: TextStyle(fontSize: 12, color: color)),
             ),
+          if (progress != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  backgroundColor: color.withValues(alpha: 0.2),
+                  valueColor: AlwaysStoppedAnimation<Color>(color),
+                  minHeight: 4,
+                ),
+              ),
+            ),
         ],
+      ),
       ),
     );
   }

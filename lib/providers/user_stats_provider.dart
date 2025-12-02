@@ -1,4 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:flutter/foundation.dart';
 
 class UserStatsProvider {
   static const String STATS_BOX_KEY = "stats_box";
@@ -30,6 +31,10 @@ class UserStatsProvider {
 
   static int getAllViewsCount() {
     return getAnimeViewsCount() + getMangaViewsCount();
+  }
+
+  static ValueListenable<Box<List>> getViewsListenable() {
+    return _box.listenable();
   }
 
   // SETTERS

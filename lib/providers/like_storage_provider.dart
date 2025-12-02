@@ -1,4 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:flutter/foundation.dart';
 
 class LikeStorage {
   static const String LIKES_BOX_KEY = "likes_box";
@@ -45,4 +46,8 @@ class LikeStorage {
       _toggleId(LIKED_MANGAS_KEY, mangaId);
 
   static bool isMangaLiked(int mangaId) => _isLiked(LIKED_MANGAS_KEY, mangaId);
+
+  static ValueListenable<Box<List>> getLikesListenable() {
+    return _box.listenable();
+  }
 }
