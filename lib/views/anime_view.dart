@@ -31,10 +31,10 @@ class _AnimeViewState extends State<AnimeView> {
     _mostLikedController = ScrollController();
 
     // On attend que le BuildContext soit disponible
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final vm = context.read<AnimeViewModel>();
 
-      vm.fetchForYou(context.read<GlobalAnimeFavoritesProvider>());
+      await vm.fetchForYou(context.read<GlobalAnimeFavoritesProvider>());
 
       _popularController.addListener(() {
         if (_popularController.position.pixels >=
