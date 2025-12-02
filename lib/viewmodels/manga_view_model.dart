@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/manga.dart';
+import 'package:flutter_application_1/providers/request_queue_provider.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:flutter_application_1/views/manga_info_view.dart';
 
@@ -28,9 +29,7 @@ class MangaViewModel extends ChangeNotifier {
 
   void _init() async {
     await fetchPopular();
-    await Future.delayed(Duration(milliseconds: 500));
     await fetchPublishing();
-    await Future.delayed(Duration(milliseconds: 500));
     await fetchMostLiked();
   }
 
@@ -41,9 +40,8 @@ class MangaViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final mangas = await _service.getTopManga(
-        page: _popularPage,
-        filter: "bypopularity",
+      final mangas = await RequestQueue.instance.enqueue(
+        () => _service.getTopManga(page: _popularPage, filter: "bypopularity"),
       );
 
       if (mangas.isEmpty) {
@@ -72,9 +70,8 @@ class MangaViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final mangas = await _service.getTopManga(
-        page: _publishingPage,
-        status: "publishing",
+      final mangas = await RequestQueue.instance.enqueue(
+        () => _service.getTopManga(page: _publishingPage, status: "publishing"),
       );
 
       if (mangas.isEmpty) {
@@ -103,9 +100,8 @@ class MangaViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final mangas = await _service.getTopManga(
-        page: _mostLikedPage,
-        filter: "favorite",
+      final mangas = await RequestQueue.instance.enqueue(
+        () => _service.getTopManga(page: _mostLikedPage, filter: "favorite"),
       );
 
       if (mangas.isEmpty) {
