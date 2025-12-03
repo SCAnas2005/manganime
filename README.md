@@ -1,16 +1,164 @@
-# flutter_application_1
+# MangAnime – Application Mobile de Recommandation Adaptative
 
-A new Flutter project.
+**Membres de l’équipe :**
 
-## Getting Started
+- AKHTAR Danyaal
+- BEN JILLANI Mohammed
+- GONCALVES DOS SANTOS Ilario
+- HADRI Anas
+- MADRAZ Elies
+- TRAORÉ Karim
 
-This project is a starting point for a Flutter application.
+## Description du projet
 
-A few resources to get you started if this is your first Flutter project:
+**Manganime** est une application mobile développée en Flutter dont l’objectif est d’offrir une **recommandation intelligente et évolutive** de mangas et d’animes.  
+Elle s’adresse à deux types d’utilisateurs :
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **Débutants** : découvrir facilement des œuvres populaires, accessibles et bien notées
+- **Connaisseurs** : obtenir des suggestions plus ciblées en fonction des interactions et préférences personnelles
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+L’application **n’exige aucun compte**, et se base sur un système d’apprentissage **local**, stocké directement sur l'appareil, pour adapter progressivement les recommandations selon les likes, les genres les plus consultés et les comportements utilisateur.
+
+## Fonctionnalités principales
+
+### Pages principales
+
+- **Animes et mangas**
+  - Onglet _Pour toi_ (recommandations personnalisées)
+  - Onglet _Tendances_ (top, popularité, animes en diffusion)
+- **Favoris**
+  - Liste des animes et mangas likés
+  - Mode d’affichage adaptatif : Grid / Liste
+  - Like / Unlike synchronisé en temps réel
+- **Statistiques**
+  - Analyse des genres préférés
+  - Comptage des likes
+  - Tendances personnelles  
+     _(selon les fonctionnalités réellement intégrées)_
+- **Paramètres**
+  - Apparence (clair/sombre)
+  - Gestion locale
+  - Informations sur l’application
+
+### Système de likes & recommandations
+
+- Like possible depuis toutes les pages (cartes + fiches détaillées)
+- Stockage local via **Hive**
+- Les items likés alimentent :
+  - La page **Favoris**
+  - Le modèle de **recommandation adaptative**
+- L’application ajuste les recommandations selon :
+  - Les genres les plus likés
+  - Les types d’œuvres consultées
+  - L'historique des préférences de l’utilisateur
+
+### Page Détail (Anime / Manga)
+
+Chaque fiche contient :
+
+- Image HD
+- Titre
+- Genres
+- Synopsis traduit automatiquement en français (API de traduction)
+- Informations additionnelles (score, popularité, épisodes/chapitres…)
+- Bouton Like + animation
+- Navigation fluide vers d’autres œuvres similaires _(si implémenté)_
+
+### Stack technique
+
+| Technologie        | Rôle                                            |
+| ------------------ | ----------------------------------------------- |
+| **Flutter (Dart)** | Développement mobile                            |
+| **Hive**           | Stockage local rapide (likes, favoris)          |
+| **AniList API**    | Métadonnées : titres, synopsis, genres, scores… |
+| **Jikan API**      | Métadonnées : animes et mangas (MyAnimeList)    |
+
+## Sources de données
+
+Les données sont récupérées depuis :
+
+- **Jikan API (MyAnimeList)** : [https://jikan.moe](https://jikan.moe)
+- **AniList API** : [https://anilist.co](https://anilist.co)
+
+Ces APIs fournissent : titres, synopsis, genres , notes, images, popularité, nombre d’épisodes
+
+## Architecture du projet
+
+- **MVVM (Model – View – ViewModel)**
+- Séparation claire entre :
+  - Modèles (Anime, Manga, AnimeDetail, MangaDetail…)
+  - ViewModels (gestion de l’état + appels API)
+  - Widgets UI (Cards, ListItems, AdaptativeDisplay…)
+- Navigation avec `Navigator.push`
+- État global avec **Provider**
+
+### Structure du projet
+
+```text
+lib/
+ ├── app/
+ ├── models/           → Anime, Manga, détails...
+ ├── providers/        → Gestion de l'état global
+ ├── services/         → Jikan/AniList API + Traduction
+ ├── theme/            → Thème et styles de l'application
+ ├── viewmodels/       → Gestion des états et logique métier pour les vues
+ ├── views/            → Pages du projet
+ ├── widgets/          → Composants UI (cards, listes...)
+ └── main.dart
+```
+
+## Installation et lancement
+
+### Prérequis
+
+- Flutter **3.38.3** ou supérieur
+- Dart **3.10.1**
+  - Android Studio ou VSCode
+- SDK Android installé
+
+**1. Cloner le projet**
+
+```bash
+git clone https://github.com/SCAnas2005/manganime.git
+cd manganime
+```
+
+**2. Installer les dépendances**
+
+```bash
+flutter pub get
+```
+
+Si nécessaire :
+
+```bash
+flutter doctor --android-licenses
+```
+
+**3. Configurer l'émulateur**
+
+Lister les émulateurs disponibles
+
+```bash
+flutter emulators
+```
+
+Lancer l'émulateur
+
+```bash
+flutter emulators --launch <nom_de_l_emulateur>
+```
+
+**4. Lancer l'application**
+
+Lister les appareils disponibles
+
+```bash
+flutter devices
+```
+
+Exécuter l'application sur un appareil précis
+
+```bash
+flutter run -d <id_du_device>
+```
