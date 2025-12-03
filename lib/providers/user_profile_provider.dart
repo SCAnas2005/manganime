@@ -43,4 +43,9 @@ class UserprofileProvider {
 
     return score;
   }
+
+  @override
+  String toString() {
+    return "$animeGenreTagFrenquencies";
+  }
 }

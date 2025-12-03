@@ -1,11 +1,9 @@
-// global_favorites_provider.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/providers/anime_cache_provider.dart';
 import 'package:flutter_application_1/providers/anime_repository_provider.dart';
 import 'package:flutter_application_1/providers/like_storage_provider.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
-// ... tes autres imports
 
 class GlobalAnimeFavoritesProvider extends ChangeNotifier {
   final JikanService _jikan = JikanService();
@@ -16,7 +14,6 @@ class GlobalAnimeFavoritesProvider extends ChangeNotifier {
   List<Anime> get loadedFavoriteAnimes => _loadedFavoriteAnimes;
 
   // Une liste simple des IDs pour vérifier rapidement si un anime est liké
-  // C'est crucial pour la performance des AnimeCard
   final Set<int> _likedIds = {};
 
   bool isLoading = true;
@@ -35,7 +32,6 @@ class GlobalAnimeFavoritesProvider extends ChangeNotifier {
     _likedIds.addAll(ids);
 
     // 2. On lance le chargement des objets complets en arrière-plan
-    // On n'attend pas forcément la fin pour rendre l'UI interactive
     loadFullAnimeObjects();
 
     isLoading = false;
@@ -48,9 +44,6 @@ class GlobalAnimeFavoritesProvider extends ChangeNotifier {
     if (_loadedFavoriteAnimes.length == _likedIds.length) return; // Déjà chargé
 
     final List<Anime> loaded = [];
-    // Attention : faire des appels API en boucle peut être lent.
-    // L'idéal serait une API qui accepte une liste d'IDs : getAnimesByIds([1, 5, 12])
-    // Si Jikan ne le permet pas, ta boucle est la seule solution pour l'instant.
     for (int id in _likedIds) {
       try {
         final anime = await animeRepository.getAnime(id);
