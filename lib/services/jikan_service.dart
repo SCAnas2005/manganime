@@ -73,8 +73,7 @@ class JikanService extends ApiService {
       if (status != null) 'status': status.toString(),
       if (rating != null) 'rating': rating.toString(),
       'sfw': sfw.toString(),
-      if (genres != null)
-        'genres': genres.map((g) => g.toReadableString()).join(','),
+      if (genres != null) 'genres': genres.map((g) => g.id).join(','),
       if (genresExclude != null) 'genres_exclude': genresExclude.toString(),
       if (orderBy != null) 'order_by': orderBy.toString(),
       if (sort != null) 'sort': sort.toString(),

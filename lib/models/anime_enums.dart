@@ -31,13 +31,16 @@ enum AnimeSortBy { desc, asc }
 enum AnimeGenre {
   Action,
   Adventure,
+  AvantGarde,
+  AwardWinning,
+  BoysLove,
+  Comedy,
   Drama,
   Ecchi,
   Fantasy,
-  Game,
-  Historical,
+  GirlsLove,
+  Gourmet,
   Horror,
-  Kids,
   MartialArts,
   Mecha,
   Music,
@@ -48,58 +51,55 @@ enum AnimeGenre {
   SciFi,
   Shoujo,
   Shounen,
-  GirlsLove,
-  BoysLove,
-  Space,
+  SliceOfLife,
   Sports,
+  Supernatural,
   SuperPower,
   Vampire,
   Harem,
-  SliceOfLife,
-  Supernatural,
-  Military,
-  Police,
   Psychological,
-  Suspense,
   Seinen,
   Josei,
-  AwardWinning,
-  Gourmet,
-  WorkLife,
-  Erotica,
+  Kids,
   None,
 }
 
 extension AnimeGenreX on AnimeGenre {
-  // Convertit un String en AnimeGenre
+  /// Convertit un String en AnimeGenre
   static AnimeGenre? fromString(String value) {
     return AnimeGenre.values.firstWhere(
-      (g) => g.name.toLowerCase() == value.toLowerCase().replaceAll(' ', ''),
+      (g) => g.toReadableString().toLowerCase() == value.toLowerCase(),
       orElse: () => AnimeGenre.None,
     );
   }
 
-  /// Convert enum -> String lisible
+  /// Retourne un String lisible
   String toReadableString() {
     switch (this) {
       case AnimeGenre.Action:
         return "Action";
       case AnimeGenre.Adventure:
         return "Adventure";
+      case AnimeGenre.AvantGarde:
+        return "Avant Garde";
+      case AnimeGenre.AwardWinning:
+        return "Award Winning";
+      case AnimeGenre.BoysLove:
+        return "Boys Love";
+      case AnimeGenre.Comedy:
+        return "Comedy";
       case AnimeGenre.Drama:
         return "Drama";
       case AnimeGenre.Ecchi:
         return "Ecchi";
       case AnimeGenre.Fantasy:
         return "Fantasy";
-      case AnimeGenre.Game:
-        return "Game";
-      case AnimeGenre.Historical:
-        return "Historical";
+      case AnimeGenre.GirlsLove:
+        return "Girls Love";
+      case AnimeGenre.Gourmet:
+        return "Gourmet";
       case AnimeGenre.Horror:
         return "Horror";
-      case AnimeGenre.Kids:
-        return "Kids";
       case AnimeGenre.MartialArts:
         return "Martial Arts";
       case AnimeGenre.Mecha:
@@ -120,46 +120,100 @@ extension AnimeGenreX on AnimeGenre {
         return "Shoujo";
       case AnimeGenre.Shounen:
         return "Shounen";
-      case AnimeGenre.GirlsLove:
-        return "Girls Love";
-      case AnimeGenre.BoysLove:
-        return "Boys Love";
-      case AnimeGenre.Space:
-        return "Space";
+      case AnimeGenre.SliceOfLife:
+        return "Slice of Life";
       case AnimeGenre.Sports:
         return "Sports";
+      case AnimeGenre.Supernatural:
+        return "Supernatural";
       case AnimeGenre.SuperPower:
         return "Super Power";
       case AnimeGenre.Vampire:
         return "Vampire";
       case AnimeGenre.Harem:
         return "Harem";
-      case AnimeGenre.SliceOfLife:
-        return "Slice of Life";
-      case AnimeGenre.Supernatural:
-        return "Supernatural";
-      case AnimeGenre.Military:
-        return "Military";
-      case AnimeGenre.Police:
-        return "Police";
       case AnimeGenre.Psychological:
         return "Psychological";
-      case AnimeGenre.Suspense:
-        return "Suspense";
       case AnimeGenre.Seinen:
         return "Seinen";
       case AnimeGenre.Josei:
         return "Josei";
-      case AnimeGenre.AwardWinning:
-        return "Award Winning";
-      case AnimeGenre.Gourmet:
-        return "Gourmet";
-      case AnimeGenre.WorkLife:
-        return "Work Life";
-      case AnimeGenre.Erotica:
-        return "Erotica";
+      case AnimeGenre.Kids:
+        return "Kids";
       case AnimeGenre.None:
         return "";
+    }
+  }
+
+  /// Retourne le mal_id officiel pour l'API Jikan
+  int get id {
+    switch (this) {
+      case AnimeGenre.Action:
+        return 1;
+      case AnimeGenre.Adventure:
+        return 2;
+      case AnimeGenre.AvantGarde:
+        return 5;
+      case AnimeGenre.AwardWinning:
+        return 46;
+      case AnimeGenre.BoysLove:
+        return 28;
+      case AnimeGenre.Comedy:
+        return 4;
+      case AnimeGenre.Drama:
+        return 8;
+      case AnimeGenre.Ecchi:
+        return 9;
+      case AnimeGenre.Fantasy:
+        return 10;
+      case AnimeGenre.GirlsLove:
+        return 26;
+      case AnimeGenre.Gourmet:
+        return 47;
+      case AnimeGenre.Horror:
+        return 14;
+      case AnimeGenre.MartialArts:
+        return 17;
+      case AnimeGenre.Mecha:
+        return 18;
+      case AnimeGenre.Music:
+        return 19;
+      case AnimeGenre.Parody:
+        return 20;
+      case AnimeGenre.Samurai:
+        return 21;
+      case AnimeGenre.Romance:
+        return 22;
+      case AnimeGenre.School:
+        return 23;
+      case AnimeGenre.SciFi:
+        return 24;
+      case AnimeGenre.Shoujo:
+        return 25;
+      case AnimeGenre.Shounen:
+        return 27;
+      case AnimeGenre.SliceOfLife:
+        return 36;
+      case AnimeGenre.Sports:
+        return 30;
+      case AnimeGenre.Supernatural:
+        return 37;
+      case AnimeGenre.SuperPower:
+        return 31;
+      case AnimeGenre.Vampire:
+        return 32;
+      case AnimeGenre.Harem:
+        return 35;
+      case AnimeGenre.Psychological:
+        return 40;
+      case AnimeGenre.Seinen:
+        return 42;
+      case AnimeGenre.Josei:
+        return 43;
+      case AnimeGenre.Kids:
+        return 15;
+      case AnimeGenre.None:
+        return -1;
     }
   }
 }
