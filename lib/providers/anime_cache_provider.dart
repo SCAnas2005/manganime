@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -22,6 +23,7 @@ class AnimeCache {
     // 2. Cache local (Hive)
     final data = _box.get(id);
     if (data != null) {
+      debugPrint("(AnimeCache) get: loading anime : $data");
       final anime = Anime.fromJson(Map<String, dynamic>.from(data));
       _memory[id] = anime; // on recharge en mémoire
       return anime;
