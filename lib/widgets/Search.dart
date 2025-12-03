@@ -36,7 +36,7 @@ class _SearchState extends State<Search> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text("Karim")),
+      appBar: AppBar(title: Text("Recheche")),
       body: Column(
         children: [
           Padding(

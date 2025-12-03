@@ -76,7 +76,7 @@ class _AnimeViewState extends State<AnimeView> {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Padding(
                 padding: const EdgeInsets.only(bottom: 20),
