@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart'
     show SearchAnchor, SearchController, SearchBar;
-import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
 import 'package:flutter_application_1/widgets/anime_card.dart';
 import 'package:flutter_application_1/viewmodels/search_view_model.dart';
