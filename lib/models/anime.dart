@@ -75,4 +75,14 @@ class Anime extends Identifiable {
       "genres": genres.map((g) => g.toReadableString()).toList(),
     };
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is Anime && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
 }
