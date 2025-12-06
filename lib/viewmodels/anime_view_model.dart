@@ -19,7 +19,7 @@ class AnimeViewModel extends ChangeNotifier {
   int _airingPage = 1;
   int _mostLikedPage = 1;
 
-  int forYouPage = 1;
+  int _forYouPage = 1;
 
   bool _isLoadingPopular = false;
   bool _isLoadingAiring = false;
@@ -196,15 +196,19 @@ class AnimeViewModel extends ChangeNotifier {
 
     // Recherche Api
     try {
-      final animes = await RequestQueue.instance.enqueue(
-        () => _service.search(page: forYouPage, query: "", genres: topGenres),
+      var animes = await RequestQueue.instance.enqueue(
+        () => _service.search(page: _forYouPage, query: "", genres: topGenres),
       );
       debugPrint("fetchForYou animes count : ${animes.length}");
+
+      debugPrint("Removing liked animes from suggestions");
+      animes = animes.where((a) => !liked.contains(a)).toList();
+
       if (animes.isEmpty) {
         _hasMoreForYou = false;
       } else {
         forYou.addAll(animes);
-        forYouPage++;
+        _forYouPage++;
       }
     } catch (e) {
       debugPrint("Erreur de fetchForYou : $e");
@@ -212,6 +216,13 @@ class AnimeViewModel extends ChangeNotifier {
 
     _isLoadingForYou = false;
     notifyListeners();
+  }
+
+  void refreshForYou(GlobalAnimeFavoritesProvider provider) {
+    forYou.clear();
+    _forYouPage = 1;
+    _hasMoreForYou = true;
+    fetchForYou(provider);
   }
 
   // ---------------- NAVIGATION ----------------
