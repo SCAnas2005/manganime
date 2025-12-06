@@ -19,19 +19,17 @@ class AnimeInfoView extends StatefulWidget {
 
 class _AnimeInfoViewState extends State<AnimeInfoView> {
   late Anime anime;
+
   @override
   void initState() {
     super.initState();
     anime = widget.anime;
-
-    // Ajouter la vue à l’ouverture de la page
     UserStatsProvider.addAnimeView(anime.id);
   }
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      // Initialise le ViewModel et charge les données
       create: (_) => AnimeInfoViewModel()..loadAnimeDetail(anime.id),
       child: Consumer<AnimeInfoViewModel>(
         builder: (context, vm, _) {
@@ -41,7 +39,6 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
             );
           }
 
-          // Erreur
           if (vm.hasError || vm.animeDetail == null) {
             return Scaffold(
               appBar: AppBar(title: Text(anime.title)),
@@ -52,85 +49,240 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
           }
           final detail = vm.animeDetail!;
 
+          // Utilisation d'un CustomScrollView pour le SliverAppBar flexible
           return Scaffold(
-            appBar: AppBar(title: Text(detail.title)),
-            body: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Image + animation du like au double tap
-                  GestureDetector(
-                    onDoubleTap: () {
-                      vm.likeAnimeOnDoubleTap();
-                      context
-                          .read<GlobalAnimeFavoritesProvider>()
-                          .toggleFavorite(anime);
-                    },
-                    child: Stack(
-                      alignment: Alignment.center,
+            body: CustomScrollView(
+              slivers: [
+                // --- En-tête Flexible avec l'Image ---
+                SliverAppBar(
+                  expandedHeight: 350.0, // Hauteur de l'image déployée
+                  pinned: true, // La barre reste visible en haut lors du scroll
+                  leading: const BackButton(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStatePropertyAll(Colors.black45),
+                      iconColor: WidgetStatePropertyAll(Colors.white),
+                    ),
+                  ),
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: GestureDetector(
+                      onDoubleTap: () {
+                        vm.likeAnimeOnDoubleTap();
+                        context
+                            .read<GlobalAnimeFavoritesProvider>()
+                            .toggleFavorite(anime);
+                      },
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          // L'image de l'anime
+                          Image.network(
+                            detail.imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Center(child: Icon(Icons.error)),
+                          ),
+                          // Un dégradé sombre en bas pour la lisibilité du texte
+                          const DecoratedBox(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [Colors.transparent, Colors.black87],
+                                stops: [0.6, 1.0],
+                              ),
+                            ),
+                          ),
+                          // L'animation du cœur au double tap
+                          Center(
+                            child: LikeAnimation(show: vm.showLikeAnimation),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // --- Contenu de la page ---
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Image.network(detail.imageUrl),
-                        LikeAnimation(show: vm.showLikeAnimation),
+                        // --- Titre, Score et Like ---
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    detail.title,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineSmall
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  // Bloc Score et Statut avec des icônes
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.star,
+                                        color: Colors.amber,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        detail.score > 0
+                                            ? detail.score.toStringAsFixed(1)
+                                            : "N/A",
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      _buildStatusChip(detail.status),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Bouton Like
+                            LikeButton(
+                              isLiked: vm.isLiked,
+                              onTap: () {
+                                vm.toggleLike();
+                                context
+                                    .read<GlobalAnimeFavoritesProvider>()
+                                    .toggleFavorite(anime);
+                              },
+                              iconSize: 36, // Un peu plus gros
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // --- Liste des Genres (Tags) ---
+                        Wrap(
+                          spacing: 8.0, // Espace horizontal entre les tags
+                          runSpacing:
+                              4.0, // Espace vertical si ça passe à la ligne
+                          children: detail.genres
+                              .where((g) => g != AnimeGenre.None)
+                              .map(
+                                (genre) => Chip(
+                                  label: Text(genre.toReadableString()),
+                                  backgroundColor: Theme.of(
+                                    context,
+                                  ).colorScheme.surfaceContainerHighest,
+                                  labelStyle: const TextStyle(fontSize: 12),
+                                  padding: EdgeInsets
+                                      .zero, // Rendre le chip plus compact
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                ),
+                              )
+                              .toList(),
+                        ),
+
+                        const SizedBox(height: 24),
+                        const Divider(), // Une petite ligne de séparation
+                        const SizedBox(height: 16),
+
+                        // --- Synopsis ---
+                        Text(
+                          "Synopsis",
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 8),
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          child: vm.translatedSynopsis.isNotEmpty
+                              ? Text(
+                                  vm.translatedSynopsis,
+                                  style: Theme.of(context).textTheme.bodyLarge
+                                      ?.copyWith(
+                                        height: 1.5, // Meilleur interlignage
+                                        color: Theme.of(
+                                          context,
+                                        ).textTheme.bodyMedium?.color,
+                                      ),
+                                )
+                              : Row(
+                                  children: const [
+                                    SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
+                                    SizedBox(width: 12),
+                                    Text(
+                                      "Traduction en cours...",
+                                      style: TextStyle(
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ),
+                        const SizedBox(height: 30), // Espace en bas de page
                       ],
                     ),
                   ),
-
-                  const SizedBox(height: 16),
-
-                  // Titre
-                  Text(
-                    detail.title,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Bloc Score, Statut et Like
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Colonne Score + Statut
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Genre : ${detail.genres.map((g) => {if (g != AnimeGenre.None) g.toReadableString()}).toList()}",
-                          ),
-                          Text("Score : ${detail.score}"),
-                          Text("Statut : ${detail.status}"),
-                        ],
-                      ),
-
-                      const Spacer(),
-                      // Bouton Like
-                      LikeButton(
-                        isLiked: vm.isLiked,
-                        onTap: () {
-                          vm.toggleLike();
-                          context
-                              .read<GlobalAnimeFavoritesProvider>()
-                              .toggleFavorite(anime);
-                        },
-                        iconSize: 30,
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  const SizedBox(height: 16),
-
-                  // Synopsis traduit
-                  Text(
-                    vm.translatedSynopsis.isNotEmpty
-                        ? vm.translatedSynopsis
-                        : "Chargement de la traduction...",
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           );
         },
+      ),
+    );
+  }
+
+  // Petit widget utilitaire pour le statut
+  Widget _buildStatusChip(String status) {
+    Color color;
+    IconData icon;
+
+    // Logique simple pour la couleur et l'icône du statut
+    if (status.toLowerCase().contains("airing")) {
+      color = Colors.green;
+      icon = Icons.play_circle_outline;
+    } else if (status.toLowerCase().contains("finished")) {
+      color = Colors.blueGrey;
+      icon = Icons.check_circle_outline;
+    } else {
+      color = Colors.grey;
+      icon = Icons.info_outline;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 4),
+          Text(
+            status,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }
