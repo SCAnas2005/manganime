@@ -39,7 +39,7 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
             );
           }
 
-          if (vm.hasError || vm.animeDetail == null) {
+          if (vm.hasError || vm.anime == null) {
             return Scaffold(
               appBar: AppBar(title: Text(anime.title)),
               body: const Center(
@@ -47,7 +47,7 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
               ),
             );
           }
-          final detail = vm.animeDetail!;
+          final animeInfo = vm.anime!;
 
           // Utilisation d'un CustomScrollView pour le SliverAppBar flexible
           return Scaffold(
@@ -76,7 +76,7 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
                         children: [
                           // L'image de l'anime
                           Image.network(
-                            detail.imageUrl,
+                            animeInfo.imageUrl,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) =>
                                 const Center(child: Icon(Icons.error)),
@@ -118,7 +118,7 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    detail.title,
+                                    animeInfo.title,
                                     style: Theme.of(context)
                                         .textTheme
                                         .headlineSmall
@@ -135,8 +135,11 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
-                                        detail.score > 0
-                                            ? detail.score.toStringAsFixed(1)
+                                        animeInfo.score != null &&
+                                                animeInfo.score! > 0
+                                            ? animeInfo.score!.toStringAsFixed(
+                                                1,
+                                              )
                                             : "N/A",
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
@@ -144,7 +147,7 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
                                         ),
                                       ),
                                       const SizedBox(width: 16),
-                                      _buildStatusChip(detail.status),
+                                      _buildStatusChip(animeInfo.status),
                                     ],
                                   ),
                                 ],
@@ -171,7 +174,7 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
                           spacing: 8.0, // Espace horizontal entre les tags
                           runSpacing:
                               4.0, // Espace vertical si ça passe à la ligne
-                          children: detail.genres
+                          children: animeInfo.genres
                               .where((g) => g != AnimeGenre.None)
                               .map(
                                 (genre) => Chip(
@@ -202,7 +205,7 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
                         const SizedBox(height: 8),
                         AnimatedSwitcher(
                           duration: const Duration(milliseconds: 300),
-                          child: vm.translatedSynopsis.isNotEmpty
+                          child: vm.translatedSynopsis != "error"
                               ? Text(
                                   vm.translatedSynopsis,
                                   style: Theme.of(context).textTheme.bodyLarge

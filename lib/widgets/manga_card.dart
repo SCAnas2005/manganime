@@ -273,7 +273,9 @@ class _MangaCardState extends State<MangaCard>
     final scoreLabel = widget.manga.score != null
         ? widget.manga.score!.toStringAsFixed(1)
         : '--';
-    final genre = widget.manga.genre ?? 'Manga';
+    final firstGenre = widget.manga.genres.isEmpty
+        ? "Unknown"
+        : widget.manga.genres.first;
 
     return GestureDetector(
       onTap: () => widget.onTap?.call(widget.manga),
@@ -346,11 +348,11 @@ class _MangaCardState extends State<MangaCard>
                       ),
 
                     // Badge de genre vertical (en haut à gauche)
-                    if (widget.manga.genre != null)
+                    if (!widget.manga.genres.isEmpty)
                       Positioned(
                         top: 8,
                         left: 8,
-                        child: VerticalGenreBadge(genre: genre),
+                        child: VerticalGenreBadge(genre: firstGenre),
                       ),
 
                     // Badge de score en bulle de dialogue (en haut à droite)

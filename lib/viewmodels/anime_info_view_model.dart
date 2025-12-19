@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/models/anime_detail.dart';
+import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/providers/anime_repository_provider.dart';
 import 'package:flutter_application_1/providers/like_storage_provider.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:flutter_application_1/services/translator.dart';
@@ -7,7 +8,7 @@ import 'package:flutter_application_1/services/translator.dart';
 class AnimeInfoViewModel extends ChangeNotifier {
   final JikanService _service = JikanService();
 
-  AnimeDetail? animeDetail;
+  Anime? anime;
   String translatedSynopsis = '';
   bool isLoading = false;
   bool hasError = false;
@@ -20,15 +21,15 @@ class AnimeInfoViewModel extends ChangeNotifier {
     hasError = false;
 
     try {
-      animeDetail = await _service.getFullDetailAnime(animeId);
-      translatedSynopsis = await Translator.translateToFrench(
-        animeDetail!.synopsis,
-      );
+      anime = await AnimeRepository(api: JikanService()).getAnime(animeId);
+      translatedSynopsis =
+          anime?.synopsis ??
+          ""; //await Translator.translateToFrench(anime!.synopsis);
     } catch (e) {
       hasError = true;
     }
 
-    isLiked = LikeStorage.getIdAnimeLiked().contains(animeDetail?.id);
+    isLiked = LikeStorage.getIdAnimeLiked().contains(anime?.id);
     isLoading = false;
     notifyListeners();
   }

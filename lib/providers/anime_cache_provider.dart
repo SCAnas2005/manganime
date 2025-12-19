@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/providers/anime_repository_provider.dart';
+import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class AnimeCache {
@@ -23,8 +25,8 @@ class AnimeCache {
     // 2. Cache local (Hive)
     final data = _box.get(id);
     if (data != null) {
-      debugPrint("(AnimeCache) get: loading anime : $data");
       final anime = Anime.fromJson(Map<String, dynamic>.from(data));
+      debugPrint("(AnimeCache) get: loading anime ${anime.id}");
       _memory[id] = anime; // on recharge en mémoire
       return anime;
     }
@@ -44,7 +46,7 @@ class AnimeCache {
 
   /// Vérifie si l’anime est en cache
   bool exists(int id) {
-    return _memory.containsKey(id) || _box.containsKey(id);
+    return _box.containsKey(id);
   }
 
   /// Vide toute la cache (rarement utile)
@@ -59,5 +61,33 @@ class AnimeCache {
 
   Future<void> clearLocalCache() async {
     await _box.clear();
+  }
+
+  Future<void> update(Anime anime) async {
+    if (exists(anime.id)) {
+      await save(anime);
+    }
+  }
+
+  /// Met à jour tous les animes déjà en cache
+  Future<void> updateCache({String? defaultSynopsis}) async {
+    // Parcours de tous les items dans Hive
+    for (final key in _box.keys) {
+      final data = _box.get(key);
+      if (data == null) continue;
+
+      final anime = Anime.fromJson(Map<String, dynamic>.from(data));
+
+      if (anime.synopsis.isNotEmpty) return;
+
+      Anime? updatedAnime = await AnimeRepository(
+        api: JikanService(),
+      ).getAnime(anime.id);
+
+      // Sauvegarde en mémoire et dans Hive
+      if (updatedAnime != null) {
+        update(anime);
+      }
+    }
   }
 }

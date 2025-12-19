@@ -23,7 +23,7 @@ class MangaInfoView extends StatelessWidget {
             );
           }
 
-          if (vm.hasError || vm.mangaDetail == null) {
+          if (vm.hasError || vm.manga == null) {
             return Scaffold(
               appBar: AppBar(title: Text(manga.title)),
               body: const Center(
@@ -32,10 +32,10 @@ class MangaInfoView extends StatelessWidget {
             );
           }
 
-          final detail = vm.mangaDetail!;
+          final mangaInfo = vm.manga!;
 
           return Scaffold(
-            appBar: AppBar(title: Text(detail.title)),
+            appBar: AppBar(title: Text(mangaInfo.title)),
             body: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -51,14 +51,14 @@ class MangaInfoView extends StatelessWidget {
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
-                        Image.network(detail.imageUrl),
+                        Image.network(mangaInfo.imageUrl),
                         LikeAnimation(show: vm.showLikeAnimation),
                       ],
                     ),
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    detail.title,
+                    mangaInfo.title,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 8),
@@ -68,9 +68,9 @@ class MangaInfoView extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("Score : ${detail.score}"),
-                          Text("Statut : ${detail.status}"),
-                          Text("Type : ${detail.type}"),
+                          Text("Score : ${mangaInfo.score}"),
+                          Text("Statut : ${mangaInfo.status}"),
+                          Text("Type : ${mangaInfo.type}"),
                         ],
                       ),
                       const Spacer(),
@@ -88,7 +88,7 @@ class MangaInfoView extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    detail.genres.join(", "),
+                    mangaInfo.genres.join(", "),
                     style: const TextStyle(fontStyle: FontStyle.italic),
                   ),
                   const SizedBox(height: 16),

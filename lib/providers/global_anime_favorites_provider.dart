@@ -47,7 +47,7 @@ class GlobalAnimeFavoritesProvider extends ChangeNotifier {
     for (int id in _likedIds) {
       try {
         final anime = await animeRepository.getAnime(id);
-        loaded.add(anime);
+        if (anime != null) loaded.add(anime);
       } catch (e) {
         // Gérer l'erreur si un anime ne se charge pas
         debugPrint("Erreur chargement anime $id: $e");
@@ -67,7 +67,7 @@ class GlobalAnimeFavoritesProvider extends ChangeNotifier {
   // La seule méthode à appeler pour liker/déliker
   void toggleFavorite(Anime anime) {
     final id = anime.id;
-    final isCurrentlyLiked = _likedIds.contains(id);
+    final isCurrentlyLiked = isAnimeLiked(id);
 
     if (isCurrentlyLiked) {
       // On retire
@@ -80,14 +80,13 @@ class GlobalAnimeFavoritesProvider extends ChangeNotifier {
       _loadedFavoriteAnimes.add(anime);
     }
 
-    // Persistance : On appelle ton stockage
+    // Persistance : On appelle le stockage
     LikeStorage.toggleAnimeLike(id);
 
     if (!AnimeCache.instance.exists(id)) {
       AnimeCache.instance.save(anime);
     }
 
-    // Notification : Tout le monde se met à jour !
     notifyListeners();
   }
 }

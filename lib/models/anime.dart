@@ -1,4 +1,3 @@
-import 'package:flutter_application_1/models/anime_detail.dart';
 import 'package:flutter_application_1/models/anime_enums.dart';
 import 'package:flutter_application_1/models/identifiable.dart';
 
@@ -13,6 +12,9 @@ class Anime extends Identifiable {
 
   /// Titre de l'anime.
   final String title;
+
+  /// Synopsis de l'anime
+  final String synopsis;
 
   /// URL de l'image de couverture de l'anime.
   final String imageUrl;
@@ -32,27 +34,18 @@ class Anime extends Identifiable {
   Anime({
     required this.id,
     required this.title,
+    required this.synopsis,
     required this.imageUrl,
     required this.status,
     required this.genres,
     this.score,
   });
 
-  factory Anime.fromDetail(AnimeDetail d) {
-    return Anime(
-      id: d.id,
-      title: d.title,
-      imageUrl: d.imageUrl,
-      status: d.status,
-      score: d.score,
-      genres: d.genres,
-    );
-  }
-
   factory Anime.fromJson(Map<String, dynamic> json) {
     return Anime(
       id: json['id'] as int,
       title: json['title'] as String,
+      synopsis: (json['synopsis'] == null) ? "" : json["synopsis"] as String,
       imageUrl: json['imageUrl'] as String,
       status: json['status'] as String,
       score: (json['score'] != null) ? (json['score'] as num).toDouble() : null,
@@ -65,15 +58,37 @@ class Anime extends Identifiable {
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'title': title,
+      'synopsis': synopsis,
       'imageUrl': imageUrl,
       'status': status,
       'score': score,
       "genres": genres.map((g) => g.toReadableString()).toList(),
     };
+  }
+
+  Anime copyWith({
+    int? id,
+    String? title,
+    String? synopsis,
+    String? imageUrl,
+    String? status,
+    List<AnimeGenre>? genres,
+    double? score,
+  }) {
+    return Anime(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      synopsis: synopsis ?? this.synopsis,
+      imageUrl: imageUrl ?? this.imageUrl,
+      status: status ?? this.status,
+      genres: genres ?? this.genres,
+      score: score ?? this.score,
+    );
   }
 
   @override
