@@ -1,5 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/providers/anime_cache_provider.dart';
+import 'package:flutter_application_1/providers/anime_path_provider.dart';
 import 'package:flutter_application_1/providers/database_provider.dart';
 import 'package:flutter_application_1/providers/request_queue_provider.dart';
 import 'package:flutter_application_1/services/api_service.dart';
@@ -34,5 +36,19 @@ class AnimeRepository {
     }
 
     return null;
+  }
+
+  Future<Image> getAnimeImage(Anime anime) async {
+    // Recherche dans les fichiers de l'app
+    final animeImage = await AnimePathProvider.getLocalFileImage(anime);
+    if (animeImage.existsSync()) {
+      return Image.file(animeImage, fit: BoxFit.cover);
+    }
+
+    if (await NetworkService.isConnected) {
+      return Image.network(anime.imageUrl, fit: BoxFit.cover);
+    } else {
+      throw Exception("Error can't access image");
+    }
   }
 }

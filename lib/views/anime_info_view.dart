@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/models/anime_enums.dart';
+import 'package:flutter_application_1/providers/anime_repository_provider.dart';
 import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
 import 'package:flutter_application_1/providers/user_stats_provider.dart';
+import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:flutter_application_1/viewmodels/anime_info_view_model.dart';
 import 'package:flutter_application_1/widgets/like_widget/like_animation.dart';
 import 'package:flutter_application_1/widgets/like_widget/like_button.dart';
@@ -19,12 +21,42 @@ class AnimeInfoView extends StatefulWidget {
 
 class _AnimeInfoViewState extends State<AnimeInfoView> {
   late Anime anime;
+  Image? _animeCover;
+  bool _hasCoverError = false;
 
   @override
   void initState() {
     super.initState();
     anime = widget.anime;
     UserStatsProvider.addAnimeView(anime.id);
+
+    _loadAnimeCover();
+  }
+
+  Future<void> _loadAnimeCover() async {
+    try {
+      // On tente de récupérer l'image
+      final image = await AnimeRepository(
+        api: JikanService(),
+      ).getAnimeImage(widget.anime);
+
+      if (mounted) {
+        setState(() {
+          _animeCover = image;
+          _hasCoverError = false;
+        });
+      }
+    } catch (e) {
+      // CRASH : Pas d'internet et pas de fichier local
+      debugPrint("Erreur chargement image : $e");
+
+      if (mounted) {
+        setState(() {
+          _hasCoverError = true;
+          _animeCover = null;
+        });
+      }
+    }
   }
 
   @override
@@ -74,7 +106,44 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
                       child: Stack(
                         fit: StackFit.expand,
                         children: [
-                          // L'image de l'anime
+                          // // L'image de l'anime
+                          // if (_hasCoverError)
+                          //   // 1. CAS ERREUR
+                          //   Container(
+                          //     color: Colors.grey[900],
+                          //     child: Column(
+                          //       mainAxisAlignment: MainAxisAlignment.center,
+                          //       children: const [
+                          //         Icon(
+                          //           Icons.broken_image_outlined,
+                          //           color: Colors.white24,
+                          //           size: 32,
+                          //         ),
+                          //         SizedBox(height: 4),
+                          //         Text(
+                          //           "Erreur",
+                          //           style: TextStyle(
+                          //             color: Colors.white24,
+                          //             fontSize: 10,
+                          //           ),
+                          //         ),
+                          //       ],
+                          //     ),
+                          //   )
+                          // else if (_animeCover != null)
+                          //   // 2. CAS SUCCÈS
+                          //   _animeCover!
+                          // else
+                          //   // 3. CAS CHARGEMENT (Par défaut)
+                          //   Container(
+                          //     color: Colors.grey[900],
+                          //     child: const Center(
+                          //       child: CircularProgressIndicator(
+                          //         strokeWidth: 2,
+                          //         color: Colors.white10,
+                          //       ),
+                          //     ),
+                          //   ),
                           Image.network(
                             animeInfo.imageUrl,
                             fit: BoxFit.cover,
