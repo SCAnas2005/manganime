@@ -37,6 +37,22 @@ class _AnimeCardState extends State<AnimeCard> {
     _loadProvider();
   }
 
+  @override
+  void didUpdateWidget(covariant AnimeCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Si l'anime a changé (l'ID est différent)
+    if (oldWidget.anime.id != widget.anime.id) {
+      // 1. On remet l'image à zéro (pour afficher le loader ou l'ancienne)
+      setState(() {
+        _imageProvider = null;
+      });
+
+      // 2. On relance le chargement pour le nouvel anime
+      _loadProvider();
+    }
+  }
+
   Future<void> _loadProvider() async {
     try {
       final provider = await AnimeRepository(
