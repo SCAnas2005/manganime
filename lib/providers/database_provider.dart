@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/models/identifiable.dart';
 import 'package:flutter_application_1/models/manga.dart';
+import 'package:flutter_application_1/providers/anime_path_provider.dart';
 import 'package:flutter_application_1/providers/request_queue_provider.dart';
 import 'package:flutter_application_1/services/api_service.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -57,6 +58,7 @@ class DatabaseProvider {
     }
 
     await instance._saveMultiple<T>(list);
+    _downloadImagesOnly(list);
 
     // Seed complet en arrière-plan
     final int totalPages = (total / 25).ceil();
@@ -79,12 +81,23 @@ class DatabaseProvider {
         }
 
         await instance._saveMultiple<T>(list);
+        await _downloadImagesOnly(list);
       }
 
       debugPrint(
         "Database populate ended. Database length : ${instance.length<T>()}",
       );
     });
+  }
+
+  /// Télécharge les images d'une liste en parallèle.
+  /// Ne modifie pas les objets, crée juste les fichiers sur le disque.
+  Future<void> _downloadImagesOnly<T>(List<T> list) async {
+    // On ne télécharge que pour les Animes
+    if (T != Anime) return;
+
+    // On lance tous les téléchargements de la liste en même temps
+    await AnimePathProvider.downloadBatchImages(list as List<Anime>);
   }
 
   Future<void> saveFromFunction<T extends Identifiable>(

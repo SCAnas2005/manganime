@@ -21,12 +21,13 @@ class AnimeInfoViewModel extends ChangeNotifier {
     hasError = false;
 
     try {
-      anime = await AnimeRepository(api: JikanService()).getAnime(animeId);
+      anime = await AnimeRepository(api: _service).getAnime(animeId);
       translatedSynopsis =
           anime?.synopsis ??
           ""; //await Translator.translateToFrench(anime!.synopsis);
     } catch (e) {
       hasError = true;
+      debugPrint("[AnimeInfoViewModel] loadAnimeDetail error: $e");
     }
 
     isLiked = LikeStorage.getIdAnimeLiked().contains(anime?.id);
