@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/providers/request_queue_provider.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
 
 class SearchViewModel extends ChangeNotifier {
@@ -7,12 +8,16 @@ class SearchViewModel extends ChangeNotifier {
   List<Anime> results = [];
 
   Future<void> search(String query) async {
-    results = await _service.search(query: query);
+    results = await RequestQueue.instance.enqueue(() {
+      return _service.search(query: query);
+    });
     notifyListeners();
   }
 
   Future<void> searchEmpty(String query) async {
-    results = await _service.getTopAnime();
+    results = await RequestQueue.instance.enqueue(() {
+      return _service.getTopAnime();
+    });
     notifyListeners();
   }
 }

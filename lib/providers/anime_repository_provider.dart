@@ -51,4 +51,20 @@ class AnimeRepository {
       throw Exception("Error can't access image");
     }
   }
+
+  Future<ImageProvider?> getAnimeImageProvider(Anime anime) async {
+    final file = await AnimePathProvider.getLocalFileImage(anime);
+    if (file.existsSync()) {
+      return FileImage(file);
+    }
+
+    if (await NetworkService.isConnected) {
+      return NetworkImage(
+        anime.imageUrl,
+        headers: {'User-Agent': 'MangAnime/1.0'},
+      );
+    }
+
+    return null;
+  }
 }
