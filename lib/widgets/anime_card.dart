@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/providers/anime_repository_provider.dart';
+import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:flutter_application_1/widgets/like_widget/like_animation.dart';
 
 class AnimeCard extends StatefulWidget {
@@ -27,6 +29,27 @@ class AnimeCard extends StatefulWidget {
 class _AnimeCardState extends State<AnimeCard> {
   bool showHeart = false;
 
+  ImageProvider<Object>? _imageProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProvider();
+  }
+
+  Future<void> _loadProvider() async {
+    try {
+      final provider = await AnimeRepository(
+        api: JikanService(),
+      ).getAnimeImageProvider(widget.anime);
+      if (mounted) {
+        setState(() {
+          _imageProvider = provider;
+        });
+      }
+    } catch (e) {}
+  }
+
   void triggerLikeAnimation() {
     setState(() => showHeart = true);
 
@@ -52,10 +75,12 @@ class _AnimeCardState extends State<AnimeCard> {
         decoration: BoxDecoration(
           color: Colors.black.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(12),
-          image: DecorationImage(
-            image: NetworkImage(widget.anime.imageUrl),
-            fit: BoxFit.cover,
-          ),
+          image: _imageProvider != null
+              ? DecorationImage(
+                  image: _imageProvider!,
+                  fit: BoxFit.cover, // Gère le redimensionnement proprement
+                )
+              : null,
         ),
         child: Stack(
           alignment: Alignment.center,
