@@ -15,8 +15,7 @@ class MangaRepository {
     }
 
     // 2. API
-    final mangaDetail = await api.getFullDetailManga(id);
-    final manga = Manga.fromDetail(mangaDetail);
+    final manga = await api.getFullDetailManga(id);
 
     // 3. Sauvegarde
     await MangaCache.instance.save(manga);

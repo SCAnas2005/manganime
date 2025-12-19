@@ -1,9 +1,7 @@
 import 'dart:convert';
-import 'package:flutter_application_1/models/anime_detail.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/models/anime_enums.dart';
 import 'package:flutter_application_1/models/manga.dart';
-import 'package:flutter_application_1/models/manga_detail.dart';
 import 'package:flutter_application_1/services/api_service.dart';
 import 'package:http/http.dart' as http;
 
@@ -18,6 +16,8 @@ class JikanService extends ApiService {
   /// URL de base de l’API Jikan.
   @override
   final String baseUrl = "https://api.jikan.moe/v4";
+  @override
+  final int reqPerSec = 2;
 
   @override
   Future<List<Anime>> fetchAnimeList(Uri uri) async {
@@ -225,14 +225,14 @@ class JikanService extends ApiService {
   ///
   /// Retourne un objet [AnimeDetail].
   @override
-  Future<AnimeDetail> getFullDetailAnime(int id) async {
+  Future<Anime> getFullDetailAnime(int id) async {
     final url = Uri.parse('$baseUrl/anime/$id');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
       final dynamic animeJson = jsonData["data"];
-      final AnimeDetail anime = jsonToAnimeDetail(animeJson);
+      final Anime anime = jsonToAnime(animeJson);
       return anime;
     } else {
       throw Exception('Erreur ${response.statusCode}');
@@ -243,7 +243,7 @@ class JikanService extends ApiService {
   ///
   /// Retourne un objet [MangaDetail].
   @override
-  Future<MangaDetail> getFullDetailManga(int id) async {
+  Future<Manga> getFullDetailManga(int id) async {
     final url = Uri.parse('$baseUrl/manga/$id');
     final response = await http.get(url);
 
@@ -251,7 +251,7 @@ class JikanService extends ApiService {
       final jsonData = json.decode(response.body);
       final dynamic mangaJson = jsonData["data"];
 
-      final MangaDetail manga = jsonToMangaDetail(mangaJson);
+      final Manga manga = jsonToManga(mangaJson);
       return manga;
     } else {
       throw Exception('Erreur ${response.statusCode}');
@@ -264,30 +264,10 @@ class JikanService extends ApiService {
     return Anime(
       id: json["mal_id"],
       title: json['title_english']?.toString() ?? '',
+      synopsis: json['synopsis'] ?? '',
       imageUrl: json['images']?['jpg']?['image_url']?.toString() ?? '',
       status: json["status"] ?? "",
       score: (json["score"] ?? 0).toDouble(),
-      genres: (json["genres"] != null)
-          ? (json["genres"] as List)
-                .map((genreJson) => AnimeGenreX.fromString(genreJson["name"]))
-                .where((g) => g != null)
-                .map((g) => g!)
-                .toList()
-          : [],
-    );
-  }
-
-  /// Convertit un objet JSON détaillé en instance de [AnimeDetail].
-  @override
-  AnimeDetail jsonToAnimeDetail(Map<String, dynamic> json) {
-    return AnimeDetail(
-      id: json['mal_id'],
-      title: json['title'] ?? '',
-      synopsis: json['synopsis'] ?? '',
-      imageUrl: json['images']?['jpg']?['large_image_url'] ?? '',
-      score: (json['score'] ?? 0).toDouble(),
-      type: json['type'] ?? '',
-      status: json['status'] ?? '',
       genres: (json["genres"] != null)
           ? (json["genres"] as List)
                 .map((genreJson) => AnimeGenreX.fromString(genreJson["name"]))
@@ -311,27 +291,16 @@ class JikanService extends ApiService {
       id: json["mal_id"],
       title:
           json['title_english']?.toString() ?? json['title']?.toString() ?? '',
+      synopsis: json["synopsis"] ?? '',
       imageUrl: json['images']?['jpg']?['image_url']?.toString() ?? '',
       status: json["status"] ?? "",
       score: (json["score"] ?? 0).toDouble(),
-      genre: genre,
-    );
-  }
-
-  /// Convertit un objet JSON détaillé en instance de [MangaDetail].
-  @override
-  MangaDetail jsonToMangaDetail(Map<String, dynamic> json) {
-    return MangaDetail(
-      id: json['mal_id'],
-      title: json['title'] ?? '',
-      synopsis: json['synopsis'] ?? '',
-      imageUrl: json['images']?['jpg']?['large_image_url'] ?? '',
-      score: (json['score'] ?? 0).toDouble(),
-      type: json['type'] ?? '',
-      status: json['status'] ?? '',
-      genres: (json['genres'] as List<dynamic>)
-          .map((g) => g['name'].toString())
-          .toList(),
+      type: json["type"],
+      genres: (json["genres"] != null)
+          ? (json["genres"] as List)
+                .map((genreJson) => "${genreJson["name"]}")
+                .toList()
+          : [],
     );
   }
 

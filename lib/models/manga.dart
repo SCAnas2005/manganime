@@ -1,5 +1,4 @@
 import 'package:flutter_application_1/models/identifiable.dart';
-import 'package:flutter_application_1/models/manga_detail.dart';
 
 /// Représente un manga dans l'application.
 ///
@@ -13,6 +12,9 @@ class Manga extends Identifiable {
   /// Titre du manga.
   final String title;
 
+  /// Synopsis du manga
+  final String synopsis;
+
   /// URL de l'image de couverture du manga.
   final String imageUrl;
 
@@ -21,48 +23,49 @@ class Manga extends Identifiable {
 
   final String status;
 
+  final String type;
+
   /// Genre principal du manga (ex: Shonen, Seinen, Shojo).
-  final String? genre;
+  final List<String> genres;
 
   /// Constructeur de la classe Manga.
   ///
-  /// Tous les champs sauf [score] et [genre] sont obligatoires.
+  /// Tous les champs sauf [score] et [genres] sont obligatoires.
   Manga({
     required this.id,
     required this.title,
+    required this.synopsis,
     required this.imageUrl,
     required this.status,
-    this.score,
-    this.genre,
+    required this.type,
+    required this.score,
+    required this.genres,
   });
-
-  factory Manga.fromDetail(MangaDetail d) {
-    return Manga(
-      id: d.id,
-      title: d.title,
-      imageUrl: d.imageUrl,
-      status: d.status,
-      score: d.score,
-    );
-  }
 
   factory Manga.fromJson(Map<String, dynamic> json) {
     return Manga(
       id: json['id'] as int,
       title: json['title'] as String,
+      synopsis: (json["synopsis"] == null) ? "" : json["synopsis"] as String,
       imageUrl: json['imageUrl'] as String,
       status: json['status'] as String,
       score: (json['score'] != null) ? (json['score'] as num).toDouble() : null,
+      type: json["type"] as String,
+      genres: json["genres"] as List<String>,
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'title': title,
+      'synopsis': synopsis,
       'imageUrl': imageUrl,
       'status': status,
       'score': score,
+      'type': type,
+      'genres': genres,
     };
   }
 }

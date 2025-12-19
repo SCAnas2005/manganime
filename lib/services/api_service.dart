@@ -1,8 +1,6 @@
-import 'package:flutter_application_1/models/anime_detail.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/models/anime_enums.dart';
 import 'package:flutter_application_1/models/manga.dart';
-import 'package:flutter_application_1/models/manga_detail.dart';
 
 /// Interface abstraite définissant la structure de base pour tout service d’API
 /// utilisé pour récupérer et convertir les données d’animes.
@@ -25,6 +23,7 @@ import 'package:flutter_application_1/models/manga_detail.dart';
 abstract class ApiService {
   /// URL de base de l’API (exemple : `https://api.jikan.moe/v4`).
   String get baseUrl;
+  int get reqPerSec;
 
   Future<List<Anime>> fetchAnimeList(Uri uri);
 
@@ -78,9 +77,9 @@ abstract class ApiService {
   ///
   /// [id] correspond à l’identifiant unique de l’anime dans l’API.
   /// Retourne un objet [AnimeDetail] contenant les informations complètes.
-  Future<AnimeDetail> getFullDetailAnime(int id);
+  Future<Anime> getFullDetailAnime(int id);
 
-  Future<MangaDetail> getFullDetailManga(int id);
+  Future<Manga> getFullDetailManga(int id);
 
   /// Convertit une réponse JSON d’un anime basique (liste, recherche, top, etc.)
   /// en un objet [Anime].
@@ -88,19 +87,9 @@ abstract class ApiService {
   /// Doit être implémentée de manière spécifique à chaque API.
   Anime jsonToAnime(Map<String, dynamic> json);
 
-  /// Convertit une réponse JSON détaillée d’un anime en un objet [AnimeDetail].
-  ///
-  /// Utilisée pour le parsing des résultats d’un appel détaillé (`getFullDetailAnime`).
-  AnimeDetail jsonToAnimeDetail(Map<String, dynamic> json);
-
   // Convertit une réponse JSON d’un anime basique (liste, recherche, top, etc.)
   /// en un objet [Manga].
   ///
   /// Doit être implémentée de manière spécifique à chaque API.
   Manga jsonToManga(Map<String, dynamic> json);
-
-  /// Convertit une réponse JSON détaillée d’un anime en un objet [MangaDetail].
-  ///
-  /// Utilisée pour le parsing des résultats d’un appel détaillé (`getFullDetailAnime`).
-  MangaDetail jsonToMangaDetail(Map<String, dynamic> json);
 }
