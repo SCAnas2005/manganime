@@ -14,27 +14,45 @@ class AnimeRepository {
 
   Future<void> loadAnimes() async {}
 
+  Future<Anime?> getAnimeFromCache(int id) async {
+    var data = await AnimeCache.instance.get(id);
+    return data;
+  }
+
+  Future<Anime?> getAnimeFromDatabase(int id) async {
+    var data = await DatabaseProvider.instance.getAnime(id);
+    return data;
+  }
+
+  Future<Anime?> getAnimeFromService(int id) async {
+    Anime? anime;
+    if (await NetworkService.isConnected) {
+      anime = await RequestQueue.instance.enqueue(
+        () => api.getFullDetailAnime(id),
+      );
+    }
+    return anime;
+  }
+
+  Future<void> saveAnimeInCache(Anime anime) async {
+    await AnimeCache.instance.save(anime);
+  }
+
   Future<Anime?> getAnime(int id) async {
     // 1. Cache
-    var data = await AnimeCache.instance.get(id);
+    var data = await getAnimeFromCache(id);
     if (data != null) return data;
 
     // 2. Base de donnée
-    data = await DatabaseProvider.instance.getAnime(id);
+    data = await getAnimeFromDatabase(id);
     if (data != null) return data;
 
-    if (await NetworkService.isConnected) {
-      // 3. API
-      final anime = await RequestQueue.instance.enqueue(
-        () => api.getFullDetailAnime(id),
-      );
-
-      // 3. Sauvegarde
-      await AnimeCache.instance.save(anime);
-
-      return anime;
+    // 3. Api
+    data = await getAnimeFromService(id);
+    if (data != null) {
+      await saveAnimeInCache(data);
+      return data;
     }
-
     return null;
   }
 

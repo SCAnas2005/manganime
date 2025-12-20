@@ -71,6 +71,7 @@ class AnimeCache {
 
   /// Met à jour tous les animes déjà en cache
   Future<void> updateCache({String? defaultSynopsis}) async {
+    AnimeRepository repo = AnimeRepository(api: JikanService());
     // Parcours de tous les items dans Hive
     for (final key in _box.keys) {
       final data = _box.get(key);
@@ -78,15 +79,17 @@ class AnimeCache {
 
       final anime = Anime.fromJson(Map<String, dynamic>.from(data));
 
-      if (anime.synopsis.isNotEmpty) return;
+      // if (anime.synopsis.isNotEmpty) return;
 
-      Anime? updatedAnime = await AnimeRepository(
-        api: JikanService(),
-      ).getAnime(anime.id);
+      // Database
+      Anime? updatedAnime = await repo.getAnimeFromDatabase(anime.id);
+      // Api
+      updatedAnime = updatedAnime ?? await repo.getAnimeFromService(anime.id);
 
       // Sauvegarde en mémoire et dans Hive
       if (updatedAnime != null) {
-        update(anime);
+        update(updatedAnime);
+        debugPrint("Cache mis à jour avec succès pour ${updatedAnime.title}");
       }
     }
   }

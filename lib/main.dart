@@ -70,10 +70,12 @@ Future<void> onAppStart() async {
 
   if (isFirstLaunch) {
     debugPrint("========= App first launch");
-    debugPrint("Database populate started");
 
-    await DatabaseProvider.instance.clear<Anime>();
-    await DatabaseProvider.instance.populate<Anime>(JikanService(), 300);
+    // debugPrint("Database populate started");
+    // await DatabaseProvider.instance.clear<Anime>();
+    // await DatabaseProvider.instance.populate<Anime>(JikanService(), 300);
+    // debugPrint("Updating cache");
+    // await AnimeCache.instance.updateCache();
 
     await provider.updateSettings(
       provider.getSettings().copyWith(isFirstLaunch: false),

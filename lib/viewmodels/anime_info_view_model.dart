@@ -16,19 +16,15 @@ class AnimeInfoViewModel extends ChangeNotifier {
   bool isLiked = false;
   bool showLikeAnimation = false;
 
+  AnimeInfoViewModel({required this.anime});
+
   Future<void> loadAnimeDetail(int animeId) async {
     isLoading = true;
     hasError = false;
 
-    try {
-      anime = await AnimeRepository(api: _service).getAnime(animeId);
-      translatedSynopsis =
-          anime?.synopsis ??
-          ""; //await Translator.translateToFrench(anime!.synopsis);
-    } catch (e) {
-      hasError = true;
-      debugPrint("[AnimeInfoViewModel] loadAnimeDetail error: $e");
-    }
+    translatedSynopsis =
+        anime?.synopsis ??
+        ""; //await Translator.translateToFrench(anime!.synopsis);
 
     isLiked = LikeStorage.getIdAnimeLiked().contains(anime?.id);
     isLoading = false;
