@@ -62,7 +62,8 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => AnimeInfoViewModel()..loadAnimeDetail(anime.id),
+      create: (_) =>
+          AnimeInfoViewModel(anime: widget.anime)..loadAnimeDetail(anime.id),
       child: Consumer<AnimeInfoViewModel>(
         builder: (context, vm, _) {
           if (vm.isLoading) {
@@ -106,50 +107,50 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
                       child: Stack(
                         fit: StackFit.expand,
                         children: [
-                          // // L'image de l'anime
-                          // if (_hasCoverError)
-                          //   // 1. CAS ERREUR
-                          //   Container(
-                          //     color: Colors.grey[900],
-                          //     child: Column(
-                          //       mainAxisAlignment: MainAxisAlignment.center,
-                          //       children: const [
-                          //         Icon(
-                          //           Icons.broken_image_outlined,
-                          //           color: Colors.white24,
-                          //           size: 32,
-                          //         ),
-                          //         SizedBox(height: 4),
-                          //         Text(
-                          //           "Erreur",
-                          //           style: TextStyle(
-                          //             color: Colors.white24,
-                          //             fontSize: 10,
-                          //           ),
-                          //         ),
-                          //       ],
-                          //     ),
-                          //   )
-                          // else if (_animeCover != null)
-                          //   // 2. CAS SUCCÈS
-                          //   _animeCover!
-                          // else
-                          //   // 3. CAS CHARGEMENT (Par défaut)
-                          //   Container(
-                          //     color: Colors.grey[900],
-                          //     child: const Center(
-                          //       child: CircularProgressIndicator(
-                          //         strokeWidth: 2,
-                          //         color: Colors.white10,
-                          //       ),
-                          //     ),
-                          //   ),
-                          Image.network(
-                            animeInfo.imageUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Center(child: Icon(Icons.error)),
-                          ),
+                          // L'image de l'anime
+                          if (_hasCoverError)
+                            // 1. CAS ERREUR
+                            Container(
+                              color: Colors.grey[900],
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Icon(
+                                    Icons.broken_image_outlined,
+                                    color: Colors.white24,
+                                    size: 32,
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    "Erreur",
+                                    style: TextStyle(
+                                      color: Colors.white24,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          else if (_animeCover != null)
+                            // 2. CAS SUCCÈS
+                            _animeCover!
+                          else
+                            // 3. CAS CHARGEMENT (Par défaut)
+                            Container(
+                              color: Colors.grey[900],
+                              child: const Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white10,
+                                ),
+                              ),
+                            ),
+                          // Image.network(
+                          //   animeInfo.imageUrl,
+                          //   fit: BoxFit.cover,
+                          //   errorBuilder: (context, error, stackTrace) =>
+                          //       const Center(child: Icon(Icons.error)),
+                          // ),
                           // Un dégradé sombre en bas pour la lisibilité du texte
                           const DecoratedBox(
                             decoration: BoxDecoration(

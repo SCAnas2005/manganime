@@ -9,7 +9,9 @@ import 'package:flutter_application_1/services/api_service.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class DatabaseProvider {
+  // ignore: constant_identifier_names
   static const String ANIMES_KEY = "animes_key";
+  // ignore: constant_identifier_names
   static const String MANGAS_KEY = "animes_key";
 
   static late final Box _animeBox;
@@ -120,8 +122,8 @@ class DatabaseProvider {
 
     if (raw == null) return null;
 
-    if (T is Anime) return Anime.fromJson(raw) as T;
-    if (T is Manga) return Manga.fromJson(raw) as T;
+    if (T == Anime) return Anime.fromJson(raw) as T;
+    if (T == Manga) return Manga.fromJson(raw) as T;
 
     throw UnsupportedError('Type $T not supported');
   }
@@ -146,14 +148,14 @@ class DatabaseProvider {
     }
   }
 
-  Future<Anime?> getAnime(int id) => _get<Anime>(id);
-  Future<Manga?> getManga(int id) => _get<Manga>(id);
+  Future<Anime?> getAnime(int id) async => await _get<Anime>(id);
+  Future<Manga?> getManga(int id) async => await _get<Manga>(id);
 
-  Future<void> saveAnime(Anime anime) => _save<Anime>(anime);
-  Future<void> saveManga(Manga manga) => _save<Manga>(manga);
+  Future<void> saveAnime(Anime anime) async => await _save<Anime>(anime);
+  Future<void> saveManga(Manga manga) async => await _save<Manga>(manga);
 
-  Future<void> saveMultipleAnimes(List<Anime> animes) =>
-      _saveMultiple<Anime>(animes);
-  Future<void> saveMultipleMangas(List<Manga> mangas) =>
-      _saveMultiple<Manga>(mangas);
+  Future<void> saveMultipleAnimes(List<Anime> animes) async =>
+      await _saveMultiple<Anime>(animes);
+  Future<void> saveMultipleMangas(List<Manga> mangas) async =>
+      await _saveMultiple<Manga>(mangas);
 }
