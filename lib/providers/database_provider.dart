@@ -60,7 +60,7 @@ class DatabaseProvider {
     }
 
     await instance._saveMultiple<T>(list);
-    _downloadImagesOnly(list);
+    downloadImagesOnly(list);
 
     // Seed complet en arrière-plan
     final int totalPages = (total / 25).ceil();
@@ -83,7 +83,7 @@ class DatabaseProvider {
         }
 
         await instance._saveMultiple<T>(list);
-        await _downloadImagesOnly(list);
+        await downloadImagesOnly(list);
       }
 
       debugPrint(
@@ -94,12 +94,17 @@ class DatabaseProvider {
 
   /// Télécharge les images d'une liste en parallèle.
   /// Ne modifie pas les objets, crée juste les fichiers sur le disque.
-  Future<void> _downloadImagesOnly<T>(List<T> list) async {
+  Future<void> downloadImagesOnly<T extends Identifiable>(List<T> list) async {
     // On ne télécharge que pour les Animes
     if (T != Anime) return;
 
     // On lance tous les téléchargements de la liste en même temps
     await AnimePathProvider.downloadBatchImages(list as List<Anime>);
+  }
+
+  Future<void> downloadImageOnly<T extends Identifiable>(T identifiable) async {
+    if (T != Anime) return;
+    await AnimePathProvider.downloadFileImage(identifiable as Anime);
   }
 
   Future<void> saveFromFunction<T extends Identifiable>(
@@ -116,16 +121,38 @@ class DatabaseProvider {
     throw UnsupportedError('Type $T not supported');
   }
 
+  Map<String, dynamic> _castToMap(dynamic data) {
+    // .from() crée une nouvelle Map propre avec les bons types
+    return Map<String, dynamic>.from(data as Map);
+  }
+
+  T _fromJson<T extends Identifiable>(dynamic raw) {
+    final Map<String, dynamic> data = _castToMap(raw);
+
+    if (T == Anime) return Anime.fromJson(data) as T;
+    if (T == Manga) return Manga.fromJson(data) as T;
+    throw UnsupportedError('Type $T not supported');
+  }
+
   Future<T?> _get<T extends Identifiable>(int id) async {
     Box box = getBoxByType<T>();
     final Map<String, dynamic>? raw = await box.get(id);
 
     if (raw == null) return null;
+    return _fromJson<T>(raw);
+  }
 
-    if (T == Anime) return Anime.fromJson(raw) as T;
-    if (T == Manga) return Manga.fromJson(raw) as T;
+  Future<List<T>> _getMultiples<T extends Identifiable>(List<int> ids) async {
+    Box box = getBoxByType<T>();
+    List<T> results = [];
+    for (var id in ids) {
+      final raw = await box.get(id);
+      if (raw != null) {
+        results.add(_fromJson<T>(raw));
+      }
+    }
 
-    throw UnsupportedError('Type $T not supported');
+    return results;
   }
 
   Future<void> _save<T extends Identifiable>(T identifiable) async {
@@ -142,7 +169,11 @@ class DatabaseProvider {
   ) async {
     Box box = getBoxByType<T>();
     try {
-      await Future.wait(identifiables.map((i) => box.put(i.id, i.toJson())));
+      final Map<int, Map<String, dynamic>> entries = {
+        for (var item in identifiables) item.id: item.toJson(),
+      };
+      await box.putAll(entries);
+      // await Future.wait(identifiables.map((i) => box.put(i.id, i.toJson())));
     } catch (e) {
       debugPrint("Error _saveMultiple<T> : box.put failed $e");
     }
@@ -150,6 +181,12 @@ class DatabaseProvider {
 
   Future<Anime?> getAnime(int id) async => await _get<Anime>(id);
   Future<Manga?> getManga(int id) async => await _get<Manga>(id);
+
+  Future<List<Anime>> getMultipleAnimes(List<int> ids) async =>
+      await _getMultiples<Anime>(ids);
+
+  Future<List<Manga>> getMultipleMangas(List<int> ids) async =>
+      await _getMultiples<Manga>(ids);
 
   Future<void> saveAnime(Anime anime) async => await _save<Anime>(anime);
   Future<void> saveManga(Manga manga) async => await _save<Manga>(manga);

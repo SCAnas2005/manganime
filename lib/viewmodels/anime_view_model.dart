@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/providers/anime_repository_provider.dart';
 import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
 import 'package:flutter_application_1/providers/request_queue_provider.dart';
 import 'package:flutter_application_1/providers/user_profile_provider.dart';
@@ -63,9 +64,9 @@ class AnimeViewModel extends ChangeNotifier {
     bool hasNewItems = true;
 
     try {
-      final newAnimes = await RequestQueue.instance.enqueue(
-        () => _service.getTopAnime(page: _popularPage, filter: "bypopularity"),
-      );
+      final newAnimes = await AnimeRepository(
+        api: JikanService(),
+      ).getPopularAnimes(page: _popularPage);
 
       if (newAnimes.isEmpty) {
         _hasMorePopular = false;
@@ -102,14 +103,9 @@ class AnimeViewModel extends ChangeNotifier {
     bool hasNewItems = false;
 
     try {
-      final newAnimes = await RequestQueue.instance.enqueue(
-        () => _service.getTopAnime(
-          page: _airingPage,
-          season: "winter",
-          year: 2025,
-          filter: "airing",
-        ),
-      );
+      final newAnimes = await AnimeRepository(
+        api: JikanService(),
+      ).getAiringAnimes(page: _airingPage);
 
       if (newAnimes.isEmpty) {
         _hasMoreAiring = false;
@@ -147,9 +143,9 @@ class AnimeViewModel extends ChangeNotifier {
     bool hasNewItems = false;
 
     try {
-      final newAnimes = await RequestQueue.instance.enqueue(
-        () => _service.getTopAnime(page: _mostLikedPage, filter: "favorite"),
-      );
+      final newAnimes = await AnimeRepository(
+        api: JikanService(),
+      ).getMostLikedAnimes(page: _mostLikedPage);
       if (newAnimes.isEmpty) {
         _hasMoreMostLiked = false;
       } else {

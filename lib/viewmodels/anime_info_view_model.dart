@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
-import 'package:flutter_application_1/providers/anime_repository_provider.dart';
 import 'package:flutter_application_1/providers/like_storage_provider.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:flutter_application_1/services/translator.dart';

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/models/anime_enums.dart';
 import 'package:flutter_application_1/models/manga.dart';
+import 'package:flutter_application_1/models/year_seasons_enum.dart';
 import 'package:flutter_application_1/services/api_service.dart';
 import 'package:http/http.dart' as http;
 
@@ -186,6 +187,30 @@ class JikanService extends ApiService {
       throw Exception('Erreur ${response.statusCode}');
     }
   }
+
+  @override
+  Future<List<Anime>> getSeasonAnimes({
+    int page = 1,
+    int? year,
+    Season? season,
+    bool airingOnly = true,
+    bool sfw = false,
+  }) async {
+    late Uri url;
+    if (year != null && season != null) {
+      url = Uri.parse("$baseUrl/seasons/$year/${season.key}");
+    } else {
+      url = Uri.parse("$baseUrl/seasons/now");
+    }
+    final queryParameters = <String, String>{
+      "page": page.toString(),
+      // if (airingOnly) "filter": "airing",
+      "sfw": sfw.toString(),
+    };
+    url = url.replace(queryParameters: queryParameters);
+    return await fetchAnimeList(url);
+  }
+
   // =======
   //   Future<List<Anime>> searchAnime({
   //     String query =""
