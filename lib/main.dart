@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/app.dart';
+import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/providers/anime_cache_provider.dart';
 import 'package:flutter_application_1/providers/anime_sections_provider.dart';
 import 'package:flutter_application_1/providers/database_provider.dart';
@@ -83,5 +86,7 @@ Future<void> onAppStart() async {
     await provider.updateSettings(
       provider.getSettings().copyWith(isFirstLaunch: false),
     );
+
+    // exit(0);
   }
 }

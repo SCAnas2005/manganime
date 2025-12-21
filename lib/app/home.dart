@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/bottom_nav/bottom_nav_view.dart';
-import 'package:flutter_application_1/providers/settings_repository_provider.dart';
-import 'package:flutter_application_1/providers/settings_storage_provider.dart';
 import 'package:flutter_application_1/viewmodels/anime_view_model.dart';
-import 'package:flutter_application_1/viewmodels/app_settings_view_model.dart';
 import 'package:flutter_application_1/viewmodels/manga_view_model.dart';
 import 'package:flutter_application_1/viewmodels/search_view_model.dart';
 import 'package:flutter_application_1/views/anime_view.dart';

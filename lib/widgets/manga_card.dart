@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/identifiable_enums.dart';
 import 'package:flutter_application_1/models/manga.dart';
 import 'package:flutter_application_1/widgets/like_widget/like_animation.dart';
 
@@ -275,7 +276,7 @@ class _MangaCardState extends State<MangaCard>
         : '--';
     final firstGenre = widget.manga.genres.isEmpty
         ? "Unknown"
-        : widget.manga.genres.first;
+        : widget.manga.genres.first.toReadableString();
 
     return GestureDetector(
       onTap: () => widget.onTap?.call(widget.manga),

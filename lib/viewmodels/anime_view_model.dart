@@ -192,13 +192,9 @@ class AnimeViewModel extends ChangeNotifier {
 
     // Recherche Api
     try {
-      var animes = await RequestQueue.instance.enqueue(
-        () => _service.search(page: _forYouPage, query: "", genres: topGenres),
-      );
-      debugPrint("fetchForYou animes count : ${animes.length}");
-
-      debugPrint("Removing liked animes from suggestions");
-      animes = animes.where((a) => !liked.contains(a)).toList();
+      var animes = await AnimeRepository(
+        api: JikanService(),
+      ).getForYouAnimes(provider);
 
       if (animes.isEmpty) {
         _hasMoreForYou = false;

@@ -5,9 +5,13 @@ import 'package:flutter_application_1/providers/anime_cache_provider.dart';
 import 'package:flutter_application_1/providers/anime_path_provider.dart';
 import 'package:flutter_application_1/providers/anime_sections_provider.dart';
 import 'package:flutter_application_1/providers/database_provider.dart';
+import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
+import 'package:flutter_application_1/providers/like_storage_provider.dart';
 import 'package:flutter_application_1/providers/request_queue_provider.dart';
+import 'package:flutter_application_1/providers/user_profile_provider.dart';
 import 'package:flutter_application_1/services/api_service.dart';
 import 'package:flutter_application_1/services/network_service.dart';
+import 'package:path/path.dart';
 
 class AnimeRepository {
   final ApiService api;
@@ -169,6 +173,55 @@ class AnimeRepository {
       } catch (e) {
         debugPrint("[AnimeRepository] getMostLikedAnimes: $e");
       }
+    }
+
+    return [];
+  }
+
+  Future<List<Anime>> getForYouAnimes(
+    GlobalAnimeFavoritesProvider provider, {
+    int page = 1,
+  }) async {
+    final liked = provider.loadedFavoriteAnimes;
+
+    // Calcul du profil utilisateur
+    final userProfile = UserprofileProvider.fromLikedAnimes(liked);
+    debugPrint("User profil built: $userProfile");
+
+    // Le top genres
+    final topGenres = userProfile.getTopGenres(3);
+    debugPrint(
+      "Top genres: ${topGenres.first}, ${topGenres[1]}, ${topGenres[2]}",
+    );
+
+    try {
+      // 1. API
+      if (await NetworkService.isConnected) {
+        var animes = await RequestQueue.instance.enqueue(
+          () => api.search(page: page, query: "", genres: topGenres),
+        );
+        debugPrint("fetchForYou animes count : ${animes.length}");
+
+        debugPrint("Removing liked animes from suggestions");
+        animes = animes.where((a) => !liked.contains(a)).toList();
+
+        return animes;
+      }
+
+      // 2. Database
+      var animes = await DatabaseProvider.instance.search<Anime>(
+        query: "",
+        genres: topGenres,
+      );
+
+      debugPrint("fetchForYou animes count : ${animes.length}");
+
+      debugPrint("Removing liked animes from suggestions");
+      animes = animes.where((a) => !liked.contains(a)).toList();
+
+      return animes;
+    } catch (e) {
+      debugPrint("[AnimeRepository] getForYouAnimes: $e");
     }
 
     return [];

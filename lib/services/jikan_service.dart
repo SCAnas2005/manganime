@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_application_1/models/anime.dart';
-import 'package:flutter_application_1/models/anime_enums.dart';
+import 'package:flutter_application_1/models/identifiable_enums.dart';
 import 'package:flutter_application_1/models/manga.dart';
 import 'package:flutter_application_1/models/year_seasons_enum.dart';
 import 'package:flutter_application_1/services/api_service.dart';
@@ -51,13 +51,13 @@ class JikanService extends ApiService {
     int? score,
     int? minScore,
     int? maxScore,
-    AnimeStatus? status,
+    MediaStatus? status,
     AnimeRating? rating,
     bool sfw = false,
-    List<AnimeGenre>? genres,
+    List<Genres>? genres,
     String? genresExclude,
-    AnimeOrderBy? orderBy,
-    AnimeSortBy? sort,
+    MediaOrderBy? orderBy,
+    SortOrder? sort,
     String? letter,
     String? producers,
     String? startDate,
@@ -99,7 +99,7 @@ class JikanService extends ApiService {
     int page = 1,
     String? filter, // popular, trending, upcoming, etc.
     String? type, // tv, movie, ova, etc.
-    String? status, // airing, finished, etc.
+    MediaStatus? status, // airing, finished, etc.
     String? season, // winter, spring, summer, fall
     int? year,
     int? month,
@@ -110,7 +110,7 @@ class JikanService extends ApiService {
       'page': page.toString(),
       if (filter != null) 'filter': filter,
       if (type != null) 'type': type,
-      if (status != null) 'status': status,
+      if (status != null) 'status': status.key,
       if (season != null) 'season': season,
       if (year != null) 'year': year.toString(),
       if (month != null) 'month': month.toString(),
@@ -150,7 +150,7 @@ class JikanService extends ApiService {
     int page = 1,
     String? filter, // popular, favorite, etc.
     String? type, // manga, novel, one_shot, doujin, manhwa, manhua
-    String? status, // publishing, finished
+    MediaStatus? status, // publishing, finished
     int? year,
     int? month,
     bool sfw = true,
@@ -160,7 +160,7 @@ class JikanService extends ApiService {
       'page': page.toString(),
       if (filter != null) 'filter': filter,
       if (type != null) 'type': type,
-      if (status != null) 'status': status,
+      if (status != null) 'status': status.key,
       if (year != null) 'year': year.toString(),
       if (month != null) 'month': month.toString(),
       'sfw': sfw.toString(),
@@ -291,11 +291,11 @@ class JikanService extends ApiService {
       title: json['title_english']?.toString() ?? '',
       synopsis: json['synopsis'] ?? '',
       imageUrl: json['images']?['jpg']?['image_url']?.toString() ?? '',
-      status: json["status"] ?? "",
+      status: MediaStatusX.fromJikan(json["status"]),
       score: (json["score"] ?? 0).toDouble(),
       genres: (json["genres"] != null)
           ? (json["genres"] as List)
-                .map((genreJson) => AnimeGenreX.fromString(genreJson["name"]))
+                .map((genreJson) => GenreX.fromString(genreJson["name"]))
                 .where((g) => g != null)
                 .map((g) => g!)
                 .toList()
@@ -318,12 +318,14 @@ class JikanService extends ApiService {
           json['title_english']?.toString() ?? json['title']?.toString() ?? '',
       synopsis: json["synopsis"] ?? '',
       imageUrl: json['images']?['jpg']?['image_url']?.toString() ?? '',
-      status: json["status"] ?? "",
+      status: MediaStatusX.fromJikan(json["status"]),
       score: (json["score"] ?? 0).toDouble(),
       type: json["type"],
       genres: (json["genres"] != null)
           ? (json["genres"] as List)
-                .map((genreJson) => "${genreJson["name"]}")
+                .map((genreJson) => GenreX.fromString(genreJson["name"]))
+                .where((g) => g != null)
+                .map((g) => g!)
                 .toList()
           : [],
     );

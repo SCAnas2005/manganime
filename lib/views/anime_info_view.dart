@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
-import 'package:flutter_application_1/models/anime_enums.dart';
+import 'package:flutter_application_1/models/identifiable_enums.dart';
 import 'package:flutter_application_1/providers/anime_repository_provider.dart';
 import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
 import 'package:flutter_application_1/providers/user_stats_provider.dart';
@@ -245,7 +245,7 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
                           runSpacing:
                               4.0, // Espace vertical si ça passe à la ligne
                           children: animeInfo.genres
-                              .where((g) => g != AnimeGenre.None)
+                              .where((g) => g != Genres.None)
                               .map(
                                 (genre) => Chip(
                                   label: Text(genre.toReadableString()),
@@ -319,15 +319,15 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
   }
 
   // Petit widget utilitaire pour le statut
-  Widget _buildStatusChip(String status) {
+  Widget _buildStatusChip(MediaStatus status) {
     Color color;
     IconData icon;
 
     // Logique simple pour la couleur et l'icône du statut
-    if (status.toLowerCase().contains("airing")) {
+    if (status == MediaStatus.airing) {
       color = Colors.green;
       icon = Icons.play_circle_outline;
-    } else if (status.toLowerCase().contains("finished")) {
+    } else if (status == MediaStatus.complete) {
       color = Colors.blueGrey;
       icon = Icons.check_circle_outline;
     } else {
@@ -348,7 +348,7 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
           Icon(icon, size: 14, color: color),
           const SizedBox(width: 4),
           Text(
-            status,
+            status.key,
             style: TextStyle(
               color: color,
               fontSize: 12,

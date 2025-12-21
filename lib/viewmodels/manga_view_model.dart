@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/identifiable_enums.dart';
 import 'package:flutter_application_1/models/manga.dart';
 import 'package:flutter_application_1/providers/request_queue_provider.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
@@ -71,7 +72,10 @@ class MangaViewModel extends ChangeNotifier {
 
     try {
       final mangas = await RequestQueue.instance.enqueue(
-        () => _service.getTopManga(page: _publishingPage, status: "publishing"),
+        () => _service.getTopManga(
+          page: _publishingPage,
+          status: MediaStatus.publishing,
+        ),
       );
 
       if (mangas.isEmpty) {

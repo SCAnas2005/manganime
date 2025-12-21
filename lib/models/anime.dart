@@ -1,4 +1,5 @@
-import 'package:flutter_application_1/models/anime_enums.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/identifiable_enums.dart';
 import 'package:flutter_application_1/models/identifiable.dart';
 
 /// Représente un anime dans l'application.
@@ -11,22 +12,28 @@ class Anime extends Identifiable {
   final int id;
 
   /// Titre de l'anime.
+  @override
   final String title;
 
   /// Synopsis de l'anime
+  @override
   final String synopsis;
 
   /// URL de l'image de couverture de l'anime.
+  @override
   final String imageUrl;
 
   /// Note moyenne de l'anime, si disponible.
+  @override
   final double? score;
 
   /// Le status de l'anime
-  final String status;
+  @override
+  final MediaStatus status;
 
   /// Genre de l'anime (action, aventure, ect)
-  final List<AnimeGenre> genres;
+  @override
+  final List<Genres> genres;
 
   /// Constructeur de la classe Anime.
   ///
@@ -47,12 +54,12 @@ class Anime extends Identifiable {
       title: json['title'] as String,
       synopsis: (json['synopsis'] == null) ? "" : json["synopsis"] as String,
       imageUrl: json['imageUrl'] as String,
-      status: json['status'] as String,
+      status: MediaStatusX.fromString(json['status']),
       score: (json['score'] != null) ? (json['score'] as num).toDouble() : null,
       genres:
           (json["genres"] as List<dynamic>?)
-              ?.map((g) => AnimeGenreX.fromString(g.toString()))
-              .whereType<AnimeGenre>() // <-- filtre les null
+              ?.map((g) => GenreX.fromString(g.toString()))
+              .whereType<Genres>() // <-- filtre les null
               .toList() ??
           [],
     );
@@ -65,7 +72,7 @@ class Anime extends Identifiable {
       'title': title,
       'synopsis': synopsis,
       'imageUrl': imageUrl,
-      'status': status,
+      'status': status.key,
       'score': score,
       "genres": genres.map((g) => g.toReadableString()).toList(),
     };
@@ -76,8 +83,8 @@ class Anime extends Identifiable {
     String? title,
     String? synopsis,
     String? imageUrl,
-    String? status,
-    List<AnimeGenre>? genres,
+    MediaStatus? status,
+    List<Genres>? genres,
     double? score,
   }) {
     return Anime(
