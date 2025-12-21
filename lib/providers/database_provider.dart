@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/models/identifiable.dart';
+import 'package:flutter_application_1/models/identifiable_enums.dart';
 import 'package:flutter_application_1/models/manga.dart';
 import 'package:flutter_application_1/providers/anime_path_provider.dart';
 import 'package:flutter_application_1/providers/request_queue_provider.dart';
@@ -195,4 +196,41 @@ class DatabaseProvider {
       await _saveMultiple<Anime>(animes);
   Future<void> saveMultipleMangas(List<Manga> mangas) async =>
       await _saveMultiple<Manga>(mangas);
+
+  Future<List<T>> search<T extends Identifiable>({
+    String? query,
+    List<Genres>? genres,
+    MediaStatus? status,
+    MediaOrderBy? orderBy,
+    AnimeType? animeType,
+    AnimeRating? animeRating,
+
+    MangaType? mangaType,
+  }) async {
+    Box box = getBoxByType<T>();
+    List<T> result = [];
+    final all = box.values;
+
+    final String searchQuery = query?.toLowerCase().trim() ?? "";
+    final bool hasGenreFilter = genres != null && genres.isNotEmpty;
+
+    for (var identifiableMap in all) {
+      T item = _fromJson(identifiableMap);
+
+      // 1. Filtre TEXTE (Insensible à la casse)
+      if (searchQuery.isNotEmpty) {
+        if (!item.title.toLowerCase().contains(searchQuery)) {
+          continue;
+        }
+      }
+      if (hasGenreFilter) {
+        List<Genres> itemGenres = item.genres;
+
+        bool hasMatch = itemGenres.any((g) => genres.contains(g));
+        if (!hasMatch) continue;
+      }
+      result.add(item);
+    }
+    return result;
+  }
 }

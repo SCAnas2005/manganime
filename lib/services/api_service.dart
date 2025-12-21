@@ -1,5 +1,5 @@
 import 'package:flutter_application_1/models/anime.dart';
-import 'package:flutter_application_1/models/anime_enums.dart';
+import 'package:flutter_application_1/models/identifiable_enums.dart';
 import 'package:flutter_application_1/models/manga.dart';
 import 'package:flutter_application_1/models/year_seasons_enum.dart';
 
@@ -36,13 +36,13 @@ abstract class ApiService {
     int? score,
     int? minScore,
     int? maxScore,
-    AnimeStatus? status,
+    MediaStatus? status,
     AnimeRating? rating,
     bool sfw = false,
-    List<AnimeGenre>? genres,
+    List<Genres>? genres,
     String? genresExclude,
-    AnimeOrderBy? orderBy,
-    AnimeSortBy? sort,
+    MediaOrderBy? orderBy,
+    SortOrder? sort,
     String? letter,
     String? producers,
     String? startDate,
@@ -57,7 +57,7 @@ abstract class ApiService {
     int page = 1,
     String? filter, // popular, trending, upcoming, etc.
     String? type, // tv, movie, ova, etc.
-    String? status, // airing, finished, etc.
+    MediaStatus? status, // airing, finished, etc.
     String? season, // winter, spring, summer, fall
     int? year,
     int? month,
@@ -68,7 +68,7 @@ abstract class ApiService {
     int page = 1,
     String? filter, // popular, favorite, etc.
     String? type, // manga, novel, one_shot, doujin, manhwa, manhua
-    String? status, // publishing, finished
+    MediaStatus? status, // publishing, finished
     int? year,
     int? month,
     bool sfw = true,

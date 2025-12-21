@@ -1,4 +1,5 @@
 import 'package:flutter_application_1/models/identifiable.dart';
+import 'package:flutter_application_1/models/identifiable_enums.dart';
 
 /// Représente un manga dans l'application.
 ///
@@ -10,23 +11,29 @@ class Manga extends Identifiable {
   final int id;
 
   /// Titre du manga.
+  @override
   final String title;
 
   /// Synopsis du manga
+  @override
   final String synopsis;
 
   /// URL de l'image de couverture du manga.
+  @override
   final String imageUrl;
 
   /// Note moyenne du manga, si disponible.
+  @override
   final double? score;
 
-  final String status;
+  @override
+  final MediaStatus status;
 
   final String type;
 
   /// Genre principal du manga (ex: Shonen, Seinen, Shojo).
-  final List<String> genres;
+  @override
+  final List<Genres> genres;
 
   /// Constructeur de la classe Manga.
   ///
@@ -48,10 +55,15 @@ class Manga extends Identifiable {
       title: json['title'] as String,
       synopsis: (json["synopsis"] == null) ? "" : json["synopsis"] as String,
       imageUrl: json['imageUrl'] as String,
-      status: json['status'] as String,
+      status: MediaStatusX.fromString(json['status']),
       score: (json['score'] != null) ? (json['score'] as num).toDouble() : null,
       type: json["type"] as String,
-      genres: json["genres"] as List<String>,
+      genres:
+          (json["genres"] as List<dynamic>?)
+              ?.map((g) => GenreX.fromString(g.toString()))
+              .whereType<Genres>() // <-- filtre les null
+              .toList() ??
+          [],
     );
   }
 
@@ -62,10 +74,10 @@ class Manga extends Identifiable {
       'title': title,
       'synopsis': synopsis,
       'imageUrl': imageUrl,
-      'status': status,
+      'status': status.key,
       'score': score,
       'type': type,
-      'genres': genres,
+      "genres": genres.map((g) => g.toReadableString()).toList(),
     };
   }
 }
