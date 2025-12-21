@@ -1,6 +1,7 @@
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/models/anime_enums.dart';
 import 'package:flutter_application_1/models/manga.dart';
+import 'package:flutter_application_1/models/year_seasons_enum.dart';
 
 /// Interface abstraite définissant la structure de base pour tout service d’API
 /// utilisé pour récupérer et convertir les données d’animes.
@@ -71,6 +72,14 @@ abstract class ApiService {
     int? year,
     int? month,
     bool sfw = true,
+  });
+
+  Future<List<Anime>> getSeasonAnimes({
+    int page = 1,
+    int? year,
+    Season? season,
+    bool airingOnly = true,
+    bool sfw = false,
   });
 
   /// Récupère toutes les informations détaillées concernant un anime spécifique.

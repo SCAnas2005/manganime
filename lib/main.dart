@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/app.dart';
-import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/providers/anime_cache_provider.dart';
+import 'package:flutter_application_1/providers/anime_sections_provider.dart';
 import 'package:flutter_application_1/providers/database_provider.dart';
 import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
 import 'package:flutter_application_1/providers/global_manga_favorites_provider.dart';
@@ -30,9 +30,12 @@ Future<void> main() async {
   // Ouvre une box pour les vues
   await UserStatsProvider.init();
 
-  // Ouvre une box pour le cache d'anime
+  // Ouvre une box pour le cache d'anime/manga
   await AnimeCache.instance.init();
   await MangaCache.instance.init();
+
+  // Ouvre une box pour les sections anime/manga
+  await AnimeSectionsProvider.instance.init();
 
   // Initialisation et démarrage du suivi du temps d'écran
   await ScreenTimeProvider.init();
