@@ -2,16 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/models/anime_sections.dart';
 import 'package:flutter_application_1/providers/anime_cache_provider.dart';
-import 'package:flutter_application_1/providers/anime_path_provider.dart';
 import 'package:flutter_application_1/providers/anime_sections_provider.dart';
 import 'package:flutter_application_1/providers/database_provider.dart';
 import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
-import 'package:flutter_application_1/providers/like_storage_provider.dart';
+import 'package:flutter_application_1/providers/media_path_provider.dart';
 import 'package:flutter_application_1/providers/request_queue_provider.dart';
 import 'package:flutter_application_1/providers/user_profile_provider.dart';
 import 'package:flutter_application_1/services/api_service.dart';
 import 'package:flutter_application_1/services/network_service.dart';
-import 'package:path/path.dart';
 
 class AnimeRepository {
   final ApiService api;
@@ -64,7 +62,7 @@ class AnimeRepository {
 
   Future<Image> getAnimeImage(Anime anime) async {
     // Recherche dans les fichiers de l'app
-    final animeImage = await AnimePathProvider.getLocalFileImage(anime);
+    final animeImage = await MediaPathProvider.getLocalFileImage<Anime>(anime);
     if (animeImage.existsSync()) {
       return Image.file(animeImage, fit: BoxFit.cover);
     }
@@ -77,7 +75,7 @@ class AnimeRepository {
   }
 
   Future<ImageProvider?> getAnimeImageProvider(Anime anime) async {
-    final file = await AnimePathProvider.getLocalFileImage(anime);
+    final file = await MediaPathProvider.getLocalFileImage<Anime>(anime);
     if (file.existsSync()) {
       return FileImage(file);
     }

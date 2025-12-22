@@ -26,10 +26,12 @@ class Manga extends Identifiable {
   @override
   final double? score;
 
+  /// Status du manga (en cours, fini, ect)
   @override
   final MediaStatus status;
 
-  final String type;
+  /// Type du manga
+  final String? type;
 
   /// Genre principal du manga (ex: Shonen, Seinen, Shojo).
   @override
@@ -57,13 +59,35 @@ class Manga extends Identifiable {
       imageUrl: json['imageUrl'] as String,
       status: MediaStatusX.fromString(json['status']),
       score: (json['score'] != null) ? (json['score'] as num).toDouble() : null,
-      type: json["type"] as String,
+      type: json["type"] as String?,
       genres:
           (json["genres"] as List<dynamic>?)
               ?.map((g) => GenreX.fromString(g.toString()))
               .whereType<Genres>() // <-- filtre les null
               .toList() ??
           [],
+    );
+  }
+
+  Manga copyWith({
+    int? id,
+    String? title,
+    String? synopsis,
+    String? imageUrl,
+    MediaStatus? status,
+    String? type,
+    List<Genres>? genres,
+    double? score,
+  }) {
+    return Manga(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      synopsis: synopsis ?? this.synopsis,
+      imageUrl: imageUrl ?? this.imageUrl,
+      status: status ?? this.status,
+      type: type ?? this.type,
+      genres: genres ?? this.genres,
+      score: score ?? this.score,
     );
   }
 

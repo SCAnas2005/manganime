@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/providers/anime_cache_provider.dart';
-import 'package:flutter_application_1/providers/anime_path_provider.dart';
 import 'package:flutter_application_1/providers/anime_repository_provider.dart';
 import 'package:flutter_application_1/providers/like_storage_provider.dart';
+import 'package:flutter_application_1/providers/media_path_provider.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
 
 class GlobalAnimeFavoritesProvider extends ChangeNotifier {
@@ -79,7 +79,7 @@ class GlobalAnimeFavoritesProvider extends ChangeNotifier {
       _likedIds.add(id);
       // On ajoute l'objet entier à la liste mémoire pour éviter un appel API
       _loadedFavoriteAnimes.add(anime);
-      AnimePathProvider.downloadFileImage(anime);
+      MediaPathProvider.downloadFileImage<Anime>(anime);
     }
 
     // Persistance : On appelle le stockage

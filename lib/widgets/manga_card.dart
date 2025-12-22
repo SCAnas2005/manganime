@@ -2,6 +2,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/identifiable_enums.dart';
 import 'package:flutter_application_1/models/manga.dart';
+import 'package:flutter_application_1/providers/manga_repository_provider.dart';
+import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:flutter_application_1/widgets/like_widget/like_animation.dart';
 
 /// Clipper personnalisé pour créer des coins légèrement irréguliers
@@ -234,6 +236,8 @@ class _MangaCardState extends State<MangaCard>
   late AnimationController _flipController;
   late Animation<double> _flipAnimation;
 
+  late MangaRepository _repository;
+
   @override
   void initState() {
     super.initState();
@@ -246,6 +250,8 @@ class _MangaCardState extends State<MangaCard>
     _flipAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _flipController, curve: Curves.easeInOut),
     );
+
+    _repository = MangaRepository(api: JikanService());
   }
 
   @override
@@ -330,10 +336,22 @@ class _MangaCardState extends State<MangaCard>
                   children: [
                     // Image de fond
                     Positioned.fill(
-                      child: Image.network(
-                        widget.manga.imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
+                      child: FutureBuilder<Image>(
+                        // 👇 C'est ici que tu appelles ta fonction
+                        future: _repository.getMangaImage(widget.manga),
+
+                        builder: (context, snapshot) {
+                          // CAS 1 : Ta fonction a fini et renvoyé l'Image (Fichier ou Network)
+                          if (snapshot.hasData) {
+                            return snapshot.data!;
+                          }
+
+                          // CAS 2 : Erreur (Pas internet ET pas de fichier local)
+                          if (snapshot.hasError) {
+                            return Container(color: Colors.grey[800]);
+                          }
+
+                          // CAS 3 : En attente (la fonction cherche le fichier...)
                           return Container(color: Colors.grey[800]);
                         },
                       ),
@@ -349,7 +367,7 @@ class _MangaCardState extends State<MangaCard>
                       ),
 
                     // Badge de genre vertical (en haut à gauche)
-                    if (!widget.manga.genres.isEmpty)
+                    if (widget.manga.genres.isNotEmpty)
                       Positioned(
                         top: 8,
                         left: 8,

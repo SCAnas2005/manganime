@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/manga.dart';
 import 'package:flutter_application_1/providers/anime_cache_provider.dart';
 import 'package:flutter_application_1/providers/anime_sections_provider.dart';
 import 'package:flutter_application_1/providers/database_provider.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_application_1/providers/screen_time_provider.dart';
 import 'package:flutter_application_1/providers/settings_repository_provider.dart';
 import 'package:flutter_application_1/providers/settings_storage_provider.dart';
 import 'package:flutter_application_1/providers/user_stats_provider.dart';
+import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class BootLoader {
@@ -50,7 +52,9 @@ class BootLoader {
     if (isFirstLaunch) {
       debugPrint("========= App first launch");
 
-      // debugPrint("Database populate started");
+      debugPrint("Database populate started");
+      await DatabaseProvider.instance.clear<Manga>();
+      await DatabaseProvider.instance.populate<Manga>(JikanService(), 300);
       // await DatabaseProvider.instance.clear<Anime>();
       // await DatabaseProvider.instance.populate<Anime>(JikanService(), 300);
       // debugPrint("Updating cache");

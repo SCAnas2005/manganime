@@ -4,7 +4,7 @@ import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/models/identifiable.dart';
 import 'package:flutter_application_1/models/identifiable_enums.dart';
 import 'package:flutter_application_1/models/manga.dart';
-import 'package:flutter_application_1/providers/anime_path_provider.dart';
+import 'package:flutter_application_1/providers/media_path_provider.dart';
 import 'package:flutter_application_1/providers/request_queue_provider.dart';
 import 'package:flutter_application_1/services/api_service.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -55,13 +55,12 @@ class DatabaseProvider {
                 () => service.getTopManga(page: 1),
               )
               as List<T>;
-      throw UnsupportedError('Type $T non supporté');
     } else {
       throw UnsupportedError('Type $T non supporté');
     }
 
     await instance._saveMultiple<T>(list);
-    downloadImagesOnly(list);
+    downloadImagesOnly<T>(list);
 
     // Seed complet en arrière-plan
     final int totalPages = (total / 25).ceil();
@@ -80,15 +79,14 @@ class DatabaseProvider {
                     () => service.getTopManga(page: page),
                   )
                   as List<T>;
-          throw UnsupportedError('Type $T non supporté');
         }
 
         await instance._saveMultiple<T>(list);
-        await downloadImagesOnly(list);
+        await downloadImagesOnly<T>(list);
       }
 
       debugPrint(
-        "Database populate ended. Database length : ${instance.length<T>()}",
+        "[DatabaseProvider] populate($service, $total): Database populate ended. Database length : ${instance.length<T>()}",
       );
     });
   }
@@ -96,16 +94,12 @@ class DatabaseProvider {
   /// Télécharge les images d'une liste en parallèle.
   /// Ne modifie pas les objets, crée juste les fichiers sur le disque.
   Future<void> downloadImagesOnly<T extends Identifiable>(List<T> list) async {
-    // On ne télécharge que pour les Animes
-    if (T != Anime) return;
-
     // On lance tous les téléchargements de la liste en même temps
-    await AnimePathProvider.downloadBatchImages(list as List<Anime>);
+    await MediaPathProvider.downloadBatchImages<T>(list);
   }
 
   Future<void> downloadImageOnly<T extends Identifiable>(T identifiable) async {
-    if (T != Anime) return;
-    await AnimePathProvider.downloadFileImage(identifiable as Anime);
+    await MediaPathProvider.downloadFileImage<T>(identifiable);
   }
 
   Future<void> saveFromFunction<T extends Identifiable>(

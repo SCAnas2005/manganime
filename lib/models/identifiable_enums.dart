@@ -1,7 +1,5 @@
 // ignore_for_file: constant_identifier_names
 
-import 'package:flutter/material.dart';
-
 enum AnimeType { tv, movie, ova, special, ona, music, cm, pv, tv_special }
 
 enum MangaType { manga, novel, lightnovel, oneshot, doujin, manhwa, manhua }
@@ -26,8 +24,6 @@ extension MediaStatusX on MediaStatus {
 
   static MediaStatus fromJikan(String raw) {
     final value = raw.toLowerCase();
-    debugPrint("from jikan value : $value");
-
     if (value.contains('finished') || value.contains('complete')) {
       return MediaStatus.complete;
     }
