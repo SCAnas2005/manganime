@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/manga.dart';
 import 'package:flutter_application_1/providers/anime_cache_provider.dart';
-import 'package:flutter_application_1/providers/anime_sections_provider.dart';
 import 'package:flutter_application_1/providers/database_provider.dart';
 import 'package:flutter_application_1/providers/like_storage_provider.dart';
 import 'package:flutter_application_1/providers/manga_cache_provider.dart';
+import 'package:flutter_application_1/providers/media_sections_provider.dart';
 import 'package:flutter_application_1/providers/screen_time_provider.dart';
 import 'package:flutter_application_1/providers/settings_repository_provider.dart';
 import 'package:flutter_application_1/providers/settings_storage_provider.dart';
@@ -31,7 +31,7 @@ class BootLoader {
     await MangaCache.instance.init();
 
     // Ouvre une box pour les sections anime/manga
-    await AnimeSectionsProvider.instance.init();
+    await MediaSectionsProvider.instance.init(JikanService());
 
     // Initialisation et démarrage du suivi du temps d'écran
     await ScreenTimeProvider.init();
