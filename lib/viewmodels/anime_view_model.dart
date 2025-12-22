@@ -194,7 +194,7 @@ class AnimeViewModel extends ChangeNotifier {
     try {
       var animes = await AnimeRepository(
         api: JikanService(),
-      ).getForYouAnimes(provider);
+      ).getForYouAnimes(provider, page: _forYouPage);
 
       if (animes.isEmpty) {
         _hasMoreForYou = false;

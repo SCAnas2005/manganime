@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/models/anime_sections.dart';
-import 'package:flutter_application_1/providers/anime_path_provider.dart';
 import 'package:flutter_application_1/providers/database_provider.dart';
+import 'package:flutter_application_1/providers/media_path_provider.dart';
 import 'package:flutter_application_1/providers/request_queue_provider.dart';
 import 'package:flutter_application_1/services/api_service.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -60,7 +60,7 @@ class AnimeSectionsProvider {
 
   Future<void> saveSection(AnimeSections section, List<Anime> animes) async {
     await DatabaseProvider.instance.saveMultipleAnimes(animes);
-    await AnimePathProvider.downloadBatchImages(animes);
+    await MediaPathProvider.downloadBatchImages<Anime>(animes);
     final ids = animes.map((a) => a.id).toList();
     await _box.put(section.key, ids);
   }
