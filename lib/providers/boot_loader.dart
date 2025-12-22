@@ -53,8 +53,8 @@ class BootLoader {
       debugPrint("========= App first launch");
 
       debugPrint("Database populate started");
-      await DatabaseProvider.instance.clear<Manga>();
-      await DatabaseProvider.instance.populate<Manga>(JikanService(), 300);
+      // await DatabaseProvider.instance.clear<Manga>();
+      // await DatabaseProvider.instance.populate<Manga>(JikanService(), 300);
       // await DatabaseProvider.instance.clear<Anime>();
       // await DatabaseProvider.instance.populate<Anime>(JikanService(), 300);
       // debugPrint("Updating cache");

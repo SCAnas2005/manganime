@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/anime_sections.dart';
+import 'package:flutter_application_1/models/identifiable_enums.dart';
 import 'package:flutter_application_1/models/manga.dart';
 import 'package:flutter_application_1/providers/database_provider.dart';
 import 'package:flutter_application_1/providers/manga_cache_provider.dart';
 import 'package:flutter_application_1/providers/media_path_provider.dart';
+import 'package:flutter_application_1/providers/media_sections_provider.dart';
+import 'package:flutter_application_1/providers/request_queue_provider.dart';
 import 'package:flutter_application_1/services/api_service.dart';
 import 'package:flutter_application_1/services/network_service.dart';
 
@@ -24,7 +28,9 @@ class MangaRepository {
   Future<Manga?> getMangaFromService(int id) async {
     if (await NetworkService.isConnected) {
       try {
-        final data = await api.getFullDetailManga(id);
+        final data = await RequestQueue.instance.enqueue(
+          () => api.getFullDetailManga(id),
+        );
         return data;
       } catch (e) {
         debugPrint(
@@ -92,89 +98,98 @@ class MangaRepository {
     return null;
   }
 
-  // Future<List<Anime>> getPopularAnimes({int page = 1}) async {
-  //   final section = AnimeSections.popular;
-  //   if (page == 1) {
-  //     // Database
-  //     final cachedAnimes = await AnimeSectionsProvider.instance.getAnimes(
-  //       section,
-  //     );
-  //     if (cachedAnimes.isNotEmpty) return cachedAnimes;
-  //   }
-  //   // Api
-  //   if (await NetworkService.isConnected) {
-  //     try {
-  //       final animes = await RequestQueue.instance.enqueue(
-  //         () => api.getTopAnime(page: page, filter: "bypopularity"),
-  //       );
+  Future<List<Manga>> getPopularMangas({int page = 1}) async {
+    final section = MangaSections.popular;
+    if (page == 1) {
+      // Database
+      final cachedMangas = await MediaSectionsProvider.instance.getMangas(
+        section,
+      );
+      if (cachedMangas.isNotEmpty) return cachedMangas;
+    }
+    // Api
+    if (await NetworkService.isConnected) {
+      try {
+        final mangas = await RequestQueue.instance.enqueue(
+          () => api.getTopManga(page: page, filter: "bypopularity"),
+        );
 
-  //       // Save dans le cache si page 1
-  //       if (page == 1) {
-  //         AnimeSectionsProvider.instance.saveSection(section, animes);
-  //       }
-  //       return animes;
-  //     } catch (e) {
-  //       debugPrint("[AnimeRepository] getPopularAnimes: $e");
-  //     }
-  //   }
+        // Save dans le cache si page 1
+        if (page == 1) {
+          await MediaSectionsProvider.instance.saveMangaSection(
+            section,
+            mangas,
+          );
+        }
+        return mangas;
+      } catch (e) {
+        debugPrint("[$MangaRepository] getPopularMangas: $e");
+      }
+    }
 
-  //   return [];
-  // }
+    return [];
+  }
 
-  // Future<List<Anime>> getAiringAnimes({int page = 1}) async {
-  //   final section = AnimeSections.airing;
-  //   if (page == 1) {
-  //     // Database
-  //     final cachedAnimes = await AnimeSectionsProvider.instance.getAnimes(
-  //       section,
-  //     );
-  //     if (cachedAnimes.isNotEmpty) return cachedAnimes;
-  //   }
-  //   // Api
-  //   if (await NetworkService.isConnected) {
-  //     try {
-  //       final animes = await RequestQueue.instance.enqueue(
-  //         () => api.getSeasonAnimes(page: page),
-  //       );
+  Future<List<Manga>> getPublishingMangas({int page = 1}) async {
+    final section = MangaSections.airing;
+    if (page == 1) {
+      // Database
+      final cachedMangas = await MediaSectionsProvider.instance.getMangas(
+        section,
+      );
+      if (cachedMangas.isNotEmpty) return cachedMangas;
+    }
+    // Api
+    if (await NetworkService.isConnected) {
+      try {
+        final mangas = await RequestQueue.instance.enqueue(
+          () => api.getTopManga(page: page, filter: MediaStatus.publishing.key),
+        );
 
-  //       // Save dans le cache si page 1
-  //       if (page == 1) {
-  //         AnimeSectionsProvider.instance.saveSection(section, animes);
-  //       }
-  //       return animes;
-  //     } catch (e) {
-  //       debugPrint("[AnimeRepository] getAiringAnimes: $e");
-  //     }
-  //   }
-  //   return [];
-  // }
+        // Save dans le cache si page 1
+        if (page == 1) {
+          await MediaSectionsProvider.instance.saveMangaSection(
+            section,
+            mangas,
+          );
+        }
+        return mangas;
+      } catch (e) {
+        debugPrint("[$MangaRepository] getPublishingMangas: $e");
+      }
+    }
+    return [];
+  }
 
-  // Future<List<Anime>> getMostLikedAnimes({int page = 1}) async {
-  //   final section = AnimeSections.mostLiked;
-  //   if (page == 1) {
-  //     // Database
-  //     final cachedAnimes = await AnimeSectionsProvider.instance.getAnimes(
-  //       section,
-  //     );
-  //     if (cachedAnimes.isNotEmpty) return cachedAnimes;
-  //   }
-  //   // Api
-  //   if (await NetworkService.isConnected) {
-  //     try {
-  //       final animes = await RequestQueue.instance.enqueue(
-  //         () => api.getTopAnime(page: page, filter: "favorite"),
-  //       );
+  Future<List<Manga>> getMostLikedMangas({int page = 1}) async {
+    final section = MangaSections.mostLiked;
+    if (page == 1) {
+      // Database
+      final cachedMangas = await MediaSectionsProvider.instance.getMangas(
+        section,
+      );
+      if (cachedMangas.isNotEmpty) return cachedMangas;
+    }
+    // Api
+    if (await NetworkService.isConnected) {
+      try {
+        final mangas = await RequestQueue.instance.enqueue(
+          () => api.getTopManga(page: page, filter: "favorite"),
+        );
 
-  //       // Save dans le cache si page 1
-  //       if (page == 1) {
-  //         AnimeSectionsProvider.instance.saveSection(section, animes);
-  //       }
-  //       return animes;
-  //     } catch (e) {
-  //       debugPrint("[AnimeRepository] getMostLikedAnimes: $e");
-  //     }
-  //   }
+        // Save dans le cache si page 1
+        if (page == 1) {
+          await MediaSectionsProvider.instance.saveMangaSection(
+            section,
+            mangas,
+          );
+        }
+        return mangas;
+      } catch (e) {
+        debugPrint("[$MangaRepository] getMostLikedMangas: $e");
+      }
+    }
 
-  //   return [];
-  // }
+    return [];
+  }
 }
