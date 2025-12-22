@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/models/anime_sections.dart';
 import 'package:flutter_application_1/providers/anime_cache_provider.dart';
-import 'package:flutter_application_1/providers/anime_sections_provider.dart';
 import 'package:flutter_application_1/providers/database_provider.dart';
 import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
 import 'package:flutter_application_1/providers/media_path_provider.dart';
+import 'package:flutter_application_1/providers/media_sections_provider.dart';
 import 'package:flutter_application_1/providers/request_queue_provider.dart';
 import 'package:flutter_application_1/providers/user_profile_provider.dart';
 import 'package:flutter_application_1/services/api_service.dart';
@@ -94,7 +94,7 @@ class AnimeRepository {
     final section = AnimeSections.popular;
     if (page == 1) {
       // Database
-      final cachedAnimes = await AnimeSectionsProvider.instance.getAnimes(
+      final cachedAnimes = await MediaSectionsProvider.instance.getAnimes(
         section,
       );
       if (cachedAnimes.isNotEmpty) return cachedAnimes;
@@ -108,7 +108,7 @@ class AnimeRepository {
 
         // Save dans le cache si page 1
         if (page == 1) {
-          AnimeSectionsProvider.instance.saveSection(section, animes);
+          MediaSectionsProvider.instance.saveAnimeSection(section, animes);
         }
         return animes;
       } catch (e) {
@@ -123,7 +123,7 @@ class AnimeRepository {
     final section = AnimeSections.airing;
     if (page == 1) {
       // Database
-      final cachedAnimes = await AnimeSectionsProvider.instance.getAnimes(
+      final cachedAnimes = await MediaSectionsProvider.instance.getAnimes(
         section,
       );
       if (cachedAnimes.isNotEmpty) return cachedAnimes;
@@ -137,7 +137,7 @@ class AnimeRepository {
 
         // Save dans le cache si page 1
         if (page == 1) {
-          AnimeSectionsProvider.instance.saveSection(section, animes);
+          MediaSectionsProvider.instance.saveAnimeSection(section, animes);
         }
         return animes;
       } catch (e) {
@@ -151,7 +151,7 @@ class AnimeRepository {
     final section = AnimeSections.mostLiked;
     if (page == 1) {
       // Database
-      final cachedAnimes = await AnimeSectionsProvider.instance.getAnimes(
+      final cachedAnimes = await MediaSectionsProvider.instance.getAnimes(
         section,
       );
       if (cachedAnimes.isNotEmpty) return cachedAnimes;
@@ -165,7 +165,7 @@ class AnimeRepository {
 
         // Save dans le cache si page 1
         if (page == 1) {
-          AnimeSectionsProvider.instance.saveSection(section, animes);
+          MediaSectionsProvider.instance.saveAnimeSection(section, animes);
         }
         return animes;
       } catch (e) {
