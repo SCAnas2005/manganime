@@ -108,7 +108,10 @@ class AnimeRepository {
 
         // Save dans le cache si page 1
         if (page == 1) {
-          MediaSectionsProvider.instance.saveAnimeSection(section, animes);
+          await MediaSectionsProvider.instance.saveAnimeSection(
+            section,
+            animes,
+          );
         }
         return animes;
       } catch (e) {
@@ -137,7 +140,10 @@ class AnimeRepository {
 
         // Save dans le cache si page 1
         if (page == 1) {
-          MediaSectionsProvider.instance.saveAnimeSection(section, animes);
+          await MediaSectionsProvider.instance.saveAnimeSection(
+            section,
+            animes,
+          );
         }
         return animes;
       } catch (e) {
@@ -165,7 +171,10 @@ class AnimeRepository {
 
         // Save dans le cache si page 1
         if (page == 1) {
-          MediaSectionsProvider.instance.saveAnimeSection(section, animes);
+          await MediaSectionsProvider.instance.saveAnimeSection(
+            section,
+            animes,
+          );
         }
         return animes;
       } catch (e) {
