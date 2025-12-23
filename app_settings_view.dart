@@ -137,7 +137,41 @@ class AppSettingsViewState extends State<AppSettingsView> {
             ],
           ),
 
-          
+          /// 🔐 Données
+          SettingsSection(
+            title: const Text('Données et confidentialité'),
+            tiles: [
+              SettingsTile.navigation(
+                leading: const Icon(Icons.download),
+                title: const Text('Exporter mes données'),
+                description: const Text('Télécharger une copie de vos données'),
+                onPressed: (_) {},
+              ),
+              SettingsTile.navigation(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text(
+                  'Supprimer mes données',
+                  style: TextStyle(color: Colors.red),
+                ),
+                description: const Text('Effacer toutes vos données locales'),
+                onPressed: (_) {},
+              ),
+              SettingsTile.navigation(
+                leading: const Icon(Icons.refresh),
+                title: const Text('Réinitialiser les préférences'),
+                description: const Text('Revenir aux paramètres par défaut'),
+                onPressed: (_) {
+                  setState(() {
+                    darkMode = false;
+                    notificationsEnabled = false;
+                    dailySuggestions = false;
+                    selectedGenres.clear();
+                    notificationTime = const TimeOfDay(hour: 9, minute: 0);
+                  });
+                },
+              ),
+            ],
+          ),
 
           /// ℹ️ Footer
           SettingsSection(
