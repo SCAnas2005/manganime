@@ -107,35 +107,6 @@ class AppSettingsViewState extends State<AppSettingsView> {
             ],
           ),
 
-          /// 🏷 Genres préférés
-          SettingsSection(
-            title: const Text('Genres préférés pour les suggestions'),
-            tiles: [
-              SettingsTile(
-                title: const Text(
-                  'Sélectionnez les genres que vous souhaitez recevoir en priorité',
-                ),
-                description: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: allGenres.map((genre) {
-                    final selected = selectedGenres.contains(genre);
-                    return ChoiceChip(
-                      label: Text(genre),
-                      selected: selected,
-                      onSelected: (_) {
-                        setState(() {
-                          selected
-                              ? selectedGenres.remove(genre)
-                              : selectedGenres.add(genre);
-                        });
-                      },
-                    );
-                  }).toList(),
-                ),
-              ),
-            ],
-          ),
 
           /// 🔐 Données
           SettingsSection(
