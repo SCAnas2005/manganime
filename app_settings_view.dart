@@ -85,8 +85,7 @@ class AppSettingsViewState extends State<AppSettingsView> {
                 leading: const Icon(Icons.notifications),
                 title: const Text('Notifications activées'),
                 description: const Text(
-                  'Recevoir des notifications liées à l’application'
-,
+                  'Recevoir des notifications de l\'application',
                 ),
               ),
               SettingsTile.switchTile(
@@ -108,42 +107,37 @@ class AppSettingsViewState extends State<AppSettingsView> {
             ],
           ),
 
-
-          /// 🔐 Données
+          /// 🏷 Genres préférés
           SettingsSection(
-            title: const Text('Données et confidentialité'),
+            title: const Text('Genres préférés pour les suggestions'),
             tiles: [
-              SettingsTile.navigation(
-                leading: const Icon(Icons.download),
-                title: const Text('Exporter mes données'),
-                description: const Text('Télécharger une copie de vos données'),
-                onPressed: (_) {},
-              ),
-              SettingsTile.navigation(
-                leading: const Icon(Icons.delete, color: Colors.red),
+              SettingsTile(
                 title: const Text(
-                  'Supprimer mes données',
-                  style: TextStyle(color: Colors.red),
+                  'Sélectionnez les genres que vous souhaitez recevoir en priorité',
                 ),
-                description: const Text('Effacer toutes vos données locales'),
-                onPressed: (_) {},
-              ),
-              SettingsTile.navigation(
-                leading: const Icon(Icons.refresh),
-                title: const Text('Réinitialiser les préférences'),
-                description: const Text('Revenir aux paramètres par défaut'),
-                onPressed: (_) {
-                  setState(() {
-                    darkMode = false;
-                    notificationsEnabled = false;
-                    dailySuggestions = false;
-                    selectedGenres.clear();
-                    notificationTime = const TimeOfDay(hour: 9, minute: 0);
-                  });
-                },
+                description: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: allGenres.map((genre) {
+                    final selected = selectedGenres.contains(genre);
+                    return ChoiceChip(
+                      label: Text(genre),
+                      selected: selected,
+                      onSelected: (_) {
+                        setState(() {
+                          selected
+                              ? selectedGenres.remove(genre)
+                              : selectedGenres.add(genre);
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
               ),
             ],
           ),
+
+          
 
           /// ℹ️ Footer
           SettingsSection(
