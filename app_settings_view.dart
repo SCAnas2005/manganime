@@ -97,7 +97,13 @@ class AppSettingsViewState extends State<AppSettingsView> {
                   'Recevoir une recommandation personnalisée chaque jour',
                 ),
               ),
-              
+              SettingsTile.navigation(
+                enabled: notificationsEnabled,
+                leading: const Icon(Icons.schedule),
+                title: const Text('Heure de notification'),
+                value: Text(notificationTime.format(context)),
+                onPressed: (_) => _pickNotificationTime(),
+              ),
             ],
           ),
           
