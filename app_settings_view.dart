@@ -58,22 +58,7 @@ class AppSettingsViewState extends State<AppSettingsView> {
       body: SettingsList(
         darkTheme: SettingsThemeData(settingsListBackground: Colors.black),
         sections: [
-          /// 🎨 Apparence
-          SettingsSection(
-            title: const Text('Apparence'),
-            tiles: [
-              SettingsTile.switchTile(
-                initialValue: vm.settings.darkMode,
-                onToggle: (value) => vm.toggleDarkMode(value: value),
-                leading: const Icon(Icons.dark_mode),
-                title: const Text('Mode sombre'),
-                description: const Text(
-                  'Activer le thème sombre pour un meilleur confort visuel',
-                ),
-              ),
-            ],
-          ),
-
+         
           /// 🔔 Notifications
           SettingsSection(
             title: const Text('Notifications'),
