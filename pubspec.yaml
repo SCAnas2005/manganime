@@ -38,12 +38,9 @@ dependencies:
   provider: ^6.1.5+1
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-<<<<<<< Updated upstream
-=======
   fl_chart: ^0.70.0
   flutter_launcher_icons: ^0.14.4
   settings_ui: ^2.0.2
->>>>>>> Stashed changes
 
 dev_dependencies:
   flutter_test:
