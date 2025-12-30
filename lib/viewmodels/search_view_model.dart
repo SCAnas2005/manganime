@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/providers/request_queue_provider.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
-import 'package:flutter_application_1/models/anime_enums.dart';
 
 
 class SearchViewModel extends ChangeNotifier {
@@ -38,6 +37,7 @@ class SearchViewModel extends ChangeNotifier {
         _performSearch(query);
       } else {
         searchEmpty(filter: filter);
+        _allResults = [];       
       }
     });
   }
@@ -60,8 +60,9 @@ class SearchViewModel extends ChangeNotifier {
 
   List<String> getAvailableGenres() {
   final genres = <String>{};
+  final listToUse = _allResults.isNotEmpty ? results : _allResults;
 
-  for (final anime in _allResults) {
+  for (final anime in listToUse) {
     for (final genre in anime.genres) {
       genres.add(genre.name);
     }
