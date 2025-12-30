@@ -3,6 +3,7 @@ import 'package:flutter_application_1/models/manga.dart';
 import 'package:flutter_application_1/providers/like_storage.dart';
 import 'package:flutter_application_1/widgets/like_widget/like_animation.dart';
 
+<<<<<<< Updated upstream
 /// Clipper personnalisé pour créer des coins légèrement irréguliers
 /// Les valeurs sont pré-calculées pour éviter de créer un Random à chaque rendu
 class IrregularBorderClipper extends CustomClipper<Path> {
@@ -192,6 +193,8 @@ class ScreentoneOverlay extends StatelessWidget {
   }
 }
 
+=======
+>>>>>>> Stashed changes
 class MangaCard extends StatefulWidget {
   final Manga manga;
   final Function(Manga manga)? onTap;
@@ -202,9 +205,9 @@ class MangaCard extends StatefulWidget {
   State<MangaCard> createState() => _MangaCardState();
 }
 
-class _MangaCardState extends State<MangaCard>
-    with SingleTickerProviderStateMixin {
+class _MangaCardState extends State<MangaCard> {
   bool showHeart = false;
+<<<<<<< Updated upstream
   late AnimationController _flipController;
   late Animation<double> _flipAnimation;
 
@@ -225,14 +228,11 @@ class _MangaCardState extends State<MangaCard>
     _flipController.dispose();
     super.dispose();
   }
+=======
+>>>>>>> Stashed changes
 
   void _triggerLikeAnimation() {
     setState(() => showHeart = true);
-
-    // Animation de flip page
-    _flipController.forward().then((_) {
-      _flipController.reverse();
-    });
 
     Future.delayed(const Duration(milliseconds: 600), () {
       if (mounted) {
@@ -246,14 +246,14 @@ class _MangaCardState extends State<MangaCard>
     final scoreLabel = widget.manga.score != null
         ? widget.manga.score!.toStringAsFixed(1)
         : '--';
-    final genre = widget.manga.genre ?? 'Manga';
 
-    return GestureDetector(
+    return InkWell(
       onTap: () => widget.onTap?.call(widget.manga),
       onDoubleTap: () {
         _triggerLikeAnimation();
         LikeStorage.toggleMangaLike(widget.manga.id);
       },
+<<<<<<< Updated upstream
       child: AnimatedBuilder(
         animation: _flipAnimation,
         builder: (context, child) {
@@ -287,11 +287,42 @@ class _MangaCardState extends State<MangaCard>
                     spreadRadius: -2,
                   ),
                 ],
+=======
+      child: Container(
+        width: 130,
+        height: 200,
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.black, width: 1.5),
+          image: DecorationImage(
+            image: NetworkImage(widget.manga.imageUrl),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Stack(
+          children: [
+            // Animation du coeur
+            if (showHeart)
+              Center(
+                child: LikeAnimation(show: showHeart, size: 90),
+>>>>>>> Stashed changes
               ),
-              child: ClipPath(
-                clipper: IrregularBorderClipper(),
-                child: Stack(
+
+            // Badge de score (en haut à droite)
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                decoration: BoxDecoration(
+                  color: Colors.black87,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
+<<<<<<< Updated upstream
                     // Image de fond
                     Positioned.fill(
                       child: Image.network(
@@ -366,14 +397,48 @@ class _MangaCardState extends State<MangaCard>
                             ),
                           ),
                         ),
+=======
+                    const Icon(Icons.star, color: Colors.yellow, size: 14),
+                    const SizedBox(width: 2),
+                    Text(
+                      scoreLabel,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+>>>>>>> Stashed changes
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-          );
-        },
+
+            // Titre en bas
+            Positioned(
+              bottom: 8,
+              left: 8,
+              right: 8,
+              child: Text(
+                widget.manga.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black,
+                      offset: Offset(0, 1),
+                      blurRadius: 2,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
