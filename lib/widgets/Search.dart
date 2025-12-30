@@ -111,7 +111,6 @@ class _SearchState extends State<Search> {
       ],
     ),
   ),
-
             
             const SizedBox(height: 10),
 
