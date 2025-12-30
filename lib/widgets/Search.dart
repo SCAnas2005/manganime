@@ -22,7 +22,7 @@ class _SearchState extends State<Search> {
     super.initState();
     Future.microtask(() {
       final searchViewModel = context.read<SearchViewModel>();
-      searchViewModel.searchEmpty("",filter: _selectedFilter);
+      searchViewModel.searchEmpty(filter: _selectedFilter);
     });
   }
   
@@ -31,6 +31,7 @@ class _SearchState extends State<Search> {
     final vm = context.watch<AnimeViewModel>();
     final searchViewModel = context.watch<SearchViewModel>();
     final suggestions = searchViewModel.results;
+    final genres = searchViewModel.getAvailableGenres();
 
     if (suggestions.isNotEmpty) {
       index = index % suggestions.length;
@@ -44,12 +45,14 @@ class _SearchState extends State<Search> {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             child: SearchBar(
               hintText: "Rechercher un anime",
+
               onChanged: (text) async {
-                 if (text.isNotEmpty) {
-                     await searchViewModel.search(text);
-  }             else {
-                    await searchViewModel.searchEmpty("", filter: _selectedFilter);
-}
+               //  if (text.isNotEmpty) {
+                 //    await searchViewModel.search(text);
+                 //}            // else {
+                   // await searchViewModel.searchEmpty("", filter: _selectedFilter);
+                //}
+                searchViewModel.onSearchTextChanged(text, _selectedFilter);
         
               },
             ),
@@ -57,57 +60,92 @@ class _SearchState extends State<Search> {
 
           Padding(
             padding : const EdgeInsets.symmetric(horizontal: 10),
-            child: DropdownButton<String>(
-              value: _selectedFilter,
-              items : filters.map((filters) => DropdownMenuItem(
-                  value: filters,
-                  child: Text(filters),
-                )).toList(),
-              onChanged: (newValue)  async {
-                if (newValue != null) {
-                  setState(() {
-                    _selectedFilter = newValue;
-                  });
-                  await searchViewModel.searchEmpty("", filter: _selectedFilter);
-                }
-              },
-            ),
-          ),
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: DropdownButton<String>(
+                value: _selectedFilter,
+                items : filters.map((filters) => DropdownMenuItem(
+                    value: filters,
+                    child: Text(filters),
+                  )).toList(),
+                onChanged: (newValue)  async {
+                  if (newValue != null) {
+                    setState(() {
+                      _selectedFilter = newValue;
+                    });
+                    await searchViewModel.searchEmpty(filter: _selectedFilter);
+                  }
 
-          
-          const SizedBox(height: 10),
-
-          if (suggestions.isNotEmpty)
-            Expanded(
-              child: GridView.builder(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                  childAspectRatio: 1,
-                ),
-
-                itemCount: suggestions.length,
-                itemBuilder: (context, i) {
-                  final anime = suggestions[i];
-                  return AnimeCard(
-                    anime: anime,
-                    onTap: (anime) => vm.openAnimePage(context, anime),
-                    onLikeDoubleTap: (anime) => {
-                      context
-                          .read<GlobalAnimeFavoritesProvider>()
-                          .toggleFavorite(anime),
-                    },
-                    isLiked: context
-                        .read<GlobalAnimeFavoritesProvider>()
-                        .isAnimeLiked(anime.id),
-                  );
                 },
               ),
             ),
-        ],
-      ),
-    );
+          ),
+
+          if (genres.isNotEmpty)
+  SizedBox(
+    height: 45,
+    child: ListView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      children: [
+        FilterChip(
+          label: const Text("Tous"),
+          selected: searchViewModel.selectedGenre == null,
+          onSelected: (_) {
+            searchViewModel.filterByGenre(null);
+          },
+        ),
+        const SizedBox(width: 8),
+        ...genres.map(
+          (genre) => Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: FilterChip(
+              label: Text(genre),
+              selected: searchViewModel.selectedGenre == genre,
+              onSelected: (_) {
+                searchViewModel.filterByGenre(genre);
+              },
+            ),
+          ),
+        ),
+      ],
+    ),
+  ),
+
+            
+            const SizedBox(height: 10),
+
+            if (suggestions.isNotEmpty)
+              Expanded(
+                child: GridView.builder(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 10,
+                    childAspectRatio: 1,
+                  ),
+
+                  itemCount: suggestions.length,
+                  itemBuilder: (context, i) {
+                    final anime = suggestions[i];
+                    return AnimeCard(
+                      anime: anime,
+                      onTap: (anime) => vm.openAnimePage(context, anime),
+                      onLikeDoubleTap: (anime) => {
+                        context
+                            .read<GlobalAnimeFavoritesProvider>()
+                            .toggleFavorite(anime),
+                      },
+                      isLiked: context
+                          .read<GlobalAnimeFavoritesProvider>()
+                          .isAnimeLiked(anime.id),
+                    );
+                  },
+                ),
+              ),
+          ],
+        ),
+      );
+    }
   }
-}

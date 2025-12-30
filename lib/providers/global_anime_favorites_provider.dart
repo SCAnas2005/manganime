@@ -3,6 +3,7 @@ import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/providers/anime_cache_provider.dart';
 import 'package:flutter_application_1/providers/anime_repository_provider.dart';
 import 'package:flutter_application_1/providers/like_storage_provider.dart';
+import 'package:flutter_application_1/providers/media_path_provider.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
 
 class GlobalAnimeFavoritesProvider extends ChangeNotifier {
@@ -47,7 +48,7 @@ class GlobalAnimeFavoritesProvider extends ChangeNotifier {
     for (int id in _likedIds) {
       try {
         final anime = await animeRepository.getAnime(id);
-        loaded.add(anime);
+        if (anime != null) loaded.add(anime);
       } catch (e) {
         // Gérer l'erreur si un anime ne se charge pas
         debugPrint("Erreur chargement anime $id: $e");
@@ -67,7 +68,7 @@ class GlobalAnimeFavoritesProvider extends ChangeNotifier {
   // La seule méthode à appeler pour liker/déliker
   void toggleFavorite(Anime anime) {
     final id = anime.id;
-    final isCurrentlyLiked = _likedIds.contains(id);
+    final isCurrentlyLiked = isAnimeLiked(id);
 
     if (isCurrentlyLiked) {
       // On retire
@@ -78,16 +79,16 @@ class GlobalAnimeFavoritesProvider extends ChangeNotifier {
       _likedIds.add(id);
       // On ajoute l'objet entier à la liste mémoire pour éviter un appel API
       _loadedFavoriteAnimes.add(anime);
+      MediaPathProvider.downloadFileImage<Anime>(anime);
     }
 
-    // Persistance : On appelle ton stockage
+    // Persistance : On appelle le stockage
     LikeStorage.toggleAnimeLike(id);
 
     if (!AnimeCache.instance.exists(id)) {
       AnimeCache.instance.save(anime);
     }
 
-    // Notification : Tout le monde se met à jour !
     notifyListeners();
   }
 }

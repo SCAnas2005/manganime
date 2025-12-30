@@ -4,6 +4,7 @@ import 'package:flutter_application_1/viewmodels/anime_view_model.dart';
 import 'package:flutter_application_1/viewmodels/manga_view_model.dart';
 import 'package:flutter_application_1/viewmodels/search_view_model.dart';
 import 'package:flutter_application_1/views/anime_view.dart';
+import 'package:flutter_application_1/views/app_settings_view.dart';
 import 'package:flutter_application_1/views/favorite_view.dart';
 import 'package:flutter_application_1/views/manga_view.dart';
 
@@ -27,12 +28,13 @@ class HomePageState extends State<HomePage> {
 
     const FavoriteView(),
     AnimeStatView(),
-    Center(
-      child: Text(
-        "Page en construction",
-        style: TextStyle(fontSize: 24, color: Colors.grey),
-      ),
-    ),
+    AppSettingsView(),
+    // Center(
+    //   child: Text(
+    //     "Page en construction",
+    //     style: TextStyle(fontSize: 24, color: Colors.grey),
+    //   ),
+    // ),
   ];
 
   @override

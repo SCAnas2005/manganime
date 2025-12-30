@@ -1,30 +1,34 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/identifiable_enums.dart';
 import 'package:flutter_application_1/models/manga.dart';
+import 'package:flutter_application_1/providers/manga_repository_provider.dart';
+import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:flutter_application_1/widgets/like_widget/like_animation.dart';
 
 /// Clipper personnalisé pour créer des coins légèrement irréguliers
+/// Les valeurs sont pré-calculées pour éviter de créer un Random à chaque rendu
 class IrregularBorderClipper extends CustomClipper<Path> {
+  // Valeurs pré-calculées (équivalent à Random(42).nextDouble() * 3 - 1.5 pour chaque coin)
+  static const double _topLeftVariation = 0.58;
+  static const double _topRightVariation = -0.23;
+  static const double _bottomRightVariation = 1.12;
+  static const double _bottomLeftVariation = -0.87;
+
   @override
   Path getClip(Size size) {
     final path = Path();
-    final random = math.Random(42); // Seed fixe pour cohérence
 
     // Coin supérieur gauche - légèrement irrégulier
-    final topLeftVariation = random.nextDouble() * 3 - 1.5;
-    path.moveTo(2 + topLeftVariation, 0);
+    path.moveTo(2 + _topLeftVariation, 0);
 
     // Coin supérieur droit - légèrement irrégulier
-    final topRightVariation = random.nextDouble() * 3 - 1.5;
-    path.lineTo(size.width - 2 - topRightVariation, 0);
+    path.lineTo(size.width - 2 - _topRightVariation, 0);
 
     // Coin inférieur droit - légèrement irrégulier
-    final bottomRightVariation = random.nextDouble() * 3 - 1.5;
-    path.lineTo(size.width, size.height - 2 - bottomRightVariation);
+    path.lineTo(size.width, size.height - 2 - _bottomRightVariation);
 
     // Coin inférieur gauche - légèrement irrégulier
-    final bottomLeftVariation = random.nextDouble() * 3 - 1.5;
-    path.lineTo(2 + bottomLeftVariation, size.height);
+    path.lineTo(2 + _bottomLeftVariation, size.height);
     path.close();
 
     return path;
@@ -155,65 +159,53 @@ class VerticalGenreBadge extends StatelessWidget {
 }
 
 /// Widget pour l'overlay de trame (screentone) sur les bords
+/// Optimisé pour les performances - utilise des gradients au lieu de dessiner des points individuels
 class ScreentoneOverlay extends StatelessWidget {
   const ScreentoneOverlay({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(painter: ScreentonePainter(), child: Container());
-  }
-}
-
-/// Painter pour dessiner la trame sur les bords
-class ScreentonePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.black.withOpacity(0.15)
-      ..style = PaintingStyle.fill;
-
-    // Créer un gradient radial pour la trame (plus dense sur les bords)
-    final gradient = RadialGradient(
-      colors: [Colors.transparent, Colors.black.withOpacity(0.15)],
-      stops: const [0.7, 1.0],
+    // Utilise des gradients légers sur les bords pour un effet similaire
+    // mais beaucoup plus performant que de dessiner des centaines de cercles
+    return IgnorePointer(
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.black.withOpacity(0.08),
+              Colors.transparent,
+              Colors.transparent,
+              Colors.black.withOpacity(0.08),
+            ],
+            stops: const [0.0, 0.1, 0.9, 1.0],
+          ),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [
+                Colors.black.withOpacity(0.08),
+                Colors.transparent,
+                Colors.transparent,
+                Colors.black.withOpacity(0.08),
+              ],
+              stops: const [0.0, 0.1, 0.9, 1.0],
+            ),
+          ),
+        ),
+      ),
     );
-
-    // Dessiner la trame sur les bords avec un motif de points
-    final dotSize = 2.0;
-    final spacing = 4.0;
-
-    for (double y = 0; y < size.height; y += spacing) {
-      for (double x = 0; x < size.width; x += spacing) {
-        // Calculer la distance au bord le plus proche
-        final distToLeft = x;
-        final distToRight = size.width - x;
-        final distToTop = y;
-        final distToBottom = size.height - y;
-        final minDist = math.min(
-          math.min(distToLeft, distToRight),
-          math.min(distToTop, distToBottom),
-        );
-
-        // Dessiner uniquement près des bords (dans les 20 premiers pixels)
-        if (minDist < 20) {
-          final opacity = (1 - minDist / 20) * 0.15;
-          canvas.drawCircle(
-            Offset(x, y),
-            dotSize,
-            Paint()..color = Colors.black.withOpacity(opacity),
-          );
-        }
-      }
-    }
   }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class MangaCard extends StatefulWidget {
   final Manga manga;
   final Function(Manga manga)? onTap;
+
   final Function(Manga manga)? onLikeDoubleTap;
 
   const MangaCard({
@@ -233,6 +225,8 @@ class _MangaCardState extends State<MangaCard>
   late AnimationController _flipController;
   late Animation<double> _flipAnimation;
 
+  late MangaRepository _repository;
+
   @override
   void initState() {
     super.initState();
@@ -245,6 +239,8 @@ class _MangaCardState extends State<MangaCard>
     _flipAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _flipController, curve: Curves.easeInOut),
     );
+
+    _repository = MangaRepository(api: JikanService());
   }
 
   @override
@@ -273,7 +269,9 @@ class _MangaCardState extends State<MangaCard>
     final scoreLabel = widget.manga.score != null
         ? widget.manga.score!.toStringAsFixed(1)
         : '--';
-    final genre = widget.manga.genre ?? 'Manga';
+    final genre = widget.manga.genres.isNotEmpty
+        ? widget.manga.genres.first.toReadableString()
+        : 'Manga';
 
     return GestureDetector(
       onTap: () => widget.onTap?.call(widget.manga),
@@ -314,7 +312,7 @@ class _MangaCardState extends State<MangaCard>
                 boxShadow: [
                   // Ombre intérieure pour effet page imprimée
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
+                    color: Colors.black.withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                     spreadRadius: -2,
@@ -327,10 +325,22 @@ class _MangaCardState extends State<MangaCard>
                   children: [
                     // Image de fond
                     Positioned.fill(
-                      child: Image.network(
-                        widget.manga.imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
+                      child: FutureBuilder<Image>(
+                        // 👇 C'est ici que tu appelles ta fonction
+                        future: _repository.getMangaImage(widget.manga),
+
+                        builder: (context, snapshot) {
+                          // CAS 1 : Ta fonction a fini et renvoyé l'Image (Fichier ou Network)
+                          if (snapshot.hasData) {
+                            return snapshot.data!;
+                          }
+
+                          // CAS 2 : Erreur (Pas internet ET pas de fichier local)
+                          if (snapshot.hasError) {
+                            return Container(color: Colors.grey[800]);
+                          }
+
+                          // CAS 3 : En attente (la fonction cherche le fichier...)
                           return Container(color: Colors.grey[800]);
                         },
                       ),
@@ -346,7 +356,7 @@ class _MangaCardState extends State<MangaCard>
                       ),
 
                     // Badge de genre vertical (en haut à gauche)
-                    if (widget.manga.genre != null)
+                    if (widget.manga.genres.isNotEmpty)
                       Positioned(
                         top: 8,
                         left: 8,
