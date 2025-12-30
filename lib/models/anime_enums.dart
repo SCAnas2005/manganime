@@ -24,6 +24,7 @@ enum AnimeOrderBy {
   rank,
   popularity,
   members,
+  rating,
 }
 
 enum AnimeSortBy { desc, asc }

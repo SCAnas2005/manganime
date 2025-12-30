@@ -14,17 +14,19 @@ class Search extends StatefulWidget {
 
 class _SearchState extends State<Search> {
   int index = 0;
+  String _selectedFilter = 'Note'; // Filtre par défaut
+  final List<String> filters = ['Popularité', 'Note', 'Favoris'];
 
   @override
   void initState() {
     super.initState();
     Future.microtask(() {
       final searchViewModel = context.read<SearchViewModel>();
-      searchViewModel.searchEmpty("");
+      searchViewModel.searchEmpty("",filter: _selectedFilter);
     });
   }
-
-  @override
+  
+@override
   Widget build(BuildContext context) {
     final vm = context.watch<AnimeViewModel>();
     final searchViewModel = context.watch<SearchViewModel>();
@@ -42,16 +44,37 @@ class _SearchState extends State<Search> {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             child: SearchBar(
               hintText: "Rechercher un anime",
-              onChanged: (text) {
-                if (text.isNotEmpty) {
-                  searchViewModel.search(text);
-                } else {
-                  searchViewModel.searchEmpty(text);
+              onChanged: (text) async {
+                 if (text.isNotEmpty) {
+                     await searchViewModel.search(text);
+  }             else {
+                    await searchViewModel.searchEmpty("", filter: _selectedFilter);
+}
+        
+              },
+            ),
+          ),
+
+          Padding(
+            padding : const EdgeInsets.symmetric(horizontal: 10),
+            child: DropdownButton<String>(
+              value: _selectedFilter,
+              items : filters.map((filters) => DropdownMenuItem(
+                  value: filters,
+                  child: Text(filters),
+                )).toList(),
+              onChanged: (newValue)  async {
+                if (newValue != null) {
+                  setState(() {
+                    _selectedFilter = newValue;
+                  });
+                  await searchViewModel.searchEmpty("", filter: _selectedFilter);
                 }
               },
             ),
           ),
 
+          
           const SizedBox(height: 10),
 
           if (suggestions.isNotEmpty)
