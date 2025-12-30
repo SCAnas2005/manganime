@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
 import 'package:flutter_application_1/providers/global_manga_favorites_provider.dart';
+import 'package:flutter_application_1/viewmodels/anime_view_model.dart';
 import 'package:flutter_application_1/widgets/anime_list.dart';
 import 'package:flutter_application_1/widgets/display_mode/adaptative_display.dart';
 import 'package:flutter_application_1/widgets/display_mode/display_mode.dart';
@@ -24,7 +25,6 @@ class FavoriteView extends StatefulWidget {
 class _FavoriteViewState extends State<FavoriteView> {
   int selectedTab = 0;
   DisplayMode displayMode = DisplayMode.grid;
-
   @override
   Widget build(BuildContext context) {
     final animeVM = context.watch<GlobalAnimeFavoritesProvider>();
@@ -91,14 +91,18 @@ class _FavoriteViewState extends State<FavoriteView> {
       items: items,
       gridBuilder: (anime) => AnimeCard(
         anime: anime,
-        onTap: (_) {},
+        onTap: (_) {
+          context.read<AnimeViewModel>().openAnimePage(context, anime);
+        },
         onLikeDoubleTap: (_) => vm.toggleFavorite(anime),
         isLiked: vm.isAnimeLiked(anime.id),
       ),
       listbuilder: (anime) => AnimeList(
         anime: anime,
         isLiked: true,
-        onTap: () {},
+        onTap: () {
+          context.read<AnimeViewModel>().openAnimePage(context, anime);
+        },
         onLikeToggle: () => vm.toggleFavorite(anime),
       ),
     );

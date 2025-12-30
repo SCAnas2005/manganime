@@ -1,25 +1,195 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/anime_sections.dart';
+import 'package:flutter_application_1/models/identifiable_enums.dart';
 import 'package:flutter_application_1/models/manga.dart';
+import 'package:flutter_application_1/providers/database_provider.dart';
 import 'package:flutter_application_1/providers/manga_cache_provider.dart';
+import 'package:flutter_application_1/providers/media_path_provider.dart';
+import 'package:flutter_application_1/providers/media_sections_provider.dart';
+import 'package:flutter_application_1/providers/request_queue_provider.dart';
 import 'package:flutter_application_1/services/api_service.dart';
+import 'package:flutter_application_1/services/network_service.dart';
 
 class MangaRepository {
   final ApiService api;
 
   MangaRepository({required this.api});
 
-  Future<Manga> getManga(int id) async {
+  Manga? getMangaFromCache(int id) {
+    final data = MangaCache.instance.get(id);
+    return data;
+  }
+
+  Future<Manga?> getMangaFromDatabase(int id) async {
+    var data = await DatabaseProvider.instance.getManga(id);
+    return data;
+  }
+
+  Future<Manga?> getMangaFromService(int id) async {
+    if (await NetworkService.isConnected) {
+      try {
+        final data = await RequestQueue.instance.enqueue(
+          () => api.getFullDetailManga(id),
+        );
+        return data;
+      } catch (e) {
+        debugPrint(
+          "[MangaRepository] getMangaFromService($id): manga $id not found on api",
+        );
+        return null;
+      }
+    }
+    return null;
+  }
+
+  Future<void> saveMangaOnCache(Manga manga) async {
+    await MangaCache.instance.save(manga);
+  }
+
+  Future<Manga?> getManga(int id) async {
     // 1. Cache
-    var data = await MangaCache.instance.get(id);
+    var data = getMangaFromCache(id);
     if (data != null) {
       return data;
     }
 
-    // 2. API
-    final mangaDetail = await api.getFullDetailManga(id);
-    final manga = Manga.fromDetail(mangaDetail);
+    // 2. Database
+    data = await getMangaFromDatabase(id);
+    if (data != null) return data;
 
-    // 3. Sauvegarde
-    await MangaCache.instance.save(manga);
+    // 3. API
+    final manga = await getMangaFromService(id);
+    if (manga != null) {
+      // 4. Sauvegarde
+      saveMangaOnCache(manga);
+    }
     return manga;
+  }
+
+  Future<Image> getMangaImage(Manga manga) async {
+    // Recherche dans les fichiers de l'app
+    final mangaImage = await MediaPathProvider.getLocalFileImage<Manga>(manga);
+    if (mangaImage.existsSync()) {
+      return Image.file(mangaImage, fit: BoxFit.cover);
+    }
+
+    if (await NetworkService.isConnected) {
+      return Image.network(manga.imageUrl, fit: BoxFit.cover);
+    } else {
+      throw Exception(
+        "[MangaRepository] getMangaImage: Error can't access image",
+      );
+    }
+  }
+
+  Future<ImageProvider?> getMangaImageProvider(Manga manga) async {
+    final file = await MediaPathProvider.getLocalFileImage<Manga>(manga);
+    if (file.existsSync()) {
+      return FileImage(file);
+    }
+
+    if (await NetworkService.isConnected) {
+      return NetworkImage(
+        manga.imageUrl,
+        headers: {'User-Agent': 'MangAnime/1.0'},
+      );
+    }
+
+    return null;
+  }
+
+  Future<List<Manga>> getPopularMangas({int page = 1}) async {
+    final section = MangaSections.popular;
+    if (page == 1) {
+      // Database
+      final cachedMangas = await MediaSectionsProvider.instance.getMangas(
+        section,
+      );
+      if (cachedMangas.isNotEmpty) return cachedMangas;
+    }
+    // Api
+    if (await NetworkService.isConnected) {
+      try {
+        final mangas = await RequestQueue.instance.enqueue(
+          () => api.getTopManga(page: page, filter: "bypopularity"),
+        );
+
+        // Save dans le cache si page 1
+        if (page == 1) {
+          await MediaSectionsProvider.instance.saveMangaSection(
+            section,
+            mangas,
+          );
+        }
+        return mangas;
+      } catch (e) {
+        debugPrint("[$MangaRepository] getPopularMangas: $e");
+      }
+    }
+
+    return [];
+  }
+
+  Future<List<Manga>> getPublishingMangas({int page = 1}) async {
+    final section = MangaSections.airing;
+    if (page == 1) {
+      // Database
+      final cachedMangas = await MediaSectionsProvider.instance.getMangas(
+        section,
+      );
+      if (cachedMangas.isNotEmpty) return cachedMangas;
+    }
+    // Api
+    if (await NetworkService.isConnected) {
+      try {
+        final mangas = await RequestQueue.instance.enqueue(
+          () => api.getTopManga(page: page, filter: MediaStatus.publishing.key),
+        );
+
+        // Save dans le cache si page 1
+        if (page == 1) {
+          await MediaSectionsProvider.instance.saveMangaSection(
+            section,
+            mangas,
+          );
+        }
+        return mangas;
+      } catch (e) {
+        debugPrint("[$MangaRepository] getPublishingMangas: $e");
+      }
+    }
+    return [];
+  }
+
+  Future<List<Manga>> getMostLikedMangas({int page = 1}) async {
+    final section = MangaSections.mostLiked;
+    if (page == 1) {
+      // Database
+      final cachedMangas = await MediaSectionsProvider.instance.getMangas(
+        section,
+      );
+      if (cachedMangas.isNotEmpty) return cachedMangas;
+    }
+    // Api
+    if (await NetworkService.isConnected) {
+      try {
+        final mangas = await RequestQueue.instance.enqueue(
+          () => api.getTopManga(page: page, filter: "favorite"),
+        );
+
+        // Save dans le cache si page 1
+        if (page == 1) {
+          await MediaSectionsProvider.instance.saveMangaSection(
+            section,
+            mangas,
+          );
+        }
+        return mangas;
+      } catch (e) {
+        debugPrint("[$MangaRepository] getMostLikedMangas: $e");
+      }
+    }
+
+    return [];
   }
 }

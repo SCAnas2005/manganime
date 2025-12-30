@@ -1,17 +1,17 @@
 import 'package:flutter_application_1/models/anime.dart';
-import 'package:flutter_application_1/models/anime_enums.dart';
+import 'package:flutter_application_1/models/identifiable_enums.dart';
 
 class UserprofileProvider {
-  final Map<AnimeGenre, int> animeGenreTagFrenquencies;
+  final Map<Genres, int> animeGenreTagFrenquencies;
 
   UserprofileProvider({required this.animeGenreTagFrenquencies});
 
   /// Méthode pour récupérer le profil utilisateur en fonction des likes
   factory UserprofileProvider.fromLikedAnimes(List<Anime> likedAnimes) {
-    final Map<AnimeGenre, int> counts = {};
+    final Map<Genres, int> counts = {};
 
     for (final anime in likedAnimes) {
-      final allTags = anime.genres.where((g) => g != AnimeGenre.None).toList();
+      final allTags = anime.genres.where((g) => g != Genres.None).toList();
 
       for (final tagName in allTags) {
         counts.update(tagName, (value) => value + 1, ifAbsent: () => 1);
@@ -22,7 +22,7 @@ class UserprofileProvider {
   }
 
   /// Obtient les $count genres les plus likées
-  List<AnimeGenre> getTopGenres(int count) {
+  List<Genres> getTopGenres(int count) {
     if (animeGenreTagFrenquencies.isEmpty) return [];
 
     var sortedEntries = animeGenreTagFrenquencies.entries.toList()
@@ -35,7 +35,7 @@ class UserprofileProvider {
   double calculateScoreFor(Anime candidate) {
     double score = 0.0;
     final candidateTags = candidate.genres
-        .where((g) => g != AnimeGenre.None)
+        .where((g) => g != Genres.None)
         .toList();
     for (final tagName in candidateTags) {
       score += (animeGenreTagFrenquencies[tagName] ?? 0);
