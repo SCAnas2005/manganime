@@ -58,8 +58,6 @@ class AppSettingsViewState extends State<AppSettingsView> {
       body: SettingsList(
         darkTheme: SettingsThemeData(settingsListBackground: Colors.black),
         sections: [
-
-
           /// 🎨 Apparence
           SettingsSection(
             title: const Text('Apparence'),
@@ -75,7 +73,6 @@ class AppSettingsViewState extends State<AppSettingsView> {
               ),
             ],
           ),
-          
 
           /// 🔔 Notifications
           SettingsSection(
@@ -109,7 +106,37 @@ class AppSettingsViewState extends State<AppSettingsView> {
               ),
             ],
           ),
-          
+
+          /// 🏷 Genres préférés
+          SettingsSection(
+            title: const Text('Genres préférés pour les suggestions'),
+            tiles: [
+              SettingsTile(
+                title: const Text(
+                  'Sélectionnez les genres que vous souhaitez recevoir en priorité',
+                ),
+                description: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: allGenres.map((genre) {
+                    final selected = selectedGenres.contains(genre);
+                    return ChoiceChip(
+                      label: Text(genre),
+                      selected: selected,
+                      onSelected: (_) {
+                        setState(() {
+                          selected
+                              ? selectedGenres.remove(genre)
+                              : selectedGenres.add(genre);
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+
           /// 🔐 Données
           SettingsSection(
             title: const Text('Données et confidentialité'),
@@ -133,18 +160,21 @@ class AppSettingsViewState extends State<AppSettingsView> {
                 leading: const Icon(Icons.refresh),
                 title: const Text('Réinitialiser les préférences'),
                 description: const Text('Revenir aux paramètres par défaut'),
-                onPressed: (_) {
-                  setState(() {
-                    darkMode = false;
-                    notificationsEnabled = false;
-                    dailySuggestions = false;
-                    selectedGenres.clear();
-                    notificationTime = const TimeOfDay(hour: 9, minute: 0);
-                  });
-                },
               ),
             ],
           ),
+             onPressed: (_) {
+              setState(() {
+                notificationsEnabled = false;
+                dailySuggestions = false;
+                selectedGenres.clear();
+                notificationTime = const TimeOfDay(hour: 9, minute: 0);
+         }
+         );
+
+              vm.toggleDarkMode(value: false); 
+        },
+          
 
           /// ℹ️ Footer
           SettingsSection(
