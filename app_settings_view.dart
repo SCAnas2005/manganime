@@ -160,21 +160,18 @@ class AppSettingsViewState extends State<AppSettingsView> {
                 leading: const Icon(Icons.refresh),
                 title: const Text('Réinitialiser les préférences'),
                 description: const Text('Revenir aux paramètres par défaut'),
+                onPressed: (_) {
+                  setState(() {
+                    darkMode = false;
+                    notificationsEnabled = false;
+                    dailySuggestions = false;
+                    selectedGenres.clear();
+                    notificationTime = const TimeOfDay(hour: 9, minute: 0);
+                  });
+                },
               ),
             ],
           ),
-             onPressed: (_) {
-              setState(() {
-                notificationsEnabled = false;
-                dailySuggestions = false;
-                selectedGenres.clear();
-                notificationTime = const TimeOfDay(hour: 9, minute: 0);
-         }
-         );
-
-              vm.toggleDarkMode(value: false); 
-        },
-          
 
           /// ℹ️ Footer
           SettingsSection(
