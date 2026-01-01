@@ -118,24 +118,28 @@ class AppSettingsViewState extends State<AppSettingsView> {
                 description: Wrap(
                   spacing: 8,
                   runSpacing: 8,
-                  children: allGenres.map((genre) {
-                    final selected = selectedGenres.contains(genre);
-                    return ChoiceChip(
-                      label: Text(genre),
-                      selected: selected,
-                      onSelected: (_) {
-                        setState(() {
-                          selected
-                              ? selectedGenres.remove(genre)
-                              : selectedGenres.add(genre);
-                        });
-                      },
-                    );
-                  }).toList(),
+            
                 ),
               ),
             ],
           ),
+
+          children: allGenres.map((genre) {
+            final isSelected = selectedGenres.contains(genre); [cite: 20]
+            return ChoiceChip(
+              label: Text(genre),
+              selected: isSelected, [cite: 21]
+              onSelected: (bool selected) {
+               setState(() {
+                 if (selected) {
+                   selectedGenres.add(genre); [cite: 22]
+                 } else {
+                   selectedGenres.remove(genre); [cite: 22]
+                 }
+             });
+           },
+         );
+       }).toList(), [cite: 24]
 
           /// 🔐 Données
           SettingsSection(
