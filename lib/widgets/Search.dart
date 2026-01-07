@@ -20,7 +20,7 @@ class _SearchState extends State<Search> {
     super.initState();
     Future.microtask(() {
       final searchViewModel = context.read<SearchViewModel>();
-      searchViewModel.searchEmpty("");
+      searchViewModel.searchEmpty();
     });
   }
 
@@ -43,11 +43,12 @@ class _SearchState extends State<Search> {
             child: SearchBar(
               hintText: "Rechercher un anime",
               onChanged: (text) {
-                if (text.isNotEmpty) {
-                  searchViewModel.search(text);
-                } else {
-                  searchViewModel.searchEmpty(text);
-                }
+                // if (text.isNotEmpty) {
+                //   searchViewModel.search(text);
+                // } else {
+                //   searchViewModel.searchEmpty(text);
+                // }
+                searchViewModel.onSearchTextChanged(text);
               },
             ),
           ),

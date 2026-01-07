@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter_application_1/services/jikan_service.dart';
+
 class RequestQueue {
   RequestQueue._();
   static final RequestQueue instance = RequestQueue._();
@@ -8,7 +10,9 @@ class RequestQueue {
   bool _processing = false;
 
   // delay entre chaque requête
-  Duration spacing = const Duration(milliseconds: 500);
+  Duration spacing = Duration(
+    milliseconds: (1000 / JikanService().reqPerSec).toInt() + 200,
+  );
 
   Future<T> enqueue<T>(Future<T> Function() task) {
     final job = _RequestJob<T>(task);

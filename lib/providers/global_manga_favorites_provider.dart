@@ -51,7 +51,7 @@ class GlobalMangaFavoritesProvider extends ChangeNotifier {
     for (int id in _likedIds) {
       try {
         final manga = await mangaRepository.getManga(id);
-        loaded.add(manga);
+        if (manga != null) loaded.add(manga);
       } catch (e) {
         // Gérer l'erreur si un manga ne se charge pas
         debugPrint("Erreur chargement manga $id: $e");

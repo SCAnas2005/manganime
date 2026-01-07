@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/home.dart';
+import 'package:flutter_application_1/theme/themes.dart';
+import 'package:flutter_application_1/viewmodels/app_settings_view_model.dart';
+import 'package:flutter_application_1/views/splash_screen_view.dart';
+import 'package:provider/provider.dart';
 
 class App extends StatefulWidget {
   const App({super.key});
@@ -11,10 +15,17 @@ class App extends StatefulWidget {
 class AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
+    final settingsVM = context.watch<AppSettingsViewModel>();
     return MaterialApp(
       title: "MangAnime",
-      theme: ThemeData.dark(),
-      home: HomePage(title: "MangAnime"),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: settingsVM.loaded
+          ? settingsVM.settings.darkMode
+                ? ThemeMode.dark
+                : ThemeMode.light
+          : ThemeMode.system,
+      home: SplashScreen(),
     );
   }
 }

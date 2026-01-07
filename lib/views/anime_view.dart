@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/debug/debug_page.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
 import 'package:flutter_application_1/viewmodels/anime_view_model.dart';
@@ -22,6 +23,8 @@ class _AnimeViewState extends State<AnimeView> {
   late ScrollController _airingController;
   late ScrollController _mostLikedController;
 
+  late ScrollController _forYouController;
+
   @override
   void initState() {
     super.initState();
@@ -29,12 +32,20 @@ class _AnimeViewState extends State<AnimeView> {
     _popularController = ScrollController();
     _airingController = ScrollController();
     _mostLikedController = ScrollController();
+    _forYouController = ScrollController();
 
     // On attend que le BuildContext soit disponible
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final vm = context.read<AnimeViewModel>();
 
       await vm.fetchForYou(context.read<GlobalAnimeFavoritesProvider>());
+
+      _forYouController.addListener(() {
+        if (_forYouController.position.pixels >=
+            _forYouController.position.maxScrollExtent - 200) {
+          vm.fetchForYou(context.read<GlobalAnimeFavoritesProvider>());
+        }
+      });
 
       _popularController.addListener(() {
         if (_popularController.position.pixels >=
@@ -64,6 +75,7 @@ class _AnimeViewState extends State<AnimeView> {
     _popularController.dispose();
     _airingController.dispose();
     _mostLikedController.dispose();
+    _forYouController.dispose();
     super.dispose();
   }
 
@@ -72,41 +84,88 @@ class _AnimeViewState extends State<AnimeView> {
     final vm = context.watch<AnimeViewModel>();
 
     return SafeArea(
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: miniSearchBar(context),
-              ),
+      // --- CHANGEMENT 1 : SingleChildScrollView RETIRÉ ---
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: miniSearchBar(context),
+            ),
+            FloatingActionButton(
+              child: Icon(Icons.add),
+              onPressed: () => {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (builder) => DebugPage()),
+                ),
+              },
+            ),
 
-              TabSwitcher(
-                tabs: ["Pour toi", "Tendances"],
-                selectedIndex: selectedTab,
-                onChanged: (index) {
-                  setState(() {
-                    if (selectedTab != index) selectedTab = index;
-                  });
-                },
-                isEnabled: [
-                  true,
-                  true,
-                ], // mettre [true,true] quand la page tendance sera faite
-              ),
-              const SizedBox(height: 20),
-              selectedTab == 0 ? _buildForYou(vm) : _buildTendences(vm),
-            ],
-          ),
+            TabSwitcher(
+              tabs: ["Pour toi", "Tendances"],
+              selectedIndex: selectedTab,
+              onChanged: (index) {
+                setState(() {
+                  if (selectedTab != index) selectedTab = index;
+                });
+              },
+              isEnabled: [true, true],
+            ),
+            const SizedBox(height: 20),
+
+            Expanded(
+              child: selectedTab == 0
+                  // L'onglet 0 scrolle tout seul (GridView)
+                  ? _buildForYou(vm)
+                  // L'onglet 1 a besoin d'être dans un SingleChildScrollView
+                  : SingleChildScrollView(child: _buildTendences(vm)),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  // Onglet 1 : Pour toi
+  // Onglet 1 : Pour toi (GridView qui scrolle)
+  Widget _buildForYou(AnimeViewModel vm) {
+    return GridView.builder(
+      controller: _forYouController, // Ajout du controller
+      // --- CHANGEMENT 3 : shrinkWrap et physics RETIRÉS ---
+      // shrinkWrap: true, (retiré)
+      // physics: const NeverScrollableScrollPhysics(), (retiré)
+      padding: const EdgeInsets.only(
+        top: 12,
+        bottom: 16,
+      ), // Petit padding utile
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 0.62,
+      ),
+      itemBuilder: (context, index) {
+        final anime = vm.forYou[index];
+        return AnimeCard(
+          anime: anime,
+          onTap: (a) => vm.openAnimePage(context, a),
+          onLikeDoubleTap: (a) {
+            context.read<GlobalAnimeFavoritesProvider>().toggleFavorite(anime);
+          },
+          isLiked: context.watch<GlobalAnimeFavoritesProvider>().isAnimeLiked(
+            anime.id,
+          ),
+        );
+      },
+      itemCount: vm.forYou.length,
+    );
+  }
+
+  // Onglet 2 : Tendances (Le contenu qui sera dans le SingleChildScrollView)
   Widget _buildTendences(AnimeViewModel vm) {
+    // Pas de changement ici, cette colonne est maintenant dans un SingleChildScrollView dans le build principal.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -167,35 +226,6 @@ class _AnimeViewState extends State<AnimeView> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildForYou(AnimeViewModel vm) {
-    return GridView.builder(
-      shrinkWrap: true, // prend uniquement la hauteur nécessaire
-      physics:
-          const NeverScrollableScrollPhysics(), // désactive le scroll interne
-
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.62,
-      ),
-      itemBuilder: (context, index) {
-        final anime = vm.forYou[index];
-        return AnimeCard(
-          anime: anime,
-          onTap: (a) => vm.openAnimePage(context, a),
-          onLikeDoubleTap: (a) {
-            context.read<GlobalAnimeFavoritesProvider>().toggleFavorite(anime);
-          },
-          isLiked: context.watch<GlobalAnimeFavoritesProvider>().isAnimeLiked(
-            anime.id,
-          ),
-        );
-      },
-      itemCount: vm.forYou.length,
     );
   }
 }
