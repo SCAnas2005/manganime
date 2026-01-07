@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/models/manga_detail.dart';
+import 'package:flutter_application_1/models/manga.dart';
 import 'package:flutter_application_1/providers/like_storage_provider.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:flutter_application_1/services/translator.dart';
@@ -7,30 +7,22 @@ import 'package:flutter_application_1/services/translator.dart';
 class MangaInfoViewModel extends ChangeNotifier {
   final JikanService _service = JikanService();
 
-  MangaDetail? mangaDetail;
+  Manga manga;
   String translatedSynopsis = '';
   bool isLoading = false;
   bool hasError = false;
   bool isLiked = false;
   bool showLikeAnimation = false;
 
-  Future<void> loadMangaDetail(int mangaId) async {
+  MangaInfoViewModel({required this.manga});
+
+  Future<void> loadMangaDetail() async {
     isLoading = true;
     hasError = false;
-    notifyListeners();
 
-    try {
-      mangaDetail = await _service.getFullDetailManga(mangaId);
-      translatedSynopsis = await Translator.translateToFrench(
-        mangaDetail?.synopsis ?? '',
-      );
-    } catch (e) {
-      hasError = true;
-    }
+    translatedSynopsis = manga.synopsis;
 
-    if (mangaDetail != null) {
-      isLiked = LikeStorage.isMangaLiked(mangaDetail!.id);
-    }
+    isLiked = LikeStorage.isMangaLiked(manga.id);
 
     isLoading = false;
     notifyListeners();

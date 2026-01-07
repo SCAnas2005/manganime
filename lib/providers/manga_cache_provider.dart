@@ -4,16 +4,20 @@ import 'package:hive_flutter/hive_flutter.dart';
 class MangaCache {
   static final MangaCache instance = MangaCache();
 
+  // ignore: non_constant_identifier_names
   static final String MANGA_CACHE_KEY = "manga_cache";
   final Map<int, Manga> _memory = {}; // cache rapide (RAM)
   late final Box _box; // cache persistant
+
+  get memoryCache => _memory;
+  get box => _box;
 
   Future<void> init() async {
     _box = await Hive.openBox(MANGA_CACHE_KEY);
   }
 
   /// Récupère un manga déjà en cache (RAM ou Hive)
-  Future<Manga?> get(int id) async {
+  Manga? get(int id) {
     // 1. Cache mémoire
     if (_memory.containsKey(id)) {
       return _memory[id];

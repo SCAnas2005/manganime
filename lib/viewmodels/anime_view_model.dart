@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/providers/anime_repository_provider.dart';
 import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
-import 'package:flutter_application_1/providers/request_queue_provider.dart';
-import 'package:flutter_application_1/providers/user_profile_provider.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:flutter_application_1/views/anime_info_view.dart';
 
 class AnimeViewModel extends ChangeNotifier {
-  final JikanService _service = JikanService();
-
   List<Anime> popular = [];
   List<Anime> airing = [];
   List<Anime> mostLiked = [];
@@ -19,7 +16,7 @@ class AnimeViewModel extends ChangeNotifier {
   int _airingPage = 1;
   int _mostLikedPage = 1;
 
-  int forYouPage = 1;
+  int _forYouPage = 1;
 
   bool _isLoadingPopular = false;
   bool _isLoadingAiring = false;
@@ -63,9 +60,9 @@ class AnimeViewModel extends ChangeNotifier {
     bool hasNewItems = true;
 
     try {
-      final newAnimes = await RequestQueue.instance.enqueue(
-        () => _service.getTopAnime(page: _popularPage, filter: "bypopularity"),
-      );
+      final newAnimes = await AnimeRepository(
+        api: JikanService(),
+      ).getPopularAnimes(page: _popularPage);
 
       if (newAnimes.isEmpty) {
         _hasMorePopular = false;
@@ -102,14 +99,9 @@ class AnimeViewModel extends ChangeNotifier {
     bool hasNewItems = false;
 
     try {
-      final newAnimes = await RequestQueue.instance.enqueue(
-        () => _service.getTopAnime(
-          page: _airingPage,
-          season: "winter",
-          year: 2025,
-          filter: "airing",
-        ),
-      );
+      final newAnimes = await AnimeRepository(
+        api: JikanService(),
+      ).getAiringAnimes(page: _airingPage);
 
       if (newAnimes.isEmpty) {
         _hasMoreAiring = false;
@@ -147,9 +139,9 @@ class AnimeViewModel extends ChangeNotifier {
     bool hasNewItems = false;
 
     try {
-      final newAnimes = await RequestQueue.instance.enqueue(
-        () => _service.getTopAnime(page: _mostLikedPage, filter: "favorite"),
-      );
+      final newAnimes = await AnimeRepository(
+        api: JikanService(),
+      ).getMostLikedAnimes(page: _mostLikedPage);
       if (newAnimes.isEmpty) {
         _hasMoreMostLiked = false;
       } else {
@@ -180,31 +172,17 @@ class AnimeViewModel extends ChangeNotifier {
 
   // ---------------- FOR YOU    ----------------
   Future<void> fetchForYou(GlobalAnimeFavoritesProvider provider) async {
-    debugPrint("Building recommendation algorithm");
-    // Récupération des animes liékes
-    final liked = provider.loadedFavoriteAnimes;
-    debugPrint("Liked animes : $liked");
-    // Calcul du profil utilisateur
-    final userProfile = UserprofileProvider.fromLikedAnimes(liked);
-    debugPrint("User profil built: $userProfile");
-
-    // Le top genres
-    final topGenres = userProfile.getTopGenres(3);
-    debugPrint(
-      "Top genres: ${topGenres.first}, ${topGenres[1]}, ${topGenres[2]}",
-    );
-
     // Recherche Api
     try {
-      final animes = await RequestQueue.instance.enqueue(
-        () => _service.search(page: forYouPage, query: "", genres: topGenres),
-      );
-      debugPrint("fetchForYou animes count : ${animes.length}");
+      var animes = await AnimeRepository(
+        api: JikanService(),
+      ).getForYouAnimes(provider, page: _forYouPage);
+
       if (animes.isEmpty) {
         _hasMoreForYou = false;
       } else {
         forYou.addAll(animes);
-        forYouPage++;
+        _forYouPage++;
       }
     } catch (e) {
       debugPrint("Erreur de fetchForYou : $e");
@@ -212,6 +190,13 @@ class AnimeViewModel extends ChangeNotifier {
 
     _isLoadingForYou = false;
     notifyListeners();
+  }
+
+  void refreshForYou(GlobalAnimeFavoritesProvider provider) {
+    forYou.clear();
+    _forYouPage = 1;
+    _hasMoreForYou = true;
+    fetchForYou(provider);
   }
 
   // ---------------- NAVIGATION ----------------
