@@ -27,8 +27,9 @@ abstract class ApiService {
   int get reqPerSec;
 
   Future<List<Anime>> fetchAnimeList(Uri uri);
+  Future<List<Manga>> fetchMangaList(Uri uri);
 
-  Future<List<Anime>> search({
+  Future<List<Anime>> searchAnime({
     int page = 1,
     required String query,
     int? limit,
@@ -45,6 +46,26 @@ abstract class ApiService {
     SortOrder? sort,
     String? letter,
     String? producers,
+    String? startDate,
+    String? endDate,
+  });
+
+  Future<List<Manga>> searchManga({
+    int page = 1,
+    required String query,
+    int? limit,
+    MangaType? type,
+    int? score,
+    int? minScore,
+    int? maxScore,
+    MediaStatus? status,
+    bool sfw = false,
+    List<Genres>? genres,
+    String? genresExclude,
+    MediaOrderBy? orderBy,
+    SortOrder? sort,
+    String? letter,
+    String? magazines,
     String? startDate,
     String? endDate,
   });

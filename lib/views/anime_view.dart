@@ -116,7 +116,6 @@ class _AnimeViewState extends State<AnimeView> {
             ),
             const SizedBox(height: 20),
 
-            // --- CHANGEMENT 2 : Expanded ajouté pour que l'onglet prenne la place restante ---
             Expanded(
               child: selectedTab == 0
                   // L'onglet 0 scrolle tout seul (GridView)
