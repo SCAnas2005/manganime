@@ -154,8 +154,8 @@ class AnimeStatModel extends ChangeNotifier {
       return;
     }
 
-    final userProfile = UserprofileProvider.fromLikedAnimes(likedAnimes);
-    final topGenres = userProfile.getTopGenres(5);
+    final userProfile = UserprofileProvider.create(likedAnimes: likedAnimes);
+    final topGenres = userProfile.getTopGenres<Anime>(5);
 
     final Map<String, int> newStats = {};
 

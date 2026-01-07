@@ -192,41 +192,51 @@ class AnimeRepository {
     final liked = provider.loadedFavoriteAnimes;
 
     // Calcul du profil utilisateur
-    final userProfile = UserprofileProvider.fromLikedAnimes(liked);
+    final userProfile = UserprofileProvider.create(likedAnimes: liked);
     debugPrint("User profil built: $userProfile");
 
     // Le top genres
-    final topGenres = userProfile.getTopGenres(3);
-    debugPrint(
-      "Top genres: ${topGenres.first}, ${topGenres[1]}, ${topGenres[2]}",
-    );
+    final topGenres = userProfile.getTopGenres<Anime>(3);
+    if (topGenres.length >= 3) {
+      debugPrint(
+        "Top genres: ${topGenres.first}, ${topGenres[1]}, ${topGenres[2]}",
+      );
+    }
+
+    if (topGenres.isEmpty) {
+      return await getPopularAnimes();
+    }
+
+    List<Anime> candidates = [];
 
     try {
       // 1. API
       if (await NetworkService.isConnected) {
-        var animes = await RequestQueue.instance.enqueue(
+        candidates = await RequestQueue.instance.enqueue(
           () => api.search(page: page, query: "", genres: topGenres),
         );
-        debugPrint("fetchForYou animes count : ${animes.length}");
-
-        debugPrint("Removing liked animes from suggestions");
-        animes = animes.where((a) => !liked.contains(a)).toList();
-
-        return animes;
+        debugPrint("fetchForYou animes count : ${candidates.length}");
+      } else {
+        candidates = await DatabaseProvider.instance.search<Anime>(
+          query: "",
+          genres: topGenres,
+        );
       }
 
-      // 2. Database
-      var animes = await DatabaseProvider.instance.search<Anime>(
-        query: "",
-        genres: topGenres,
-      );
-
-      debugPrint("fetchForYou animes count : ${animes.length}");
-
       debugPrint("Removing liked animes from suggestions");
-      animes = animes.where((a) => !liked.contains(a)).toList();
+      final likedIds = liked.map((e) => e.id).toSet();
+      candidates = candidates.where((a) => !likedIds.contains(a.id)).toList();
 
-      return animes;
+      candidates.sort((a, b) {
+        final scoreA = userProfile.calculateScoreFor<Anime>(a);
+        final scoreB = userProfile.calculateScoreFor<Anime>(b);
+
+        // compareTo inversé (B vers A) pour avoir l'ordre Décroissant (Plus grand score en haut)
+        return scoreB.compareTo(scoreA);
+      });
+
+      debugPrint("fetchForYou animes count : ${candidates.length}");
+      return candidates;
     } catch (e) {
       debugPrint("[AnimeRepository] getForYouAnimes: $e");
     }

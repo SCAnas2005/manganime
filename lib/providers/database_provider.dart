@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/models/identifiable.dart';
@@ -7,13 +8,15 @@ import 'package:flutter_application_1/models/manga.dart';
 import 'package:flutter_application_1/providers/media_path_provider.dart';
 import 'package:flutter_application_1/providers/request_queue_provider.dart';
 import 'package:flutter_application_1/services/api_service.dart';
+import 'package:flutter_application_1/services/image_sync_service.dart';
+import 'package:flutter_application_1/services/network_service.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class DatabaseProvider {
   // ignore: constant_identifier_names
   static const String ANIMES_KEY = "animes_key";
   // ignore: constant_identifier_names
-  static const String MANGAS_KEY = "animes_key";
+  static const String MANGAS_KEY = "mangas_key";
 
   static late final Box _animeBox;
   static late final Box _mangaBox;
@@ -40,54 +43,79 @@ class DatabaseProvider {
     ApiService service,
     int total,
   ) async {
-    late List<T> list;
-
-    // Seed minimal (bloquant)
-    if (T == Anime) {
-      list =
-          await RequestQueue.instance.enqueue(
-                () => service.getTopAnime(page: 1),
+    Future<List<T>> fetchPage(int p) async {
+      try {
+        if (T == Anime) {
+          return await RequestQueue.instance.enqueue(
+                () => service.getTopAnime(page: p),
               )
               as List<T>;
-    } else if (T == Manga) {
-      list =
-          await RequestQueue.instance.enqueue(
-                () => service.getTopManga(page: 1),
+        } else if (T == Manga) {
+          return await RequestQueue.instance.enqueue(
+                () => service.getTopManga(page: p),
               )
               as List<T>;
-    } else {
-      throw UnsupportedError('Type $T non supporté');
+        }
+        throw UnsupportedError('Type $T non supporté');
+      } catch (e) {
+        await Future.delayed(const Duration(seconds: 1));
+      }
+      return [];
     }
 
-    await instance._saveMultiple<T>(list);
-    downloadImagesOnly<T>(list);
+    // --- PAGE 1 ---
+    final listPage1 = await fetchPage(1);
+    await instance._saveMultiple<T>(listPage1);
 
-    // Seed complet en arrière-plan
+    // Ajout Page 1 à la queue
+    for (var item in listPage1) {
+      // debugPrint("from api importing anime : id : ${item.id}");
+      await ImageSyncService.instance.addToQueue(item);
+    }
+
+    ImageSyncService.instance.processQueue();
+
+    // --- PAGES SUIVANTES ---
     final int totalPages = (total / 25).ceil();
 
     Future.microtask(() async {
+      debugPrint(
+        "[DatabaseProvider] populate<$T> : Démarrage background ($totalPages pages)...",
+      );
+
       for (int page = 2; page <= totalPages; page++) {
-        if (T == Anime) {
-          list =
-              await RequestQueue.instance.enqueue(
-                    () => service.getTopAnime(page: page),
-                  )
-                  as List<T>;
-        } else if (T == Manga) {
-          list =
-              await RequestQueue.instance.enqueue(
-                    () => service.getTopManga(page: page),
-                  )
-                  as List<T>;
+        // Check internet pour éviter de spammer si coupé
+        if (!await NetworkService.isConnected) {
+          debugPrint("Populate en pause (pas d'internet)");
+          break;
         }
 
-        await instance._saveMultiple<T>(list);
-        await downloadImagesOnly<T>(list);
+        try {
+          final list = await fetchPage(
+            page,
+          ); // 'list' contient les nouveaux items
+
+          await _saveMultiple<T>(list);
+
+          await Future.wait(
+            list.map((item) {
+              // debugPrint("from api importing anime : id : ${item.id}");
+              return ImageSyncService.instance.addToQueue(item);
+            }),
+          );
+
+          ImageSyncService.instance.processQueue();
+
+          await Future.delayed(const Duration(milliseconds: 500));
+        } catch (e) {
+          debugPrint("[DatabaseProvider] Erreur page $page: $e");
+        }
       }
 
-      debugPrint(
-        "[DatabaseProvider] populate($service, $total): Database populate ended. Database length : ${instance.length<T>()}",
-      );
+      debugPrint("[DatabaseProvider] populate<$T> : Terminé.");
+
+      // Dernier passage de balai
+      ImageSyncService.instance.processQueue();
     });
   }
 
@@ -129,12 +157,22 @@ class DatabaseProvider {
     throw UnsupportedError('Type $T not supported');
   }
 
+  List<T> _getAll<T extends Identifiable>() {
+    Box box = getBoxByType<T>();
+    return box.values.map((raw) {
+      final Map<String, dynamic> typedMap = Map<String, dynamic>.from(raw);
+
+      return _fromJson<T>(typedMap);
+    }).toList();
+  }
+
   Future<T?> _get<T extends Identifiable>(int id) async {
     Box box = getBoxByType<T>();
-    final Map<String, dynamic>? raw = await box.get(id);
-
+    final dynamic raw = box.get(id);
     if (raw == null) return null;
-    return _fromJson<T>(raw);
+    final Map<String, dynamic> typedMap = Map<String, dynamic>.from(raw);
+
+    return _fromJson<T>(typedMap);
   }
 
   Future<List<T>> _getMultiples<T extends Identifiable>(List<int> ids) async {
@@ -167,6 +205,7 @@ class DatabaseProvider {
       final Map<int, Map<String, dynamic>> entries = {
         for (var item in identifiables) item.id: item.toJson(),
       };
+      debugPrint("Saving entries : ${identifiables.map((i) => i.id)}");
       await box.putAll(entries);
       // await Future.wait(identifiables.map((i) => box.put(i.id, i.toJson())));
     } catch (e) {
@@ -176,6 +215,9 @@ class DatabaseProvider {
 
   Future<Anime?> getAnime(int id) async => await _get<Anime>(id);
   Future<Manga?> getManga(int id) async => await _get<Manga>(id);
+
+  List<Anime> getAllAnime() => _getAll<Anime>();
+  List<Manga> getAllManga() => _getAll<Manga>();
 
   Future<List<Anime>> getMultipleAnimes(List<int> ids) async =>
       await _getMultiples<Anime>(ids);

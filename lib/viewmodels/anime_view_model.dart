@@ -2,14 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/providers/anime_repository_provider.dart';
 import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
-import 'package:flutter_application_1/providers/request_queue_provider.dart';
-import 'package:flutter_application_1/providers/user_profile_provider.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:flutter_application_1/views/anime_info_view.dart';
 
 class AnimeViewModel extends ChangeNotifier {
-  final JikanService _service = JikanService();
-
   List<Anime> popular = [];
   List<Anime> airing = [];
   List<Anime> mostLiked = [];
@@ -176,20 +172,6 @@ class AnimeViewModel extends ChangeNotifier {
 
   // ---------------- FOR YOU    ----------------
   Future<void> fetchForYou(GlobalAnimeFavoritesProvider provider) async {
-    debugPrint("Building recommendation algorithm");
-    // Récupération des animes liékes
-    final liked = provider.loadedFavoriteAnimes;
-    debugPrint("Liked animes : $liked");
-    // Calcul du profil utilisateur
-    final userProfile = UserprofileProvider.fromLikedAnimes(liked);
-    debugPrint("User profil built: $userProfile");
-
-    // Le top genres
-    final topGenres = userProfile.getTopGenres(3);
-    debugPrint(
-      "Top genres: ${topGenres.first}, ${topGenres[1]}, ${topGenres[2]}",
-    );
-
     // Recherche Api
     try {
       var animes = await AnimeRepository(
