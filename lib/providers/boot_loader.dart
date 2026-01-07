@@ -53,10 +53,6 @@ class BootLoader {
     var provider = SettingsRepositoryProvider(SettingsStorage.instance);
     bool isFirstLaunch = provider.getSettings().isFirstLaunch;
 
-    await provider.updateSettings(
-      provider.getSettings().copyWith(isFirstLaunch: true),
-    );
-
     if (isFirstLaunch) {
       debugPrint("========= App first launch");
 
