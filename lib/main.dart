@@ -11,7 +11,6 @@ import 'package:provider/provider.dart';
 
 Future<void> main() async {
   await BootLoader.initAll();
-  await BootLoader.onAppStart();
 
   runApp(
     MultiProvider(

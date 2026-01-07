@@ -19,10 +19,10 @@ class DebugPage extends StatelessWidget {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("Master Debugger 🕷️"),
+          title: const Text("Debugger"),
           bottom: const TabBar(
             tabs: [
-              Tab(icon: Icon(Icons.storage), text: "DATABASE (SQL)"),
+              Tab(icon: Icon(Icons.storage), text: "DATABASE"),
               Tab(icon: Icon(Icons.memory), text: "CACHE (RAM/HIVE)"),
             ],
           ),
@@ -44,9 +44,6 @@ class DebugPage extends StatelessWidget {
     );
   }
 }
-
-// ... (Le code de _DatabaseTab et _DebugDatabaseList reste inchangé, comme tu l'as déjà) ...
-// Je le remets ici pour que le fichier soit complet si tu copies-colles tout.
 
 class _DatabaseTab extends StatelessWidget {
   const _DatabaseTab();
@@ -148,7 +145,6 @@ class _CacheTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // On rajoute un TabController interne pour choisir Anime ou Manga DANS le cache
     return DefaultTabController(
       length: 2,
       child: Column(
@@ -168,7 +164,6 @@ class _CacheTab extends StatelessWidget {
           Expanded(
             child: TabBarView(
               children: [
-                // On appelle le widget générique pour chaque type
                 _GenericCacheView<Anime>(),
                 _GenericCacheView<Manga>(),
               ],
@@ -183,8 +178,6 @@ class _CacheTab extends StatelessWidget {
 class _GenericCacheView<T extends Identifiable> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // 1. Récupération dynamique des données selon le type T
-    // NOTE : Assure-toi d'avoir ajouté les getters 'memoryCache' et 'box' dans tes Providers !
     final memoryMap = T == Anime
         ? AnimeCache.instance.memoryCache
         : MangaCache.instance.memoryCache;
@@ -274,7 +267,6 @@ class _GenericCacheView<T extends Identifiable> extends StatelessWidget {
                     final rawData = hiveBox.get(key);
                     String title = "???";
 
-                    // Gestion sécurisée du titre selon le format stocké
                     if (rawData is Identifiable) {
                       title = rawData.title;
                     } else if (rawData is Map) {

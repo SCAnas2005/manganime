@@ -47,10 +47,11 @@ class BootLoader {
     await SettingsStorage.instance.init();
   }
 
-  static Future<void> onAppStart() async {
+  static Future<void> onAppStart({
+    Function(String message)? onStatusChanged,
+  }) async {
     var provider = SettingsRepositoryProvider(SettingsStorage.instance);
-    bool isFirstLaunch = true;
-    //provider.getSettings().isFirstLaunch;
+    bool isFirstLaunch = provider.getSettings().isFirstLaunch;
 
     await provider.updateSettings(
       provider.getSettings().copyWith(isFirstLaunch: true),
@@ -60,12 +61,19 @@ class BootLoader {
       debugPrint("========= App first launch");
 
       debugPrint("Database populate started");
-      // await DatabaseProvider.instance.clear<Manga>();
-      // await DatabaseProvider.instance.populate<Manga>(JikanService(), 300);
-      // await DatabaseProvider.instance.clear<Anime>();
-      // await DatabaseProvider.instance.populate<Anime>(JikanService(), 300);
-      // debugPrint("Updating cache");
-      // await AnimeCache.instance.updateCache();
+      onStatusChanged?.call("Téléchargement des Mangas...");
+      await DatabaseProvider.instance.clear<Manga>();
+      await DatabaseProvider.instance.populate<Manga>(JikanService(), 300);
+
+      onStatusChanged?.call("Téléchargement des Animes...");
+      await DatabaseProvider.instance.clear<Anime>();
+      await DatabaseProvider.instance.populate<Anime>(JikanService(), 300);
+
+      onStatusChanged?.call("Mise à jour du cache...");
+      debugPrint("Updating cache");
+      await AnimeCache.instance.updateCache();
+
+      onStatusChanged?.call("Finalisation...");
 
       await provider.updateSettings(
         provider.getSettings().copyWith(isFirstLaunch: false),
