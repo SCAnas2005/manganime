@@ -16,6 +16,12 @@ class _SearchState extends State<Search> {
   int index = 0;
   String _selectedFilter = 'Note'; // Filtre par défaut
   final List<String> filters = ['Popularité', 'Note', 'Favoris'];
+  final List<String> mainGenres = [
+    'Action', 'Adventure', 'Comedy', 'Drama',
+    'Fantasy', 'Horror', 'Mecha', 'Music',
+    'Romance', 'SciFi', 'SliceOfLife', 'Sports',
+  ];
+   Set<String> selectedGenres = {};
 
   @override
   void initState() {
@@ -31,7 +37,6 @@ class _SearchState extends State<Search> {
     final vm = context.watch<AnimeViewModel>();
     final searchViewModel = context.watch<SearchViewModel>();
     final suggestions = searchViewModel.results;
-    final genres = searchViewModel.getAvailableGenres();
 
     if (suggestions.isNotEmpty) {
       index = index % suggestions.length;
@@ -59,58 +64,68 @@ class _SearchState extends State<Search> {
           ),
 
           Padding(
-            padding : const EdgeInsets.symmetric(horizontal: 10),
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: DropdownButton<String>(
-                value: _selectedFilter,
-                items : filters.map((filters) => DropdownMenuItem(
-                    value: filters,
-                    child: Text(filters),
-                  )).toList(),
-                onChanged: (newValue)  async {
-                  if (newValue != null) {
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                PopupMenuButton<String>(
+                  child: SizedBox(
+                    width: 170,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        selectedGenres.isEmpty
+                            ? "Choisir les genres"
+                            : selectedGenres.join(", "),
+                      ),
+                    ),
+                  ),
+                  itemBuilder: (context) => mainGenres.map((genre) {
+                    final isSelected = selectedGenres.contains(genre);
+                    return CheckedPopupMenuItem<String>(
+                      value: genre,
+                      checked: isSelected,
+                      child: Text(genre),
+                    );
+                  }).toList(),
+                  onSelected: (genre) {
                     setState(() {
-                      _selectedFilter = newValue;
+                      if (selectedGenres.contains(genre)) {
+                        selectedGenres.remove(genre);
+                      } else {
+                        selectedGenres.add(genre);
+                      }
+                      context
+                          .read<SearchViewModel>()
+                          .updateSelectedGenres(selectedGenres);
                     });
-                    await searchViewModel.searchEmpty(filter: _selectedFilter);
-                  }
-
-                },
-              ),
+                  },
+                ),
+                DropdownButton<String>(
+                  value: _selectedFilter,
+                  items: filters
+                      .map((filters) => DropdownMenuItem(
+                            value: filters,
+                            child: Text(filters),
+                          ))
+                      .toList(),
+                  onChanged: (newValue) async {
+                    if (newValue != null) {
+                      setState(() {
+                        _selectedFilter = newValue;
+                      });
+                      await searchViewModel.searchEmpty(filter: _selectedFilter);
+                    }
+                  },
+                ),
+              ],
             ),
           ),
-
-          if (genres.isNotEmpty)
-  SizedBox(
-    height: 45,
-    child: ListView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      children: [
-        FilterChip(
-          label: const Text("Tous"),
-          selected: searchViewModel.selectedGenre == null,
-          onSelected: (_) {
-            searchViewModel.filterByGenre(null);
-          },
-        ),
-        const SizedBox(width: 8),
-        ...genres.map(
-          (genre) => Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: FilterChip(
-              label: Text(genre),
-              selected: searchViewModel.selectedGenre == genre,
-              onSelected: (_) {
-                searchViewModel.filterByGenre(genre);
-              },
-            ),
-          ),
-        ),
-      ],
-    ),
-  ),
+        
             
             const SizedBox(height: 10),
 
