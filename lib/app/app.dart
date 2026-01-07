@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/home.dart';
 import 'package:flutter_application_1/theme/themes.dart';
 import 'package:flutter_application_1/viewmodels/app_settings_view_model.dart';
+import 'package:flutter_application_1/views/splash_screen_view.dart';
 import 'package:provider/provider.dart';
 
 class App extends StatefulWidget {
@@ -24,7 +25,7 @@ class AppState extends State<App> {
                 ? ThemeMode.dark
                 : ThemeMode.light
           : ThemeMode.system,
-      home: HomePage(title: "MangAnime"),
+      home: SplashScreen(),
     );
   }
 }
