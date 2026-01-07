@@ -21,6 +21,8 @@ class DatabaseProvider {
   static late final Box _animeBox;
   static late final Box _mangaBox;
 
+  static const int ITEM_PER_PAGE = 25;
+
   static DatabaseProvider instance = DatabaseProvider();
   int get animeLength => length<Anime>();
   int get mangaLength => length<Manga>();
@@ -235,12 +237,12 @@ class DatabaseProvider {
 
   Future<List<T>> search<T extends Identifiable>({
     String? query,
+    int page = 1,
     List<Genres>? genres,
     MediaStatus? status,
     MediaOrderBy? orderBy,
     AnimeType? animeType,
     AnimeRating? animeRating,
-
     MangaType? mangaType,
   }) async {
     Box box = getBoxByType<T>();
@@ -267,6 +269,18 @@ class DatabaseProvider {
       }
       result.add(item);
     }
-    return result;
+
+    final int totalResults = result.length;
+    final int startIndex = (page - 1) * ITEM_PER_PAGE;
+
+    if (startIndex > totalResults) {
+      return [];
+    }
+
+    int endIndex = page * ITEM_PER_PAGE;
+    if (endIndex > totalResults) {
+      endIndex = totalResults;
+    }
+    return result.sublist(startIndex, endIndex);
   }
 }

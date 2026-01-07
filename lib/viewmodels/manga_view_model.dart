@@ -1,29 +1,46 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/models/identifiable_enums.dart';
 import 'package:flutter_application_1/models/manga.dart';
+import 'package:flutter_application_1/providers/global_manga_favorites_provider.dart';
 import 'package:flutter_application_1/providers/manga_repository_provider.dart';
-import 'package:flutter_application_1/providers/request_queue_provider.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:flutter_application_1/views/manga_info_view.dart';
 
 class MangaViewModel extends ChangeNotifier {
-  final JikanService _service = JikanService();
-
   List<Manga> popular = [];
   List<Manga> publishing = [];
   List<Manga> mostLiked = [];
+
+  List<Manga> forYou = [];
 
   int _popularPage = 1;
   int _publishingPage = 1;
   int _mostLikedPage = 1;
 
+  int _forYouPage = 1;
+
   bool _isLoadingPopular = false;
   bool _isLoadingPublishing = false;
   bool _isLoadingMostLiked = false;
 
+  bool _isLoadingForYou = false;
+
+  bool get isLoadingPopular => _isLoadingPopular;
+  bool get isLoadingPublishing => _isLoadingPublishing;
+  bool get isLoadingMostLiked => _isLoadingMostLiked;
+
+  bool get isLoadingForYou => _isLoadingForYou;
+
   bool _hasMorePopular = true;
   bool _hasMorePublishing = true;
   bool _hasMoreMostLiked = true;
+
+  bool _hasMoreForYou = true;
+
+  bool get hasMorePopular => _hasMorePopular;
+  bool get hasMorePublishing => _hasMorePublishing;
+  bool get hasMoreMostLiked => _hasMoreMostLiked;
+
+  bool get hasMoreForYou => _hasMoreForYou;
 
   MangaViewModel() {
     _init();
@@ -122,6 +139,27 @@ class MangaViewModel extends ChangeNotifier {
     }
 
     _isLoadingMostLiked = false;
+    notifyListeners();
+  }
+
+  // ---------------- FOR YOU    ----------------
+  Future<void> fetchForYou(GlobalMangaFavoritesProvider provider) async {
+    try {
+      var mangas = await MangaRepository(
+        api: JikanService(),
+      ).getForYouManga(provider, page: _forYouPage);
+
+      if (mangas.isEmpty) {
+        _hasMoreForYou = false;
+      } else {
+        forYou.addAll(mangas);
+        _forYouPage++;
+      }
+    } catch (e) {
+      debugPrint("Erreur de fetchForYou : $e");
+    }
+
+    _isLoadingForYou = false;
     notifyListeners();
   }
 
