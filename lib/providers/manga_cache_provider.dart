@@ -9,6 +9,9 @@ class MangaCache {
   final Map<int, Manga> _memory = {}; // cache rapide (RAM)
   late final Box _box; // cache persistant
 
+  get memoryCache => _memory;
+  get box => _box;
+
   Future<void> init() async {
     _box = await Hive.openBox(MANGA_CACHE_KEY);
   }
