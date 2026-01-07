@@ -187,6 +187,7 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  Text("id: ${animeInfo.id}"),
                                   Text(
                                     animeInfo.title,
                                     style: Theme.of(context)

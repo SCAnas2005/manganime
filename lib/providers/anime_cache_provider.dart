@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/providers/anime_repository_provider.dart';
+import 'package:flutter_application_1/services/image_sync_service.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -12,6 +13,9 @@ class AnimeCache {
   static final String ANIME_CACHE_KEY = "anime_cache";
   final Map<int, Anime> _memory = {}; // cache rapide (RAM)
   late final Box _box; // cache persistant
+
+  get memoryCache => _memory;
+  get box => _box;
 
   Future<void> init() async {
     _box = await Hive.openBox(ANIME_CACHE_KEY);
@@ -91,7 +95,10 @@ class AnimeCache {
       // Sauvegarde en mémoire et dans Hive
       if (updatedAnime != null) {
         update(updatedAnime);
-        debugPrint("Cache mis à jour avec succès pour ${updatedAnime.title}");
+        await ImageSyncService.instance.scheduleDownload<Anime>(updatedAnime);
+        debugPrint(
+          "Cache mis à jour avec succès pour id:${updatedAnime.id} ${updatedAnime.title}",
+        );
       }
     }
   }

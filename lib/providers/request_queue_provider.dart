@@ -11,7 +11,7 @@ class RequestQueue {
 
   // delay entre chaque requête
   Duration spacing = Duration(
-    milliseconds: (1000 / JikanService().reqPerSec).toInt() + 100,
+    milliseconds: (1000 / JikanService().reqPerSec).toInt() + 200,
   );
 
   Future<T> enqueue<T>(Future<T> Function() task) {

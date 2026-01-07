@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/debug/debug_page.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
 import 'package:flutter_application_1/viewmodels/anime_view_model.dart';
@@ -92,6 +93,15 @@ class _AnimeViewState extends State<AnimeView> {
             Padding(
               padding: const EdgeInsets.only(bottom: 20),
               child: miniSearchBar(context),
+            ),
+            FloatingActionButton(
+              child: Icon(Icons.add),
+              onPressed: () => {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (builder) => DebugPage()),
+                ),
+              },
             ),
 
             TabSwitcher(
