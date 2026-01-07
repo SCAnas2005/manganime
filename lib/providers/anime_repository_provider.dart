@@ -213,11 +213,12 @@ class AnimeRepository {
       // 1. API
       if (await NetworkService.isConnected) {
         candidates = await RequestQueue.instance.enqueue(
-          () => api.search(page: page, query: "", genres: topGenres),
+          () => api.searchAnime(page: page, query: "", genres: topGenres),
         );
         debugPrint("fetchForYou animes count : ${candidates.length}");
       } else {
         candidates = await DatabaseProvider.instance.search<Anime>(
+          page: page,
           query: "",
           genres: topGenres,
         );

@@ -40,7 +40,7 @@ class SearchViewModel extends ChangeNotifier {
     // 3. On passe par la RequestQueue pour la sécurité API
     try {
       final newResults = await RequestQueue.instance.enqueue(() {
-        return _service.search(query: query);
+        return _service.searchAnime(query: query);
       });
 
       results = newResults;
