@@ -21,6 +21,8 @@ class _MangaViewState extends State<MangaView> {
   late ScrollController _publishingController;
   late ScrollController _mostLikedController;
 
+  late ScrollController _forYouController;
+
   @override
   void initState() {
     super.initState();
@@ -29,8 +31,19 @@ class _MangaViewState extends State<MangaView> {
     _publishingController = ScrollController();
     _mostLikedController = ScrollController();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    _forYouController = ScrollController();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final vm = context.read<MangaViewModel>();
+
+      await vm.fetchForYou(context.read<GlobalMangaFavoritesProvider>());
+
+      _forYouController.addListener(() {
+        if (_forYouController.position.pixels >=
+            _forYouController.position.maxScrollExtent - 200) {
+          vm.fetchForYou(context.read<GlobalMangaFavoritesProvider>());
+        }
+      });
 
       _popularController.addListener(() {
         if (_popularController.position.pixels >=
@@ -68,107 +81,77 @@ class _MangaViewState extends State<MangaView> {
     final vm = context.watch<MangaViewModel>();
 
     return SafeArea(
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TabSwitcher(
-                tabs: ["Pour toi", "Tendances"],
-                selectedIndex: selectedTab,
-                onChanged: (index) {
-                  setState(() {
-                    selectedTab = index;
-                  });
-                },
-                isEnabled: [
-                  true,
-                  false,
-                ], // mettre [true,true] quand la page tendance sera faite
-              ),
-              const SizedBox(height: 20),
+      // --- CHANGEMENT 1 : SingleChildScrollView RETIRÉ ---
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            // Padding(
+            //   padding: const EdgeInsets.only(bottom: 20),
+            //   child: miniSearchBar(context),
+            // ),
+            TabSwitcher(
+              tabs: ["Pour toi", "Tendances"],
+              selectedIndex: selectedTab,
+              onChanged: (index) {
+                setState(() {
+                  if (selectedTab != index) selectedTab = index;
+                });
+              },
+              isEnabled: [true, true],
+            ),
+            const SizedBox(height: 20),
 
-              _buildForYou(vm),
-              const SizedBox(height: 20),
-              // const Text(
-              //   "Les plus populaires",
-              //   style: TextStyle(
-              //     fontSize: 18,
-              //     fontWeight: FontWeight.bold,
-              //     color: Colors.white,
-              //   ),
-              // ),
-              // const SizedBox(height: 10),
-              // _buildHorizontalList(
-              //   vm.popular,
-              //   controller: _popularController,
-              //   onTap: vm.openMangaPage,
-              // ),
-              // const SizedBox(height: 20),
-              // const Text(
-              //   "En publication",
-              //   style: TextStyle(
-              //     fontSize: 18,
-              //     fontWeight: FontWeight.bold,
-              //     color: Colors.white,
-              //   ),
-              // ),
-              // const SizedBox(height: 10),
-              // _buildHorizontalList(
-              //   vm.publishing,
-              //   controller: _publishingController,
-              //   onTap: vm.openMangaPage,
-              // ),
-              // const SizedBox(height: 20),
-              // const Text(
-              //   "Les plus aimés",
-              //   style: TextStyle(
-              //     fontSize: 18,
-              //     fontWeight: FontWeight.bold,
-              //     color: Colors.white,
-              //   ),
-              // ),
-              // const SizedBox(height: 10),
-              // _buildHorizontalList(
-              //   vm.mostLiked,
-              //   controller: _mostLikedController,
-              //   onTap: vm.openMangaPage,
-              // ),
-            ],
-          ),
+            Expanded(
+              child: selectedTab == 0
+                  // L'onglet 0 scrolle tout seul (GridView)
+                  ? _buildForYou(vm)
+                  // L'onglet 1 a besoin d'être dans un SingleChildScrollView
+                  : SingleChildScrollView(child: _buildTendences(vm)),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  // Widget _buildHorizontalList(
-  //   List<Manga> mangas, {
-  //   Function(BuildContext context, Manga manga)? onTap,
-  //   ScrollController? controller,
-  // }) {
-  //   return SizedBox(
-  //     height: 250,
-  //     child: ListView.builder(
-  //       controller: controller,
-  //       scrollDirection: Axis.horizontal,
-  //       itemCount: mangas.length,
-  //       itemBuilder: (context, index) {
-  //         final manga = mangas[index];
-  //         return Padding(
-  //           padding: const EdgeInsets.only(right: 10),
-  //           child: MangaCard(
-  //             manga: manga,
-  //             onTap: (item) => onTap?.call(context, item),
-  //           ),
-  //         );
-  //       },
-  //     ),
-  //   );
-  // }
-
   // Onglet 1 : Pour toi
   Widget _buildForYou(MangaViewModel vm) {
+    return GridView.builder(
+      controller: _forYouController, // Ajout du controller
+      // --- CHANGEMENT 3 : shrinkWrap et physics RETIRÉS ---
+      // shrinkWrap: true, (retiré)
+      // physics: const NeverScrollableScrollPhysics(), (retiré)
+      padding: const EdgeInsets.only(
+        top: 12,
+        bottom: 16,
+      ), // Petit padding utile
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 0.62,
+      ),
+      itemBuilder: (context, index) {
+        final manga = vm.forYou[index];
+        return MangaCard(
+          manga: manga,
+          onTap: (a) => vm.openMangaPage(context, a),
+          onLikeDoubleTap: (a) {
+            context.read<GlobalMangaFavoritesProvider>().toggleFavorite(manga);
+          },
+          // isLiked: context.watch<GlobalAnimeFavoritesProvider>().isAnimeLiked(
+          //   manga.id,
+          // ),
+        );
+      },
+      itemCount: vm.forYou.length,
+    );
+  }
+
+  // Onglet 2 : Tendences
+  Widget _buildTendences(MangaViewModel vm) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

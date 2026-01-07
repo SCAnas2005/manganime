@@ -43,7 +43,29 @@ class JikanService extends ApiService {
   }
 
   @override
-  Future<List<Anime>> search({
+  Future<List<Manga>> fetchMangaList(Uri uri) async {
+    final response = await http.get(uri);
+
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      final List<dynamic> mangaList = jsonData['data'];
+
+      // Conversion du JSON en liste d’objets Anime
+      final List<Manga> mangas = mangaList
+          .map<Manga>((manga) {
+            return jsonToManga(manga);
+          })
+          .where((manga) => manga.title.isNotEmpty)
+          .toList();
+
+      return mangas;
+    } else {
+      throw Exception('Erreur ${response.statusCode}');
+    }
+  }
+
+  @override
+  Future<List<Anime>> searchAnime({
     int page = 1,
     required String query,
     int? limit,
@@ -87,6 +109,53 @@ class JikanService extends ApiService {
       "$baseUrl/anime",
     ).replace(queryParameters: queryParameters);
     return fetchAnimeList(url);
+  }
+
+  @override
+  Future<List<Manga>> searchManga({
+    int page = 1,
+    required String query,
+    int? limit,
+    MangaType? type,
+    int? score,
+    int? minScore,
+    int? maxScore,
+    MediaStatus? status,
+    bool sfw = false,
+    List<Genres>? genres,
+    String? genresExclude,
+    MediaOrderBy? orderBy,
+    SortOrder? sort,
+    String? letter,
+    String? magazines,
+    String? startDate,
+    String? endDate,
+  }) async {
+    final queryParameters = <String, String>{
+      'page': page.toString(),
+      'q': query,
+      if (limit != null) 'limit': limit.toString(),
+      if (type != null) 'type': type.toString(),
+      if (score != null) 'score': score.toString(),
+      if (minScore != null) 'min_score': minScore.toString(),
+      if (maxScore != null) 'max_score': maxScore.toString(),
+      if (status != null) 'status': status.toString(),
+      'sfw': sfw.toString(),
+      if (genres != null) 'genres': genres.map((g) => g.id).join(','),
+      if (genresExclude != null) 'genres_exclude': genresExclude.toString(),
+      if (orderBy != null) 'order_by': orderBy.toString(),
+      if (sort != null) 'sort': sort.toString(),
+      if (letter != null) 'letter': letter.toString(),
+      if (magazines != null) 'magazines': magazines.toString(),
+      if (startDate != null) 'start_date': startDate.toString(),
+      if (endDate != null) 'end_date': endDate.toString(),
+    };
+
+    var url = Uri.parse(
+      "$baseUrl/manga",
+    ).replace(queryParameters: queryParameters);
+
+    return fetchMangaList(url);
   }
 
   /// Récupère une liste d’animes les plus populaires depuis Jikan.
@@ -325,30 +394,30 @@ class JikanService extends ApiService {
     );
   }
 
-  Future<List<Anime>> searchAnime({String query = ""}) async {
-    final queryParameters = <String, String>{'q': query};
+  // Future<List<Anime>> searchAnime({String query = ""}) async {
+  //   final queryParameters = <String, String>{'q': query};
 
-    final url = Uri.parse(
-      '$baseUrl/anime',
-    ).replace(queryParameters: queryParameters);
+  //   final url = Uri.parse(
+  //     '$baseUrl/anime',
+  //   ).replace(queryParameters: queryParameters);
 
-    final response = await http.get(url);
+  //   final response = await http.get(url);
 
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body);
-      final List<dynamic> animeList = jsonData['data'];
+  //   if (response.statusCode == 200) {
+  //     final jsonData = json.decode(response.body);
+  //     final List<dynamic> animeList = jsonData['data'];
 
-      // Conversion du JSON en liste d’objets Anime
-      final List<Anime> animes = animeList
-          .map<Anime>((anime) {
-            return jsonToAnime(anime);
-          })
-          .where((anime) => anime.title.isNotEmpty)
-          .toList();
+  //     // Conversion du JSON en liste d’objets Anime
+  //     final List<Anime> animes = animeList
+  //         .map<Anime>((anime) {
+  //           return jsonToAnime(anime);
+  //         })
+  //         .where((anime) => anime.title.isNotEmpty)
+  //         .toList();
 
-      return animes;
-    } else {
-      throw Exception('Erreur ${response.statusCode}');
-    }
-  }
+  //     return animes;
+  //   } else {
+  //     throw Exception('Erreur ${response.statusCode}');
+  //   }
+  // }
 }

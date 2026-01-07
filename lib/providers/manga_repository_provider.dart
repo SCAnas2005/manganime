@@ -3,10 +3,12 @@ import 'package:flutter_application_1/models/anime_sections.dart';
 import 'package:flutter_application_1/models/identifiable_enums.dart';
 import 'package:flutter_application_1/models/manga.dart';
 import 'package:flutter_application_1/providers/database_provider.dart';
+import 'package:flutter_application_1/providers/global_manga_favorites_provider.dart';
 import 'package:flutter_application_1/providers/manga_cache_provider.dart';
 import 'package:flutter_application_1/providers/media_path_provider.dart';
 import 'package:flutter_application_1/providers/media_sections_provider.dart';
 import 'package:flutter_application_1/providers/request_queue_provider.dart';
+import 'package:flutter_application_1/providers/user_profile_provider.dart';
 import 'package:flutter_application_1/services/api_service.dart';
 import 'package:flutter_application_1/services/network_service.dart';
 
@@ -188,6 +190,66 @@ class MangaRepository {
       } catch (e) {
         debugPrint("[$MangaRepository] getMostLikedMangas: $e");
       }
+    }
+
+    return [];
+  }
+
+  Future<List<Manga>> getForYouManga(
+    GlobalMangaFavoritesProvider provider, {
+    int page = 1,
+  }) async {
+    final liked = provider.loadedFavoriteMangas;
+
+    // Calcul du profil utilisateur
+    final userProfile = UserprofileProvider.create(likedMangas: liked);
+    debugPrint("User profil built: $userProfile");
+
+    // Le top genres
+    final topGenres = userProfile.getTopGenres<Manga>(3);
+    if (topGenres.length >= 3) {
+      debugPrint(
+        "Manga Top genres: ${topGenres.first}, ${topGenres[1]}, ${topGenres[2]}",
+      );
+    }
+
+    if (topGenres.isEmpty) {
+      return await getPopularMangas();
+    }
+
+    List<Manga> candidates = [];
+
+    try {
+      // 1. API
+      if (await NetworkService.isConnected) {
+        candidates = await RequestQueue.instance.enqueue(
+          () => api.searchManga(page: page, query: "", genres: topGenres),
+        );
+        debugPrint("fetchForYou mangas count : ${candidates.length}");
+      } else {
+        candidates = await DatabaseProvider.instance.search<Manga>(
+          page: page,
+          query: "",
+          genres: topGenres,
+        );
+      }
+
+      debugPrint("Removing liked mangas from suggestions");
+      final likedIds = liked.map((e) => e.id).toSet();
+      candidates = candidates.where((a) => !likedIds.contains(a.id)).toList();
+
+      candidates.sort((a, b) {
+        final scoreA = userProfile.calculateScoreFor<Manga>(a);
+        final scoreB = userProfile.calculateScoreFor<Manga>(b);
+
+        // compareTo inversé (B vers A) pour avoir l'ordre Décroissant (Plus grand score en haut)
+        return scoreB.compareTo(scoreA);
+      });
+
+      debugPrint("fetchForYou mangas count : ${candidates.length}");
+      return candidates;
+    } catch (e) {
+      debugPrint("[MangaRepository] getForYouManga: $e");
     }
 
     return [];
