@@ -16,6 +16,14 @@ class MangaCache {
     _box = await Hive.openBox(MANGA_CACHE_KEY);
   }
 
+  Future<void> populate(List<Manga> mangas) async {
+    if (mangas.isEmpty) return;
+
+    for (var manga in mangas) {
+      await save(manga);
+    }
+  }
+
   /// Récupère un manga déjà en cache (RAM ou Hive)
   Manga? get(int id) {
     // 1. Cache mémoire

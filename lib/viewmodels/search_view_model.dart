@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/providers/anime_repository_provider.dart';
 import 'package:flutter_application_1/providers/request_queue_provider.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
 
@@ -39,9 +40,9 @@ class SearchViewModel extends ChangeNotifier {
   Future<void> _performSearch(String query) async {
     // 3. On passe par la RequestQueue pour la sécurité API
     try {
-      final newResults = await RequestQueue.instance.enqueue(() {
-        return _service.searchAnime(query: query);
-      });
+      final newResults = await AnimeRepository(
+        api: JikanService(),
+      ).search(query: query);
 
       results = newResults;
       notifyListeners();
@@ -53,9 +54,7 @@ class SearchViewModel extends ChangeNotifier {
   Future<void> searchEmpty() async {
     try {
       // Même pour le top anime, on passe par la queue
-      results = await RequestQueue.instance.enqueue(() {
-        return _service.getTopAnime();
-      });
+      results = await AnimeRepository(api: JikanService()).getPopularAnimes();
       notifyListeners();
     } catch (e) {
       debugPrint("Erreur Empty Search: $e");
