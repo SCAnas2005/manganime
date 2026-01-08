@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/home.dart';
 import 'package:flutter_application_1/providers/boot_loader.dart';
-import 'package:flutter_application_1/services/network_service.dart'; // Ton service réseau
+import 'package:flutter_application_1/services/network_service.dart';
+import 'package:flutter_application_1/providers/settings_repository_provider.dart';
+import 'package:flutter_application_1/providers/settings_storage_provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -11,31 +13,47 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  String _loadingText = "Initialisation...";
-  bool _hasError = false; // Nouvel état pour gérer l'erreur
+  String _loadingText = "Chargement...";
+  bool _hasError = false;
 
   @override
   void initState() {
     super.initState();
-    _startAppProcess();
+    _checkAndStart();
   }
 
-  Future<void> _startAppProcess() async {
+  Future<void> _checkAndStart() async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    // 0. Reset état
     setState(() {
       _hasError = false;
-      _loadingText = "Vérification de la connexion...";
+      _loadingText = "Vérification...";
     });
 
+    var settingsRepo = SettingsRepositoryProvider(SettingsStorage.instance);
+    bool isFirstLaunch = settingsRepo.getSettings().isFirstLaunch;
+
+    if (!isFirstLaunch) {
+      debugPrint("Lancement rapide (Mode hors-ligne supporté)");
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _navigateToHome();
+      });
+      return;
+    }
+
+    _loadingText = "Vérification de la connexion...";
     bool isConnected = await NetworkService.isConnected;
 
     if (!isConnected) {
       setState(() {
         _hasError = true;
-        _loadingText = "Aucune connexion internet détectée.";
+        _loadingText =
+            "Première installation : Connexion internet requise pour télécharger les données.";
       });
       return;
     }
 
+    // Si on a internet, on lance le gros téléchargement
     try {
       await BootLoader.onAppStart(
         onStatusChanged: (message) {
@@ -44,18 +62,24 @@ class _SplashScreenState extends State<SplashScreen> {
           });
         },
       );
-
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => HomePage(title: "MangAnime")),
-        );
-      }
+      // Une fois fini, on va à l'accueil
+      _navigateToHome();
     } catch (e) {
-      debugPrint("Erreur BootLoader: $e");
+      debugPrint("Erreur init: $e");
       setState(() {
         _hasError = true;
-        _loadingText = "Une erreur est survenue pendant le chargement.";
+        _loadingText = "Erreur lors du téléchargement. Veuillez réessayer.";
       });
+    }
+  }
+
+  void _navigateToHome() {
+    if (mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => const HomePage(title: "MangAnime"),
+        ),
+      );
     }
   }
 
@@ -69,15 +93,12 @@ class _SplashScreenState extends State<SplashScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // --- ICONE (Change selon l'état) ---
               Icon(
                 _hasError ? Icons.wifi_off_rounded : Icons.downloading_rounded,
                 size: 80,
                 color: _hasError ? Colors.red : Colors.blue,
               ),
               const SizedBox(height: 30),
-
-              // --- TEXTE D'ÉTAT ---
               Text(
                 _loadingText,
                 textAlign: TextAlign.center,
@@ -88,20 +109,14 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
               ),
               const SizedBox(height: 30),
-
-              // --- BOUTON RETRY OU LOADER ---
               if (_hasError)
                 ElevatedButton.icon(
-                  onPressed: _startAppProcess, // Relance la fonction
+                  onPressed: _checkAndStart, // On relance la vérif
                   icon: const Icon(Icons.refresh),
                   label: const Text("Réessayer"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
-                    ),
                   ),
                 )
               else

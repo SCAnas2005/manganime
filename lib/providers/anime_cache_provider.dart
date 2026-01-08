@@ -21,6 +21,14 @@ class AnimeCache {
     _box = await Hive.openBox(ANIME_CACHE_KEY);
   }
 
+  Future<void> populate(List<Anime> animes) async {
+    if (animes.isEmpty) return;
+
+    for (var anime in animes) {
+      await save(anime);
+    }
+  }
+
   /// Récupère un anime déjà en cache (RAM ou Hive)
   Future<Anime?> get(int id) async {
     // 1. Cache mémoire
