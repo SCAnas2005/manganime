@@ -253,6 +253,7 @@ class AnimeRepository {
     List<Genres>? genres,
     MediaStatus? status,
     MediaOrderBy? orderBy,
+    SortOrder? sort,
     AnimeType? animeType,
     AnimeRating? animeRating,
   }) async {
@@ -265,6 +266,7 @@ class AnimeRepository {
             genres: genres,
             status: status,
             orderBy: orderBy,
+            sort: sort,
             type: animeType,
             rating: animeRating,
           ),
