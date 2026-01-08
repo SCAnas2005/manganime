@@ -58,7 +58,6 @@ class AppSettingsViewState extends State<AppSettingsView> {
       body: SettingsList(
         darkTheme: SettingsThemeData(settingsListBackground: Colors.black),
         sections: [
-          /// 🎨 Apparence
           SettingsSection(
             title: const Text('Apparence'),
             tiles: [
@@ -74,7 +73,6 @@ class AppSettingsViewState extends State<AppSettingsView> {
             ],
           ),
 
-          /// 🔔 Notifications
           SettingsSection(
             title: const Text('Notifications'),
             tiles: [
@@ -137,7 +135,6 @@ class AppSettingsViewState extends State<AppSettingsView> {
             ],
           ),
 
-          /// 🔐 Données
           SettingsSection(
             title: const Text('Données et confidentialité'),
             tiles: [
@@ -173,7 +170,6 @@ class AppSettingsViewState extends State<AppSettingsView> {
             ],
           ),
 
-          /// ℹ️ Footer
           SettingsSection(
             tiles: [
               SettingsTile(

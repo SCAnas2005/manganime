@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/models/manga.dart';
 import 'package:flutter_application_1/providers/anime_cache_provider.dart';
+import 'package:flutter_application_1/providers/anime_repository_provider.dart';
 import 'package:flutter_application_1/providers/database_provider.dart';
 import 'package:flutter_application_1/providers/like_storage_provider.dart';
 import 'package:flutter_application_1/providers/manga_cache_provider.dart';
@@ -13,6 +16,7 @@ import 'package:flutter_application_1/providers/settings_storage_provider.dart';
 import 'package:flutter_application_1/providers/user_stats_provider.dart';
 import 'package:flutter_application_1/services/image_sync_service.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
+import 'package:flutter_application_1/services/network_service.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class BootLoader {
@@ -47,27 +51,42 @@ class BootLoader {
     await SettingsStorage.instance.init();
   }
 
+  static Future<void> _requireInternet() async {
+    // Si tu as une classe NetworkService, utilise-la ici
+    // Exemple basique :
+    bool hasConnection = await NetworkService.isConnected;
+    if (!hasConnection) {
+      throw const SocketException("Connexion perdue pendant le téléchargement");
+    }
+  }
+
   static Future<void> onAppStart({
     Function(String message)? onStatusChanged,
   }) async {
     var provider = SettingsRepositoryProvider(SettingsStorage.instance);
     bool isFirstLaunch = provider.getSettings().isFirstLaunch;
 
-    await provider.updateSettings(
-      provider.getSettings().copyWith(isFirstLaunch: true),
-    );
-
     if (isFirstLaunch) {
       debugPrint("========= App first launch");
 
+      await MediaSectionsProvider.instance.clearAll();
+      await AnimeCache.instance.clear();
+      await MangaCache.instance.clear();
+      await DatabaseProvider.instance.clear<Manga>();
+      await DatabaseProvider.instance.clear<Anime>();
+
+      await _requireInternet();
       debugPrint("Database populate started");
       onStatusChanged?.call("Téléchargement des Mangas...");
-      await DatabaseProvider.instance.clear<Manga>();
       await DatabaseProvider.instance.populate<Manga>(JikanService(), 300);
 
+      await _requireInternet();
       onStatusChanged?.call("Téléchargement des Animes...");
-      await DatabaseProvider.instance.clear<Anime>();
       await DatabaseProvider.instance.populate<Anime>(JikanService(), 300);
+
+      await _requireInternet();
+      onStatusChanged?.call("Initialisation du cache");
+      await MediaSectionsProvider.instance.reloadSections(JikanService());
 
       onStatusChanged?.call("Mise à jour du cache...");
       debugPrint("Updating cache");
