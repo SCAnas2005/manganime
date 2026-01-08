@@ -37,7 +37,7 @@ class SearchViewModel extends ChangeNotifier {
       _lastQuery = query;
 
       if (query.isNotEmpty) {
-        _performSearch(query);
+        _performSearch(query, filter);
       } else {
         searchEmpty(filter: filter);
         _allResults = [];       
@@ -45,21 +45,49 @@ class SearchViewModel extends ChangeNotifier {
     });
   }
 
-  Future<void> _performSearch(String query) async {
-    // 3. On passe par la RequestQueue pour la sécurité API
-    try {
-      final newResults = await AnimeRepository(
-        api: JikanService(),
-      ).search(query: query);
-
-      results = newResults;
-      _allResults = newResults;
-      _applyGenreFilter();
-      notifyListeners();
-    } catch (e) {
-      debugPrint("Erreur Search: $e");
-    }
+  void onFilterChanged(String newFilter) {
+  // Si on a une recherche en cours, on la relance avec le nouveau filtre
+  if (_lastQuery.isNotEmpty) {
+    _performSearch(_lastQuery, newFilter);
+  } else {
+    // Sinon on recharge la liste vide avec le nouveau filtre
+    searchEmpty(filter: newFilter);
   }
+}
+
+
+ Future<void> _performSearch(String query, String filter) async {
+  try {
+    MediaOrderBy? orderBy;
+    SortOrder? sortOrder;
+
+    if (filter == 'date de sortie') {
+      orderBy = MediaOrderBy.start_date;
+      sortOrder = SortOrder.asc;
+    } else if (filter == 'Popularité') {
+      orderBy = MediaOrderBy.popularity;
+      sortOrder = SortOrder.asc;
+    } else if (filter == 'Note') {
+      orderBy = MediaOrderBy.score;
+      sortOrder = SortOrder.desc; 
+    }
+
+    final newResults = await AnimeRepository(
+      api: JikanService(),
+    ).search(
+      query: query,
+      orderBy: orderBy,
+      sort: sortOrder,
+    );
+
+    results = newResults;
+    _allResults = newResults;
+    _applyGenreFilter();
+    notifyListeners();
+  } catch (e) {
+    debugPrint("Erreur Search: $e");
+  }
+}
   
   void _applyGenreFilter() {
     if (_currentSelectedGenres.isEmpty) {
@@ -82,30 +110,28 @@ void updateSelectedGenres(Set<String> genres) {
 
 Future<void> searchEmpty({required String filter}) async {
     try {
+      MediaOrderBy? orderBy;
+      SortOrder? sortOrder;
 
-     switch (filter) {
-    case 'Popularité':
-      results = await RequestQueue.instance.enqueue(() {
-        return _service.getTopAnime(filter: 'bypopularity');
-      });
-      break;
-    case 'Note':
-        results = await AnimeRepository(api: JikanService()).getPopularAnimes();
-      break;
-    case 'Favoris':
-      results = await RequestQueue.instance.enqueue(() {
-        return _service.getTopAnime(filter: 'favorite');
-      });
-      break;
-
-//       // Même pour le top anime, on passe par la queue
-//       results = await AnimeRepository(api: JikanService()).getPopularAnimes();
-//       notifyListeners();
-//     } catch (e) {
-//       debugPrint("Erreur Empty Search: $e");
-//     }
-// >>>>>>> c67b7bce45a7be23ab9f81b935a7fefe0d0b2c58
-  }
+      // Configuration du tri selon le filtre
+      if (filter == 'date de sortie') {
+        orderBy = MediaOrderBy.start_date;
+        sortOrder = SortOrder.desc;
+      } else if (filter == 'Popularité') {
+        orderBy = MediaOrderBy.popularity;
+        sortOrder = SortOrder.asc;
+      } else if (filter == 'Note') {
+        orderBy = MediaOrderBy.score;
+        sortOrder = SortOrder.desc;
+      }
+   // Recherche avec query vide mais avec tri
+      results = await AnimeRepository(
+        api: JikanService(),
+      ).search(
+        query: "",
+        orderBy: orderBy,
+        sort: sortOrder,
+      );
 
       _allResults = List.from(results);
       _applyGenreFilter();

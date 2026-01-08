@@ -15,7 +15,7 @@ class Search extends StatefulWidget {
 class _SearchState extends State<Search> {
   int index = 0;
   String _selectedFilter = 'Note'; // Filtre par défaut
-  final List<String> filters = ['Popularité', 'Note', 'Favoris'];
+  final List<String> filters = ['Popularité', 'Note', 'date de sortie'];
   final List<String> mainGenres = [
     'Action', 'Adventure', 'Comedy', 'Drama',
     'Fantasy', 'Horror', 'Mecha', 'Music',
@@ -118,7 +118,7 @@ class _SearchState extends State<Search> {
                       setState(() {
                         _selectedFilter = newValue;
                       });
-                      await searchViewModel.searchEmpty(filter: _selectedFilter);
+                      searchViewModel.onFilterChanged(_selectedFilter);
                     }
                   },
                 ),
