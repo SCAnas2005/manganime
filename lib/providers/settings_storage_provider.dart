@@ -26,6 +26,7 @@ class SettingsStorage {
       notificationTime: TimeOfDayX.fromMinutes(
         _box.get(AppSettingsKey.notificationTime.key) ?? 0,
       ),
+      dataVersion: _box.get(AppSettingsKey.dataVersion.key) ?? 0,
     );
   }
 
@@ -48,5 +49,7 @@ class SettingsStorage {
         settings.notificationTime!.toMinutes(),
       );
     }
+
+    await _box.put(AppSettingsKey.dataVersion.key, settings.dataVersion);
   }
 }

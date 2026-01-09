@@ -5,6 +5,7 @@ enum AppSettingsKey {
   isNotificationAllowed,
   isPersonalizedRecommendationAllowed,
   notificationTime,
+  dataVersion,
 }
 
 extension AppSettingsKeyX on AppSettingsKey {
