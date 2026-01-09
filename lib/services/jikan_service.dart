@@ -280,41 +280,6 @@ class JikanService extends ApiService {
     return await fetchAnimeList(url);
   }
 
-  // =======
-  //   Future<List<Anime>> searchAnime({
-  //     String query =""
-  //     }) async {
-
-  //       final queryParameters = <String, String>{
-  //         'q': query,
-  //          };
-
-  //        final url = Uri.parse(
-  //         '$baseUrl/anime',
-  //       ).replace(queryParameters: queryParameters);
-
-  //       final response = await http.get(url);
-
-  //       if (response.statusCode == 200) {
-  //         final jsonData = json.decode(response.body);
-  //         final List<dynamic> animeList = jsonData['data'];
-
-  //         // Conversion du JSON en liste d’objets Anime
-  //         final List<Anime> animes = animeList
-  //             .map<Anime>((anime) {
-  //               return jsonToAnime(anime);
-  //             })
-  //             .where((anime) => anime.title.isNotEmpty)
-  //             .toList();
-
-  //         return animes;
-  //       } else {
-  //         throw Exception('Erreur ${response.statusCode}');
-  //       }
-  //     }
-
-  // >>>>>>> d736284cb48dda01c35ea0580f4e23f912b35d19
-
   /// Récupère les informations détaillées d’un anime via son [id MAL].
   ///
   /// Retourne un objet [AnimeDetail].
@@ -357,7 +322,7 @@ class JikanService extends ApiService {
   Anime jsonToAnime(Map<String, dynamic> json) {
     return Anime(
       id: json["mal_id"],
-      title: json['title_english']?.toString() ?? '',
+      title: (json['title_english'] ?? json['title'] ?? '').toString(),
       synopsis: json['synopsis'] ?? '',
       imageUrl: json['images']?['jpg']?['image_url']?.toString() ?? '',
       status: MediaStatusX.fromJikan(json["status"]),
@@ -369,6 +334,16 @@ class JikanService extends ApiService {
                 .map((g) => g!)
                 .toList()
           : [],
+      startDate: json["aired"] == null
+          ? null
+          : json["aired"]["from"] == null
+          ? null
+          : DateTime.tryParse(json["aired"]["from"]),
+      endDate: json["aired"] == null
+          ? null
+          : json["aired"]["to"] == null || json["aired"]["to"] == "null"
+          ? null
+          : DateTime.tryParse(json["aired"]["to"]),
     );
   }
 
@@ -391,33 +366,16 @@ class JikanService extends ApiService {
                 .map((g) => g!)
                 .toList()
           : [],
+      startDate: json["published"] == null
+          ? null
+          : json["published"]["from"] == null
+          ? null
+          : DateTime.tryParse(json["published"]["from"]),
+      endDate: json["published"] == null
+          ? null
+          : json["published"]["to"] == null || json["published"]["to"] == "null"
+          ? null
+          : DateTime.tryParse(json["published"]["to"]),
     );
   }
-
-  // Future<List<Anime>> searchAnime({String query = ""}) async {
-  //   final queryParameters = <String, String>{'q': query};
-
-  //   final url = Uri.parse(
-  //     '$baseUrl/anime',
-  //   ).replace(queryParameters: queryParameters);
-
-  //   final response = await http.get(url);
-
-  //   if (response.statusCode == 200) {
-  //     final jsonData = json.decode(response.body);
-  //     final List<dynamic> animeList = jsonData['data'];
-
-  //     // Conversion du JSON en liste d’objets Anime
-  //     final List<Anime> animes = animeList
-  //         .map<Anime>((anime) {
-  //           return jsonToAnime(anime);
-  //         })
-  //         .where((anime) => anime.title.isNotEmpty)
-  //         .toList();
-
-  //     return animes;
-  //   } else {
-  //     throw Exception('Erreur ${response.statusCode}');
-  //   }
-  // }
 }

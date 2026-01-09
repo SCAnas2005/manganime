@@ -37,6 +37,12 @@ class Manga extends Identifiable {
   @override
   final List<Genres> genres;
 
+  @override
+  DateTime? startDate;
+
+  @override
+  DateTime? endDate;
+
   /// Constructeur de la classe Manga.
   ///
   /// Tous les champs sauf [score] et [genres] sont obligatoires.
@@ -49,6 +55,8 @@ class Manga extends Identifiable {
     required this.type,
     required this.score,
     required this.genres,
+    this.startDate,
+    this.endDate,
   });
 
   factory Manga.fromJson(Map<String, dynamic> json) {
@@ -66,6 +74,12 @@ class Manga extends Identifiable {
               .whereType<Genres>() // <-- filtre les null
               .toList() ??
           [],
+      startDate: json["startDate"] == null
+          ? null
+          : DateTime.tryParse(json["startDate"]),
+      endDate: json["endDate"] == null
+          ? null
+          : DateTime.tryParse(json["endDate"]),
     );
   }
 
@@ -78,6 +92,8 @@ class Manga extends Identifiable {
     String? type,
     List<Genres>? genres,
     double? score,
+    DateTime? startDate,
+    DateTime? endDate,
   }) {
     return Manga(
       id: id ?? this.id,
@@ -88,6 +104,8 @@ class Manga extends Identifiable {
       type: type ?? this.type,
       genres: genres ?? this.genres,
       score: score ?? this.score,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
     );
   }
 
@@ -102,6 +120,8 @@ class Manga extends Identifiable {
       'score': score,
       'type': type,
       "genres": genres.map((g) => g.toReadableString()).toList(),
+      "startDate": startDate?.toIso8601String(),
+      "endDate": endDate?.toIso8601String(),
     };
   }
 }

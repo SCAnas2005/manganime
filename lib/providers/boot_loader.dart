@@ -39,7 +39,7 @@ class BootLoader {
 
     // Ouvre une box poru le service de synchronisation d'image
     await ImageSyncService.instance.init();
-    await ImageSyncService.instance.processQueue();
+    ImageSyncService.instance.processQueue();
 
     // Ouvre une box pour les sections anime/manga
     await MediaSectionsProvider.instance.init(JikanService());
@@ -65,6 +65,8 @@ class BootLoader {
   }) async {
     var provider = SettingsRepositoryProvider(SettingsStorage.instance);
     bool isFirstLaunch = provider.getSettings().isFirstLaunch;
+
+    isFirstLaunch = true;
 
     if (isFirstLaunch) {
       debugPrint("========= App first launch");

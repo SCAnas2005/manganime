@@ -34,6 +34,12 @@ class Anime extends Identifiable {
   @override
   final List<Genres> genres;
 
+  @override
+  DateTime? startDate;
+
+  @override
+  DateTime? endDate;
+
   /// Constructeur de la classe Anime.
   ///
   /// Tous les champs sauf [score] sont obligatoires.
@@ -45,6 +51,8 @@ class Anime extends Identifiable {
     required this.status,
     required this.genres,
     this.score,
+    this.startDate,
+    this.endDate,
   });
 
   factory Anime.fromJson(Map<String, dynamic> json) {
@@ -61,6 +69,12 @@ class Anime extends Identifiable {
               .whereType<Genres>() // <-- filtre les null
               .toList() ??
           [],
+      startDate: json["startDate"] == null
+          ? null
+          : DateTime.tryParse(json["startDate"]),
+      endDate: json["endDate"] == null
+          ? null
+          : DateTime.tryParse(json["endDate"]),
     );
   }
 
@@ -74,6 +88,8 @@ class Anime extends Identifiable {
       'status': status.key,
       'score': score,
       "genres": genres.map((g) => g.toReadableString()).toList(),
+      "startDate": startDate?.toIso8601String(),
+      "endDate": endDate?.toIso8601String(),
     };
   }
 
@@ -85,6 +101,8 @@ class Anime extends Identifiable {
     MediaStatus? status,
     List<Genres>? genres,
     double? score,
+    DateTime? startDate,
+    DateTime? endDate,
   }) {
     return Anime(
       id: id ?? this.id,
@@ -94,6 +112,8 @@ class Anime extends Identifiable {
       status: status ?? this.status,
       genres: genres ?? this.genres,
       score: score ?? this.score,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
     );
   }
 
