@@ -270,7 +270,7 @@ class DatabaseProvider {
       result.add(item);
     }
 
-    if (orderBy != null && T == Anime) {
+    if (orderBy != null) {
       switch (orderBy) {
         case MediaOrderBy.score:
           result.sort((a, b) {

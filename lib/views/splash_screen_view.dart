@@ -33,13 +33,13 @@ class _SplashScreenState extends State<SplashScreen> {
     var settingsRepo = SettingsRepositoryProvider(SettingsStorage.instance);
     bool isFirstLaunch = settingsRepo.getSettings().isFirstLaunch;
 
-    if (!isFirstLaunch) {
-      debugPrint("Lancement rapide (Mode hors-ligne supporté)");
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _navigateToHome();
-      });
-      return;
-    }
+    // if (!isFirstLaunch) {
+    //   debugPrint("Lancement rapide (Mode hors-ligne supporté)");
+    //   WidgetsBinding.instance.addPostFrameCallback((_) {
+    //     _navigateToHome();
+    //   });
+    //   return;
+    // }
 
     _loadingText = "Vérification de la connexion...";
     bool isConnected = await NetworkService.isConnected;
