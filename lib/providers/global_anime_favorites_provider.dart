@@ -3,7 +3,6 @@ import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/providers/anime_cache_provider.dart';
 import 'package:flutter_application_1/providers/anime_repository_provider.dart';
 import 'package:flutter_application_1/providers/like_storage_provider.dart';
-import 'package:flutter_application_1/providers/media_path_provider.dart';
 import 'package:flutter_application_1/services/image_sync_service.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
 

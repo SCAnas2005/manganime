@@ -40,6 +40,14 @@ class Anime extends Identifiable {
   @override
   DateTime? endDate;
 
+  final String studio;
+
+  final AnimeType type;
+
+  final AnimeRating rating;
+
+  final int? episodes;
+
   /// Constructeur de la classe Anime.
   ///
   /// Tous les champs sauf [score] sont obligatoires.
@@ -53,6 +61,10 @@ class Anime extends Identifiable {
     this.score,
     this.startDate,
     this.endDate,
+    required this.studio,
+    required this.type,
+    required this.rating,
+    this.episodes,
   });
 
   factory Anime.fromJson(Map<String, dynamic> json) {
@@ -75,6 +87,10 @@ class Anime extends Identifiable {
       endDate: json["endDate"] == null
           ? null
           : DateTime.tryParse(json["endDate"]),
+      studio: json["studio"] as String? ?? "Inconnu",
+      type: AnimeTypeX.fromString(json["type"] as String?),
+      rating: AnimeRatingX.fromString(json["rating"] as String?),
+      episodes: json["episodes"] as int?,
     );
   }
 
@@ -90,6 +106,10 @@ class Anime extends Identifiable {
       "genres": genres.map((g) => g.toReadableString()).toList(),
       "startDate": startDate?.toIso8601String(),
       "endDate": endDate?.toIso8601String(),
+      "studio": studio,
+      "type": type.key,
+      "rating": rating.key,
+      "episodes": episodes,
     };
   }
 
@@ -103,6 +123,10 @@ class Anime extends Identifiable {
     double? score,
     DateTime? startDate,
     DateTime? endDate,
+    String? studio,
+    AnimeType? type,
+    AnimeRating? rating,
+    int? episodes,
   }) {
     return Anime(
       id: id ?? this.id,
@@ -114,6 +138,10 @@ class Anime extends Identifiable {
       score: score ?? this.score,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
+      studio: studio ?? this.studio,
+      type: type ?? this.type,
+      rating: rating ?? this.rating,
+      episodes: episodes ?? this.episodes,
     );
   }
 

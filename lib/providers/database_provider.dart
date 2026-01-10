@@ -1,5 +1,6 @@
+// ignore_for_file: constant_identifier_names
+
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/models/identifiable.dart';
@@ -13,9 +14,7 @@ import 'package:flutter_application_1/services/network_service.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class DatabaseProvider {
-  // ignore: constant_identifier_names
   static const String ANIMES_KEY = "animes_key";
-  // ignore: constant_identifier_names
   static const String MANGAS_KEY = "mangas_key";
 
   static late final Box _animeBox;

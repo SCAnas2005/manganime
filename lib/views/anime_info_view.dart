@@ -114,7 +114,6 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
                             fit: StackFit.expand,
                             children: [
                               _buildCoverImage(),
-                              // Dégradé pour la lisibilité
                               const DecoratedBox(
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
@@ -162,7 +161,7 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Ligne Titre + Like Button
+                              // A. TITRE + LIKE
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -191,57 +190,154 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 20),
 
-                              // --- 3. GRID D'INFOS (Score, Statut, Date) ---
+                              const SizedBox(height: 12),
+
+                              // B. LIGNE TYPE & STUDIO
+                              Row(
+                                children: [
+                                  // Badge pour le Type (TV, Movie...)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      animeInfo.type.label.toUpperCase(),
+                                      style: TextStyle(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onPrimary,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+
+                                  if (animeInfo.type != AnimeType.none)
+                                    const SizedBox(width: 8),
+
+                                  // Nom du Studio
+                                  Expanded(
+                                    child: Text(
+                                      animeInfo.studio.isEmpty
+                                          ? "Studio inconnu"
+                                          : animeInfo.studio,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 24),
+
+                              // C. GRID D'INFOS (Score, Statut, Episodes, Date, Age)
+                              // C. GRID D'INFOS (Score, Statut, Episodes, Date, Age)
                               Container(
-                                padding: const EdgeInsets.all(16),
+                                width: double
+                                    .infinity, // ✅ 1. Force la largeur maximale
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                  horizontal: 8,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Theme.of(context)
                                       .colorScheme
                                       .surfaceContainerHighest
-                                      .withOpacity(0.3),
+                                      .withValues(alpha: 0.3),
                                   borderRadius: BorderRadius.circular(16),
                                 ),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: [
-                                    _buildInfoColumn(
-                                      context,
-                                      icon: Icons.star_rounded,
-                                      color: Colors.amber,
-                                      label: "Score",
-                                      value: animeInfo.score != null
-                                          ? animeInfo.score!.toStringAsFixed(1)
-                                          : "N/A",
-                                    ),
-                                    _buildVerticalDivider(context),
-                                    _buildInfoColumn(
-                                      context,
-                                      icon: _getStatusIcon(animeInfo.status),
-                                      color: _getStatusColor(animeInfo.status),
-                                      label: "Statut",
-                                      value: animeInfo.status.key,
-                                    ),
-                                    _buildVerticalDivider(context),
-                                    _buildInfoColumn(
-                                      context,
-                                      icon: Icons.calendar_today_rounded,
-                                      color: Colors.blueAccent,
-                                      label: "Année",
-                                      value:
-                                          animeInfo.startDate?.year
-                                              .toString() ??
-                                          "?",
-                                    ),
-                                  ],
+                                // ✅ 2. On remplace SingleChildScrollView par FittedBox
+                                // Ça permet aux items de prendre toute la largeur (spaceAround)
+                                // et de rétrécir un tout petit peu si l'écran est minuscule.
+                                child: FittedBox(
+                                  fit: BoxFit
+                                      .scaleDown, // Rétrécit seulement si nécessaire
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment
+                                        .spaceAround, // Répartition équitable
+                                    children: [
+                                      // 1. SCORE
+                                      _buildInfoColumn(
+                                        context,
+                                        icon: Icons.star_rounded,
+                                        color: Colors.amber,
+                                        label: "Score",
+                                        value: animeInfo.score != null
+                                            ? animeInfo.score!.toStringAsFixed(
+                                                1,
+                                              )
+                                            : "N/A",
+                                      ),
+                                      _buildVerticalDivider(context),
+
+                                      // 2. STATUT
+                                      _buildInfoColumn(
+                                        context,
+                                        icon: _getStatusIcon(animeInfo.status),
+                                        color: _getStatusColor(
+                                          animeInfo.status,
+                                        ),
+                                        label: "Statut",
+                                        value: animeInfo.status.key,
+                                      ),
+
+                                      // 3. EPISODES
+                                      if (animeInfo.episodes != null) ...[
+                                        _buildVerticalDivider(context),
+                                        _buildInfoColumn(
+                                          context,
+                                          icon: Icons.layers_outlined,
+                                          color: Colors.purpleAccent,
+                                          label: "EPS",
+                                          value: "${animeInfo.episodes}",
+                                        ),
+                                      ],
+
+                                      _buildVerticalDivider(context),
+
+                                      // 4. ANNEE
+                                      _buildInfoColumn(
+                                        context,
+                                        icon: Icons.calendar_today_rounded,
+                                        color: Colors.blueAccent,
+                                        label: "Année",
+                                        value:
+                                            animeInfo.startDate?.year
+                                                .toString() ??
+                                            "?",
+                                      ),
+
+                                      _buildVerticalDivider(context),
+
+                                      // 5. RATING (AGE)
+                                      _buildInfoColumn(
+                                        context,
+                                        icon: Icons.privacy_tip_rounded,
+                                        color: animeInfo.rating.color,
+                                        label: "Age",
+                                        value: animeInfo.rating.key
+                                            .toUpperCase(),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
 
                               const SizedBox(height: 24),
 
-                              // --- 4. DATES DE DIFFUSION ---
+                              // D. DATES
                               _buildSectionTitle(context, "Diffusion"),
                               const SizedBox(height: 8),
                               Row(
@@ -264,7 +360,7 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
 
                               const SizedBox(height: 24),
 
-                              // --- 5. GENRES ---
+                              // E. GENRES
                               Wrap(
                                 spacing: 8,
                                 runSpacing: 8,
@@ -299,7 +395,7 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
 
                               const SizedBox(height: 24),
 
-                              // --- 6. SYNOPSIS ---
+                              // F. SYNOPSIS
                               _buildSectionTitle(context, "Synopsis"),
                               const SizedBox(height: 12),
                               AnimatedSwitcher(
@@ -335,7 +431,6 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
                                         ],
                                       ),
                               ),
-                              // Espace pour le scroll
                               const SizedBox(height: 80),
                             ],
                           ),
@@ -384,19 +479,24 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
     required String label,
     required String value,
   }) {
-    return Column(
-      children: [
-        Icon(icon, color: color, size: 24),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-        Text(
-          label.toUpperCase(),
-          style: TextStyle(color: Colors.grey[600], fontSize: 10),
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8.0,
+      ), // Un peu d'espace horizontal
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 24),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          ),
+          Text(
+            label.toUpperCase(),
+            style: TextStyle(color: Colors.grey[600], fontSize: 9),
+          ),
+        ],
+      ),
     );
   }
 
@@ -413,7 +513,6 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
     );
   }
 
-  // Logique UI pour le statut
   IconData _getStatusIcon(MediaStatus status) {
     switch (status) {
       case MediaStatus.airing:

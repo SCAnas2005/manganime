@@ -13,7 +13,6 @@ class DisplayModeToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [

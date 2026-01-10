@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart'
-    show SearchAnchor, SearchController, SearchBar;
 import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
-import 'package:flutter_application_1/widgets/anime_card.dart';
-import 'package:flutter_application_1/viewmodels/search_view_model.dart';
 import 'package:flutter_application_1/viewmodels/anime_view_model.dart';
+import 'package:flutter_application_1/viewmodels/search_view_model.dart';
+import 'package:flutter_application_1/widgets/anime_card.dart';
 import 'package:provider/provider.dart';
 
 class Search extends StatefulWidget {
@@ -17,11 +15,20 @@ class _SearchState extends State<Search> {
   String _selectedFilter = 'Note'; // Filtre par défaut
   final List<String> filters = ['Popularité', 'Note', 'date de sortie'];
   final List<String> mainGenres = [
-    'Action', 'Adventure', 'Comedy', 'Drama',
-    'Fantasy', 'Horror', 'Mecha', 'Music',
-    'Romance', 'SciFi', 'SliceOfLife', 'Sports',
+    'Action',
+    'Adventure',
+    'Comedy',
+    'Drama',
+    'Fantasy',
+    'Horror',
+    'Mecha',
+    'Music',
+    'Romance',
+    'SciFi',
+    'SliceOfLife',
+    'Sports',
   ];
-   Set<String> selectedGenres = {};
+  Set<String> selectedGenres = {};
 
   @override
   void initState() {
@@ -31,8 +38,8 @@ class _SearchState extends State<Search> {
       searchViewModel.searchEmpty(filter: _selectedFilter);
     });
   }
-  
-@override
+
+  @override
   Widget build(BuildContext context) {
     final vm = context.watch<AnimeViewModel>();
     final searchViewModel = context.watch<SearchViewModel>();
@@ -52,13 +59,12 @@ class _SearchState extends State<Search> {
               hintText: "Rechercher un anime",
 
               onChanged: (text) async {
-               //  if (text.isNotEmpty) {
-                 //    await searchViewModel.search(text);
-                 //}            // else {
-                   // await searchViewModel.searchEmpty("", filter: _selectedFilter);
+                //  if (text.isNotEmpty) {
+                //    await searchViewModel.search(text);
+                //}            // else {
+                // await searchViewModel.searchEmpty("", filter: _selectedFilter);
                 //}
                 searchViewModel.onSearchTextChanged(text, _selectedFilter);
-        
               },
             ),
           ),
@@ -72,7 +78,10 @@ class _SearchState extends State<Search> {
                   child: SizedBox(
                     width: 170,
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.grey),
                         borderRadius: BorderRadius.circular(8),
@@ -99,19 +108,21 @@ class _SearchState extends State<Search> {
                       } else {
                         selectedGenres.add(genre);
                       }
-                      context
-                          .read<SearchViewModel>()
-                          .updateSelectedGenres(selectedGenres);
+                      context.read<SearchViewModel>().updateSelectedGenres(
+                        selectedGenres,
+                      );
                     });
                   },
                 ),
                 DropdownButton<String>(
                   value: _selectedFilter,
                   items: filters
-                      .map((filters) => DropdownMenuItem(
-                            value: filters,
-                            child: Text(filters),
-                          ))
+                      .map(
+                        (filters) => DropdownMenuItem(
+                          value: filters,
+                          child: Text(filters),
+                        ),
+                      )
                       .toList(),
                   onChanged: (newValue) async {
                     if (newValue != null) {
@@ -125,41 +136,40 @@ class _SearchState extends State<Search> {
               ],
             ),
           ),
-        
-            
-            const SizedBox(height: 10),
 
-            if (suggestions.isNotEmpty)
-              Expanded(
-                child: GridView.builder(
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 10,
-                    crossAxisSpacing: 10,
-                    childAspectRatio: 1,
-                  ),
+          const SizedBox(height: 10),
 
-                  itemCount: suggestions.length,
-                  itemBuilder: (context, i) {
-                    final anime = suggestions[i];
-                    return AnimeCard(
-                      anime: anime,
-                      onTap: (anime) => vm.openAnimePage(context, anime),
-                      onLikeDoubleTap: (anime) => {
-                        context
-                            .read<GlobalAnimeFavoritesProvider>()
-                            .toggleFavorite(anime),
-                      },
-                      isLiked: context
-                          .read<GlobalAnimeFavoritesProvider>()
-                          .isAnimeLiked(anime.id),
-                    );
-                  },
+          if (suggestions.isNotEmpty)
+            Expanded(
+              child: GridView.builder(
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                  childAspectRatio: 1,
                 ),
+
+                itemCount: suggestions.length,
+                itemBuilder: (context, i) {
+                  final anime = suggestions[i];
+                  return AnimeCard(
+                    anime: anime,
+                    onTap: (anime) => vm.openAnimePage(context, anime),
+                    onLikeDoubleTap: (anime) => {
+                      context
+                          .read<GlobalAnimeFavoritesProvider>()
+                          .toggleFavorite(anime),
+                    },
+                    isLiked: context
+                        .read<GlobalAnimeFavoritesProvider>()
+                        .isAnimeLiked(anime.id),
+                  );
+                },
               ),
-          ],
-        ),
-      );
-    }
+            ),
+        ],
+      ),
+    );
   }
+}
