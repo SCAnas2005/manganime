@@ -105,6 +105,29 @@ class MediaSectionsProvider {
     }
   }
 
+  Future<void> reloadSections(ApiService service) async {
+    await fetchAllSectionsFromApi<Anime>(service);
+    await fetchAllSectionsFromApi<Manga>(service);
+  }
+
+  Future<void> clear<T extends Identifiable>() async {
+    Box box = getBoxByType<T>();
+    await box.clear();
+  }
+
+  Future<void> clearAnimes() async {
+    await clear<Anime>();
+  }
+
+  Future<void> clearMangas() async {
+    await clear<Manga>();
+  }
+
+  Future<void> clearAll() async {
+    await clearAnimes();
+    await clearMangas();
+  }
+
   List<int> getAnimesId(AnimeSections section) {
     final ids = _animeBox.get(section.key, defaultValue: []);
     return List<int>.from(ids);

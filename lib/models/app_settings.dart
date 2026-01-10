@@ -8,12 +8,15 @@ class AppSettings {
   bool isPersonalizedRecommendationAllowed;
   TimeOfDay? notificationTime;
 
+  final int dataVersion;
+
   AppSettings({
     this.isFirstLaunch = true,
     this.autoSync = false,
     this.darkMode = false,
     this.isNotificationAllowed = false,
     this.isPersonalizedRecommendationAllowed = false,
+    this.dataVersion = 0,
     this.notificationTime,
   }) {
     notificationTime = isNotificationAllowed
@@ -28,6 +31,7 @@ class AppSettings {
     bool? isNotificationAllowed,
     bool? isPersonalizedRecommendationAllowed,
     TimeOfDay? notificationTime,
+    int? dataVersion,
   }) {
     return AppSettings(
       isFirstLaunch: isFirstLaunch ?? this.isFirstLaunch,
@@ -39,6 +43,7 @@ class AppSettings {
           isPersonalizedRecommendationAllowed ??
           this.isPersonalizedRecommendationAllowed,
       notificationTime: notificationTime ?? this.notificationTime,
+      dataVersion: dataVersion ?? this.dataVersion,
     );
   }
 }

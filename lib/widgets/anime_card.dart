@@ -63,7 +63,9 @@ class _AnimeCardState extends State<AnimeCard> {
           _imageProvider = provider;
         });
       }
-    } catch (e) {}
+    } catch (e) {
+      debugPrint("[AnimeCard] _loadProvider() : $e");
+    }
   }
 
   void triggerLikeAnimation() {
