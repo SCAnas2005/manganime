@@ -12,14 +12,13 @@ class AnimeStatView extends StatefulWidget {
 
 class AnimeStatViewState extends State<AnimeStatView> {
   final AnimeStatModel _animeStatModel = AnimeStatModel();
-  List<Color> _colorsList = [
+  final List<Color> _colorsList = [
     Color(0xFFC7F141),
     Color(0xFF51D95F),
     Color(0xFFFFB84D),
     Color(0xFFFF6B9D),
     Color(0xFF6B7FFF),
   ];
-  int _indexColor = -1;
   Key _animationKey = UniqueKey();
 
   @override
@@ -218,7 +217,9 @@ class AnimeStatViewState extends State<AnimeStatView> {
                               ),
                             )
                           else
-                            ..._animeStatModel.recentAchievements.map((achievement) {
+                            ..._animeStatModel.recentAchievements.map((
+                              achievement,
+                            ) {
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 12),
                                 child: AchievementCard(

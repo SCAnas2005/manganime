@@ -32,5 +32,8 @@ Future<void> main() async {
 void onNotificationClick(String payload) {
   final parts = payload.split(":");
   String type = parts.first;
-  String id = parts.last;
+  // String id = parts.last;
+
+  if (type == "anime") {
+  } else {}
 }
