@@ -92,7 +92,20 @@ class _AnimeViewState extends State<AnimeView> {
           children: [
             Padding(
               padding: const EdgeInsets.only(bottom: 20),
-              child: miniSearchBar(context),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ClipOval(
+                    child: Image.asset(
+                      'assets/icons/app_icon.png',
+                      height: 60,
+                      width: 60,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  miniSearchBar(context),
+                ],
+              ),
             ),
             FloatingActionButton(
               child: Icon(Icons.add),
