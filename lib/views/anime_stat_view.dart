@@ -198,7 +198,7 @@ class AnimeStatViewState extends State<AnimeStatView> {
                     child: BlurCard(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
+                        children: [
                           Text(
                             'Succès récents',
                             style: TextStyle(
@@ -208,29 +208,30 @@ class AnimeStatViewState extends State<AnimeStatView> {
                             ),
                           ),
                           SizedBox(height: 16),
-                          Achievement(
-                            icon: Icons.emoji_events,
-                            title: 'Marathon Master',
-                            desc: 'Regarder 10 épisodes en une journée',
-                            time: 'Nouveau',
-                            color: Color(0xFFC7F141),
-                          ),
-                          SizedBox(height: 12),
-                          Achievement(
-                            icon: Icons.favorite,
-                            title: 'Super Fan',
-                            desc: 'Atteindre 1000 likes',
-                            time: 'Il y a 3j',
-                            color: Color(0xFF51D95F),
-                          ),
-                          SizedBox(height: 12),
-                          Achievement(
-                            icon: Icons.trending_up,
-                            title: 'Découvreur',
-                            desc: 'Explorer 50 animes différents',
-                            time: 'Il y a 1s',
-                            color: Color(0xFFFFB84D),
-                          ),
+                          if (_animeStatModel.recentAchievements.isEmpty)
+                            const Text(
+                              "Continuez d'explorer pour débloquer des succès !",
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            )
+                          else
+                            ..._animeStatModel.recentAchievements.map((achievement) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: AchievementCard(
+                                  icon: achievement.icon,
+                                  title: achievement.title,
+                                  desc: achievement.description,
+                                  time: achievement.unlockedAt != null
+                                      ? "Débloqué"
+                                      : "",
+                                  color: achievement.color,
+                                ),
+                              );
+                            }),
                         ],
                       ),
                     ),

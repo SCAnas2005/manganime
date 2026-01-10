@@ -153,14 +153,14 @@ class GenreLegend extends StatelessWidget {
   }
 }
 
-class Achievement extends StatelessWidget {
+class AchievementCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String desc;
   final String time;
   final Color color;
 
-  const Achievement({
+  const AchievementCard({
     super.key,
     required this.icon,
     required this.title,

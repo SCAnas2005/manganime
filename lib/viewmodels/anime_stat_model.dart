@@ -6,6 +6,7 @@ import 'package:flutter_application_1/providers/user_profile_provider.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/models/identifiable_enums.dart';
 import 'package:flutter_application_1/models/rank_info.dart';
+import 'package:flutter_application_1/models/achievement.dart';
 import 'package:flutter/material.dart';
 
 import 'dart:async';
@@ -100,15 +101,19 @@ class AnimeStatModel extends ChangeNotifier {
     UserStatsProvider.getViewsListenable().addListener(_updateRank);
 
     _timeSubscription = ScreenTimeProvider().timeStream.listen(_updateTime);
+    _initAchievements();
+    _checkAchievements();
   }
 
   void _updateLikes() {
     likesNumber = LikeStorage.getIdAnimeLiked().length;
+    _checkAchievements();
     notifyListeners();
   }
 
   void _updateViews() {
     viewNumber = UserStatsProvider.getAnimeViewsCount();
+    _checkAchievements();
     notifyListeners();
   }
 
@@ -134,6 +139,7 @@ class AnimeStatModel extends ChangeNotifier {
     currentRankTitle = currentRank.name;
     currentRankColor = currentRank.color;
 
+    _checkAchievements();
     notifyListeners();
   }
 
@@ -174,10 +180,12 @@ class AnimeStatModel extends ChangeNotifier {
     }
 
     categoryPercentage = newStats;
+    _checkAchievements();
     notifyListeners();
   }
 
   void _updateTime(int totalSeconds) {
+    totalSecondsWatched = totalSeconds;
     final int hours = totalSeconds ~/ 3600;
     final int minutes = (totalSeconds % 3600) ~/ 60;
     if (hours >= 1) {
@@ -185,8 +193,148 @@ class AnimeStatModel extends ChangeNotifier {
     } else {
       timeFormatted = "$minutes m";
     }
+    _checkAchievements();
     notifyListeners();
   }
+
+  List<Achievement> allAchievements = [];
+  List<Achievement> get recentAchievements =>
+      allAchievements.where((a) => a.isUnlocked).toList();
+
+  void _initAchievements() {
+    allAchievements = [
+      Achievement(
+        id: 'first_step',
+        title: 'Premier Pas',
+        description: 'Regarder ton premier anime',
+        icon: Icons.play_arrow,
+        color: const Color(0xFFC7F141),
+        condition: (model) => model.viewNumber >= 1,
+      ),
+      Achievement(
+        id: 'getting_started',
+        title: 'Débutant',
+        description: 'Regarder 10 animes',
+        icon: Icons.looks_one,
+        color: const Color(0xFF51D95F),
+        condition: (model) => model.viewNumber >= 10,
+      ),
+      Achievement(
+        id: 'otaku_junior',
+        title: 'Cap sur GrandLine',
+        description: 'Regarder 50 animes',
+        icon: Icons.accessibility_new,
+        color: const Color(0xFFFFB84D),
+        condition: (model) => model.viewNumber >= 50,
+      ),
+      Achievement(
+        id: 'otaku_master',
+        title: 'Curieux',
+        description: 'Regarder 100 animes',
+        icon: Icons.workspace_premium,
+        color: const Color(0xFFFF6B9D),
+        condition: (model) => model.viewNumber >= 100,
+      ),
+      Achievement(
+        id: 'love_is_war',
+        title: 'Love is War',
+        description: 'Aimer 5 animes',
+        icon: Icons.favorite_border,
+        color: const Color(0xFF6B7FFF),
+        condition: (model) => model.likesNumber >= 5,
+      ),
+      Achievement(
+        id: 'heart_collector',
+        title: 'Collectionneur de Cœurs',
+        description: 'Aimer 20 animes',
+        icon: Icons.favorite,
+        color: const Color(0xFFFF6B9D),
+        condition: (model) => model.likesNumber >= 20,
+      ),
+      Achievement(
+        id: 'marathon_runner',
+        title: 'Marathonien',
+        description: 'Passer 10 heures sur l\'app',
+        icon: Icons.timer,
+        color: const Color(0xFFC7F141),
+        condition: (model) {
+          return model.totalSecondsWatched >= 36000;
+        },
+      ),
+      Achievement(
+        id: 'time_traveler',
+        title: 'Voyageur Temporel',
+        description: 'Passer 24 heures sur l\'app',
+        icon: Icons.hourglass_full,
+        color: const Color(0xFF51D95F),
+        condition: (model) => model.totalSecondsWatched >= 86400,
+      ),
+       Achievement(
+        id: 'explorer',
+        title: 'Explorateur',
+        description: 'Avoir un rang au-dessus de 10',
+        icon: Icons.explore,
+        color: const Color(0xFF2E7D32),
+        condition: (model) => model.rankNumber >= 10,
+      ),
+      Achievement(
+        id: 'rank_up',
+        title: 'Level Up',
+        description: 'Atteindre le rang "Chef Otaku"',
+        icon: Icons.upgrade,
+        color: const Color(0xFF2E7D32),
+        condition: (model) => model.rankNumber >= 10,
+      ),
+      Achievement(
+        id: 'legend',
+        title: 'Légende Vivante',
+        description: 'Atteindre le rang "Roi des Pirates"',
+        icon: Icons.diamond,
+        color: const Color(0xFFFFD700),
+        condition: (model) => model.rankNumber >= 100,
+      ),
+      Achievement(
+        id: 'diverse_taste',
+        title: 'Goûts Variés',
+        description: 'Avoir au moins 3 genres préférés',
+        icon: Icons.category,
+        color: const Color(0xFF6B7FFF),
+        condition: (model) => model.categoryPercentage.length >= 3,
+      ),
+      Achievement(
+        id: 'addicted',
+        title: 'Accro',
+        description: 'Regarder plus de 500 animes',
+        icon: Icons.local_fire_department,
+        color: Colors.redAccent,
+        condition: (model) => model.viewNumber >= 500,
+      ),
+      Achievement(
+        id: 'critic',
+        title: 'Critique d\'Anime',
+        description: 'Aimer 50 animes',
+        icon: Icons.rate_review,
+        color: Colors.purpleAccent,
+        condition: (model) => model.likesNumber >= 50,
+      )
+    ];
+  }
+
+  void _checkAchievements() {
+    bool hasChanged = false;
+    for (var achievement in allAchievements) {
+      if (!achievement.isUnlocked && achievement.condition(this)) {
+        achievement.isUnlocked = true;
+        achievement.unlockedAt = DateTime.now(); 
+        hasChanged = true;
+      }
+    }
+    if (hasChanged) {
+      notifyListeners();
+    }
+  }
+
+  int totalSecondsWatched = 0;
 
   @override
   void dispose() {

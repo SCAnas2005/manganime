@@ -56,7 +56,12 @@ class AppSettingsViewState extends State<AppSettingsView> {
     return Scaffold(
       appBar: AppBar(title: const Text('Paramètres')),
       body: SettingsList(
-        darkTheme: SettingsThemeData(settingsListBackground: Colors.black),
+        darkTheme: SettingsThemeData(
+          settingsListBackground: Theme.of(context).scaffoldBackgroundColor,
+        ),
+        lightTheme: SettingsThemeData(
+          settingsListBackground: Theme.of(context).scaffoldBackgroundColor,
+        ),
         sections: [
           SettingsSection(
             title: const Text('Apparence'),

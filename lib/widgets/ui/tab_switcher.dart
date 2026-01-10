@@ -26,16 +26,33 @@ class TabSwitcher extends StatelessWidget {
           onTap: enabled ? () => onChanged?.call(index) : null,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            child: Text(
-              tabs[index],
-              style: TextStyle(
-                fontSize: isSelected ? 20 : 18,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: enabled
-                    ? (isSelected ? Colors.white : Colors.white70)
-                    : Colors
-                          .white30, // Modifier quand la page tendance sera terminée
-              ),
+            child: Column(
+              children: [
+                Text(
+                  tabs[index],
+                  style: TextStyle(
+                    fontSize: isSelected ? 20 : 18,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    color: enabled
+                        ? (isSelected ? Colors.white : Colors.white70)
+                        : Colors.white30,
+                  ),
+                ),
+                if (isSelected)
+                  Container(
+                    margin: const EdgeInsets.only(top: 4),
+                    height: 3,
+                    width: 20,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(2),
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFC7F141), Color(0xFF51D95F)],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         );
