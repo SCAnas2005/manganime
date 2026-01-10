@@ -6,6 +6,7 @@ import 'package:flutter_application_1/widgets/manga_card.dart';
 import 'package:flutter_application_1/widgets/ui/tab_section.dart';
 import 'package:flutter_application_1/widgets/ui/tab_switcher.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_application_1/widgets/search_widget/search_button.dart';
 
 class MangaView extends StatefulWidget {
   const MangaView({super.key});
@@ -87,10 +88,23 @@ class _MangaViewState extends State<MangaView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            // Padding(
-            //   padding: const EdgeInsets.only(bottom: 20),
-            //   child: miniSearchBar(context),
-            // ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ClipOval(
+                    child: Image.asset(
+                      'assets/icons/app_icon.png',
+                      height: 60,
+                      width: 60,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  miniSearchBar(context),
+                ],
+              ),
+            ),
             TabSwitcher(
               tabs: ["Pour toi", "Tendances"],
               selectedIndex: selectedTab,

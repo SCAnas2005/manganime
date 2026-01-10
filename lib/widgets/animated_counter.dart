@@ -4,11 +4,7 @@ class AnimatedCounter extends StatelessWidget {
   final String value;
   final TextStyle? style;
 
-  const AnimatedCounter({
-    Key? key,
-    required this.value,
-    this.style,
-  }) : super(key: key);
+  const AnimatedCounter({super.key, required this.value, this.style});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +15,7 @@ class AnimatedCounter extends StatelessWidget {
           begin: const Offset(0.0, 1.0),
           end: Offset.zero,
         ).animate(animation);
-        
+
         final outAnimation = Tween<Offset>(
           begin: const Offset(0.0, -1.0),
           end: Offset.zero,
@@ -31,17 +27,13 @@ class AnimatedCounter extends StatelessWidget {
             child: FadeTransition(opacity: animation, child: child),
           );
         } else {
-           return SlideTransition(
+          return SlideTransition(
             position: outAnimation,
             child: FadeTransition(opacity: animation, child: child),
           );
         }
       },
-      child: Text(
-        value,
-        key: ValueKey<String>(value),
-        style: style,
-      ),
+      child: Text(value, key: ValueKey<String>(value), style: style),
     );
   }
 }

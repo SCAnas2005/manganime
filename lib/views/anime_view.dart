@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/debug/debug_page.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
 import 'package:flutter_application_1/viewmodels/anime_view_model.dart';
@@ -84,7 +83,6 @@ class _AnimeViewState extends State<AnimeView> {
     final vm = context.watch<AnimeViewModel>();
 
     return SafeArea(
-      // --- CHANGEMENT 1 : SingleChildScrollView RETIRÉ ---
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         child: Column(
@@ -92,18 +90,32 @@ class _AnimeViewState extends State<AnimeView> {
           children: [
             Padding(
               padding: const EdgeInsets.only(bottom: 20),
-              child: miniSearchBar(context),
-            ),
-            FloatingActionButton(
-              child: Icon(Icons.add),
-              onPressed: () => {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (builder) => DebugPage()),
-                ),
-              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ClipOval(
+                    child: Image.asset(
+                      'assets/icons/app_icon.png',
+                      height: 60,
+                      width: 60,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+
+                  miniSearchBar(context),
+                ],
+              ),
             ),
 
+            // FloatingActionButton(
+            //   child: Icon(Icons.add),
+            //   onPressed: () => {
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(builder: (builder) => DebugPage()),
+            //     ),
+            //   },
+            // ),
             TabSwitcher(
               tabs: ["Pour toi", "Tendances"],
               selectedIndex: selectedTab,

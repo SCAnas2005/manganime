@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart'
-    show SearchAnchor, SearchController, SearchBar;
 import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
-import 'package:flutter_application_1/widgets/anime_card.dart';
-import 'package:flutter_application_1/viewmodels/search_view_model.dart';
 import 'package:flutter_application_1/viewmodels/anime_view_model.dart';
+import 'package:flutter_application_1/viewmodels/search_view_model.dart';
+import 'package:flutter_application_1/widgets/anime_card.dart';
 import 'package:provider/provider.dart';
 
 class Search extends StatefulWidget {
@@ -14,13 +12,30 @@ class Search extends StatefulWidget {
 
 class _SearchState extends State<Search> {
   int index = 0;
+  String _selectedFilter = 'Note'; // Filtre par défaut
+  final List<String> filters = ['Popularité', 'Note', 'date de sortie'];
+  final List<String> mainGenres = [
+    'Action',
+    'Adventure',
+    'Comedy',
+    'Drama',
+    'Fantasy',
+    'Horror',
+    'Mecha',
+    'Music',
+    'Romance',
+    'SciFi',
+    'SliceOfLife',
+    'Sports',
+  ];
+  Set<String> selectedGenres = {};
 
   @override
   void initState() {
     super.initState();
     Future.microtask(() {
       final searchViewModel = context.read<SearchViewModel>();
-      searchViewModel.searchEmpty();
+      searchViewModel.searchEmpty(filter: _selectedFilter);
     });
   }
 
@@ -35,21 +50,90 @@ class _SearchState extends State<Search> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text("Recheche")),
+      appBar: AppBar(title: Text("Recherche")),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             child: SearchBar(
               hintText: "Rechercher un anime",
-              onChanged: (text) {
-                // if (text.isNotEmpty) {
-                //   searchViewModel.search(text);
-                // } else {
-                //   searchViewModel.searchEmpty(text);
-                // }
-                searchViewModel.onSearchTextChanged(text);
+
+              onChanged: (text) async {
+                //  if (text.isNotEmpty) {
+                //    await searchViewModel.search(text);
+                //}            // else {
+                // await searchViewModel.searchEmpty("", filter: _selectedFilter);
+                //}
+                searchViewModel.onSearchTextChanged(text, _selectedFilter);
               },
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                PopupMenuButton<String>(
+                  child: SizedBox(
+                    width: 170,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        selectedGenres.isEmpty
+                            ? "Choisir les genres"
+                            : selectedGenres.join(", "),
+                      ),
+                    ),
+                  ),
+                  itemBuilder: (context) => mainGenres.map((genre) {
+                    final isSelected = selectedGenres.contains(genre);
+                    return CheckedPopupMenuItem<String>(
+                      value: genre,
+                      checked: isSelected,
+                      child: Text(genre),
+                    );
+                  }).toList(),
+                  onSelected: (genre) {
+                    setState(() {
+                      if (selectedGenres.contains(genre)) {
+                        selectedGenres.remove(genre);
+                      } else {
+                        selectedGenres.add(genre);
+                      }
+                      context.read<SearchViewModel>().updateSelectedGenres(
+                        selectedGenres,
+                      );
+                    });
+                  },
+                ),
+                DropdownButton<String>(
+                  value: _selectedFilter,
+                  items: filters
+                      .map(
+                        (filters) => DropdownMenuItem(
+                          value: filters,
+                          child: Text(filters),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (newValue) async {
+                    if (newValue != null) {
+                      setState(() {
+                        _selectedFilter = newValue;
+                      });
+                      searchViewModel.onFilterChanged(_selectedFilter);
+                    }
+                  },
+                ),
+              ],
             ),
           ),
 

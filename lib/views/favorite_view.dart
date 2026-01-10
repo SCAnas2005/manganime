@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/models/manga.dart';
 import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
 import 'package:flutter_application_1/providers/global_manga_favorites_provider.dart';
 import 'package:flutter_application_1/viewmodels/anime_view_model.dart';
-import 'package:flutter_application_1/widgets/anime_list.dart';
+import 'package:flutter_application_1/viewmodels/manga_view_model.dart';
+import 'package:flutter_application_1/widgets/anime_card.dart';
+import 'package:flutter_application_1/widgets/anime_list_tile.dart';
 import 'package:flutter_application_1/widgets/display_mode/adaptative_display.dart';
 import 'package:flutter_application_1/widgets/display_mode/display_mode.dart';
 import 'package:flutter_application_1/widgets/display_mode/display_mode_toggle.dart';
+import 'package:flutter_application_1/widgets/manga_card.dart';
+import 'package:flutter_application_1/widgets/manga_list_tile.dart';
+import 'package:flutter_application_1/widgets/ui/tab_switcher.dart';
 import 'package:provider/provider.dart';
-import '../widgets/ui/tab_switcher.dart';
-import '../widgets/anime_card.dart';
-import '../widgets/manga_card.dart';
-import '../models/anime.dart';
-import '../models/manga.dart';
 
 enum FavoriteDisplayMode { grid, list }
 
@@ -97,13 +99,13 @@ class _FavoriteViewState extends State<FavoriteView> {
         onLikeDoubleTap: (_) => vm.toggleFavorite(anime),
         isLiked: vm.isAnimeLiked(anime.id),
       ),
-      listbuilder: (anime) => AnimeList(
+      listbuilder: (anime) => AnimeListTile(
         anime: anime,
         isLiked: true,
-        onTap: () {
+        onTap: (anime) {
           context.read<AnimeViewModel>().openAnimePage(context, anime);
         },
-        onLikeToggle: () => vm.toggleFavorite(anime),
+        onLikeToggle: (anime) => vm.toggleFavorite(anime),
       ),
     );
   }
@@ -122,13 +124,21 @@ class _FavoriteViewState extends State<FavoriteView> {
     return AdaptativeDisplay<Manga>(
       mode: displayMode,
       items: items,
-      gridBuilder: (manga) => MangaCard(manga: manga, onTap: (_) {}),
+      gridBuilder: (manga) => MangaCard(
+        manga: manga,
+        onTap: (manga) {
+          context.read<MangaViewModel>().openMangaPage(context, manga);
+        },
+        onLikeDoubleTap: (manga) => vm.toggleFavorite(manga),
+      ),
       listbuilder: (manga) {
-        // TODO : Créer MangaList
-        return ListTile(
-          leading: Image.network(manga.imageUrl, width: 55),
-          title: Text(manga.title),
-          onTap: () => {},
+        return MangaListTile(
+          manga: manga,
+          isLiked: true,
+          onTap: (manga) {
+            context.read<MangaViewModel>().openMangaPage(context, manga);
+          },
+          onLikeToggle: (manga) => vm.toggleFavorite(manga),
         );
       },
     );

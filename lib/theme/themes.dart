@@ -15,10 +15,7 @@ class AppTheme {
       primary: AppColors.accent,
       surface: AppColors.cardLight,
       onSurface: AppColors.textLight,
-      background: AppColors.backgroundLight,
-      // outline: AppColors.dividerLight,
     ),
-
     // Barre d'application
     appBarTheme: const AppBarTheme(
       backgroundColor: AppColors.backgroundLight,
@@ -66,7 +63,6 @@ class AppTheme {
       primary: AppColors.accent,
       surface: AppColors.cardDark,
       onSurface: AppColors.textDark,
-      background: AppColors.backgroundDark,
       outline: AppColors.dividerDark,
     ),
 
