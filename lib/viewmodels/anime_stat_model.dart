@@ -183,7 +183,7 @@ class AnimeStatModel extends ChangeNotifier {
     if (hours >= 1) {
       timeFormatted = "${hours}h ${minutes}m";
     } else {
-      timeFormatted = "${minutes} m";
+      timeFormatted = "$minutes m";
     }
     notifyListeners();
   }

@@ -18,7 +18,8 @@ import 'package:flutter_application_1/services/network_service.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class BootLoader {
-  static const int CURRENT_DATA_VERSION = 0;
+  // ignore: constant_identifier_names
+  static const int CURRENT_DATA_VERSION = 4;
   static Future<void> initAll() async {
     WidgetsFlutterBinding.ensureInitialized();
 

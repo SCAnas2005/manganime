@@ -124,7 +124,6 @@ class _FavoriteViewState extends State<FavoriteView> {
       items: items,
       gridBuilder: (manga) => MangaCard(manga: manga, onTap: (_) {}),
       listbuilder: (manga) {
-        // TODO : Créer MangaList
         return ListTile(
           leading: Image.network(manga.imageUrl, width: 55),
           title: Text(manga.title),

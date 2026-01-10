@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 import 'package:flutter_application_1/models/app_settings.dart';
 import 'package:flutter_application_1/models/app_settings_enums.dart';
 import 'package:hive_flutter/hive_flutter.dart';

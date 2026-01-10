@@ -287,6 +287,5 @@ class AnimeRepository {
       animeType: animeType,
       animeRating: animeRating,
     );
-    ;
   }
 }

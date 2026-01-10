@@ -2,14 +2,13 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/identifiable_enums.dart';
 import 'package:flutter_application_1/models/manga.dart';
-import 'package:flutter_application_1/providers/global_manga_favorites_provider.dart'; // Assure-toi d'avoir ce provider ou équivalent
+import 'package:flutter_application_1/providers/global_manga_favorites_provider.dart';
 import 'package:flutter_application_1/providers/manga_repository_provider.dart';
 import 'package:flutter_application_1/providers/user_stats_provider.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
-import 'package:flutter_application_1/viewmodels/manga_info_view_model.dart'; // Assure-toi de créer ce ViewModel similaire à l'Anime
+import 'package:flutter_application_1/viewmodels/manga_info_view_model.dart';
 import 'package:flutter_application_1/widgets/like_widget/like_animation.dart';
 import 'package:flutter_application_1/widgets/like_widget/like_button.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class MangaInfoView extends StatefulWidget {
@@ -30,7 +29,6 @@ class _MangaInfoViewState extends State<MangaInfoView> {
   void initState() {
     super.initState();
     manga = widget.manga;
-    // Enregistrement de la vue
     UserStatsProvider.addMangaView(manga.id);
     _loadMangaCover();
   }
@@ -58,14 +56,15 @@ class _MangaInfoViewState extends State<MangaInfoView> {
     }
   }
 
-  String _formatDate(DateTime? date) {
-    if (date == null) return "?";
-    return DateFormat.yMMMd().format(date);
+  // Helper pour afficher les auteurs joliment
+  String _getFormattedAuthors(List<dynamic> authors) {
+    if (authors.isEmpty) return "Auteur inconnu";
+    // On prend les 2 premiers max pour pas surcharger
+    return authors.take(2).map((a) => a.name).join(", ");
   }
 
   @override
   Widget build(BuildContext context) {
-    // On suppose que tu as un MangaInfoViewModel similaire à AnimeInfoViewModel
     return ChangeNotifierProvider(
       create: (_) => MangaInfoViewModel(manga: widget.manga)..loadMangaDetail(),
       child: Consumer<MangaInfoViewModel>(
@@ -84,22 +83,19 @@ class _MangaInfoViewState extends State<MangaInfoView> {
               ),
             );
           }
-          final mangaInfo = vm.manga!;
+          final mangaInfo = vm.manga;
 
           return Scaffold(
-            // Utilisation d'un Stack pour gérer le fond flouté et le contenu
             body: Stack(
               children: [
-                // --- 1. ARRIÈRE-PLAN FLOUTÉ (AMBIANCE) ---
+                // --- 1. ARRIÈRE-PLAN FLOUTÉ ---
                 Positioned.fill(
                   bottom: MediaQuery.of(context).size.height * 0.55,
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
                       _buildBlurBackground(),
-                      // Filtre sombre
                       Container(color: Colors.black.withValues(alpha: 0.4)),
-                      // Effet de flou
                       BackdropFilter(
                         filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
                         child: Container(color: Colors.transparent),
@@ -112,12 +108,11 @@ class _MangaInfoViewState extends State<MangaInfoView> {
                 SafeArea(
                   child: CustomScrollView(
                     slivers: [
-                      // Barre de navigation minimaliste
+                      // Navbar
                       SliverAppBar(
                         backgroundColor: Colors.transparent,
                         leading: const BackButton(color: Colors.white),
                         actions: [
-                          // Petit bouton like rapide dans la barre
                           LikeButton(
                             isLiked: vm.isLiked,
                             onTap: () {
@@ -135,21 +130,18 @@ class _MangaInfoViewState extends State<MangaInfoView> {
                       // --- EN-TÊTE STYLE "LIVRE" ---
                       SliverToBoxAdapter(
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 10,
-                          ),
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Couverture Physique (Ombre portée)
+                              // Couverture
                               Hero(
                                 tag: "manga_cover_${manga.id}",
                                 child: Container(
-                                  width: 120,
-                                  height: 180,
+                                  width: 110, // Légèrement réduit
+                                  height: 165,
                                   decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(6),
                                     boxShadow: [
                                       BoxShadow(
                                         color: Colors.black.withValues(
@@ -161,48 +153,34 @@ class _MangaInfoViewState extends State<MangaInfoView> {
                                     ],
                                   ),
                                   child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(6),
                                     child: _buildCoverImage(BoxFit.cover),
                                   ),
                                 ),
                               ),
                               const SizedBox(width: 20),
+
                               // Infos Droite
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const SizedBox(height: 10),
-                                    // Type (Manga / Novel)
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withValues(
-                                          alpha: 0.2,
-                                        ),
-                                        borderRadius: BorderRadius.circular(4),
-                                        border: Border.all(
-                                          color: Colors.white.withValues(
-                                            alpha: 0.3,
+                                    // Type & Démographie (Ligne 1)
+                                    Row(
+                                      children: [
+                                        _buildTag(mangaInfo.type.label),
+                                        if (mangaInfo.demographic != null) ...[
+                                          const SizedBox(width: 8),
+                                          _buildTag(
+                                            mangaInfo.demographic!,
+                                            color: Colors.orangeAccent,
                                           ),
-                                        ),
-                                      ),
-                                      child: Text(
-                                        (mangaInfo.type ?? "Manga")
-                                            .toUpperCase(),
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                          letterSpacing: 1.0,
-                                        ),
-                                      ),
+                                        ],
+                                      ],
                                     ),
                                     const SizedBox(height: 8),
-                                    // Titre
+
+                                    // Titre (Ligne 2)
                                     Text(
                                       mangaInfo.title,
                                       maxLines: 3,
@@ -211,18 +189,36 @@ class _MangaInfoViewState extends State<MangaInfoView> {
                                         color: Colors.white,
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
-                                        fontFamily: 'Serif', // Touche "Livre"
+                                        fontFamily: 'Serif',
                                         height: 1.2,
                                       ),
                                     ),
-                                    const SizedBox(height: 12),
-                                    // Score
+
+                                    const SizedBox(height: 6),
+
+                                    // Auteurs (Ligne 3) - NOUVEAU
+                                    Text(
+                                      _getFormattedAuthors(mangaInfo.authors),
+                                      style: TextStyle(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.9,
+                                        ),
+                                        fontSize: 13,
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+
+                                    const SizedBox(height: 10),
+
+                                    // Score (Ligne 4)
                                     Row(
                                       children: [
                                         const Icon(
                                           Icons.star,
                                           color: Colors.amber,
-                                          size: 20,
+                                          size: 18,
                                         ),
                                         const SizedBox(width: 4),
                                         Text(
@@ -231,7 +227,7 @@ class _MangaInfoViewState extends State<MangaInfoView> {
                                               : "N/A",
                                           style: const TextStyle(
                                             color: Colors.white,
-                                            fontSize: 18,
+                                            fontSize: 16,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
@@ -257,7 +253,7 @@ class _MangaInfoViewState extends State<MangaInfoView> {
                       // --- CORPS DE PAGE (FEUILLE BLANCHE) ---
                       SliverToBoxAdapter(
                         child: Container(
-                          margin: const EdgeInsets.only(top: 20),
+                          // On colle la feuille au header (pas de margin top)
                           decoration: BoxDecoration(
                             color: Theme.of(context).scaffoldBackgroundColor,
                             borderRadius: const BorderRadius.vertical(
@@ -276,7 +272,6 @@ class _MangaInfoViewState extends State<MangaInfoView> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Animation Like Double Tap (Invisible sauf action)
                                 Center(
                                   child: LikeAnimation(
                                     show: vm.showLikeAnimation,
@@ -284,7 +279,7 @@ class _MangaInfoViewState extends State<MangaInfoView> {
                                   ),
                                 ),
 
-                                // 1. Barre de Statut et Dates
+                                // 1. Barre d'Infos Complète (Statut | Vols | Chaps | Dates)
                                 Container(
                                   padding: const EdgeInsets.all(16),
                                   decoration: BoxDecoration(
@@ -297,35 +292,42 @@ class _MangaInfoViewState extends State<MangaInfoView> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      // Statut
+                                      // GAUCHE : Statut + Indicateur
                                       _buildStatusIndicator(mangaInfo.status),
-                                      // Ligne verticale
-                                      Container(
-                                        height: 30,
-                                        width: 1,
-                                        color: Colors.grey.withValues(
-                                          alpha: 0.3,
-                                        ),
-                                      ),
-                                      // Dates
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
+
+                                      // DROITE : Infos Techniques (Vols / Chaps)
+                                      Row(
                                         children: [
-                                          Text(
-                                            "Publication",
-                                            style: TextStyle(
-                                              color: Colors.grey[600],
-                                              fontSize: 10,
+                                          if (mangaInfo.volumes != null)
+                                            _buildTechInfo(
+                                              "${mangaInfo.volumes}",
+                                              "VOLS",
+                                            ),
+                                          if (mangaInfo.chapters != null) ...[
+                                            const SizedBox(width: 12),
+                                            _buildTechInfo(
+                                              "${mangaInfo.chapters}",
+                                              "CHAPS",
+                                            ),
+                                          ],
+
+                                          const SizedBox(width: 12),
+                                          // Ligne verticale de séparation
+                                          Container(
+                                            height: 24,
+                                            width: 1,
+                                            color: Colors.grey.withValues(
+                                              alpha: 0.3,
                                             ),
                                           ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            "${_formatDate(mangaInfo.startDate)} - ${_formatDate(mangaInfo.endDate)}",
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 12,
-                                            ),
+                                          const SizedBox(width: 12),
+
+                                          // Année de début
+                                          _buildTechInfo(
+                                            mangaInfo.startDate?.year
+                                                    .toString() ??
+                                                "?",
+                                            "ANNÉE",
                                           ),
                                         ],
                                       ),
@@ -333,39 +335,66 @@ class _MangaInfoViewState extends State<MangaInfoView> {
                                   ),
                                 ),
 
-                                const SizedBox(height: 24),
+                                // Affichage du Magazine (Serialization)
+                                if (mangaInfo.serialization != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 8.0,
+                                      right: 4.0,
+                                    ),
+                                    child: Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Text(
+                                        "Publié dans : ${mangaInfo.serialization}",
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.grey[600],
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
 
-                                // 2. Genres (Style étiquette)
+                                const SizedBox(height: 20),
+
+                                // 2. Genres (Compacts et fins)
                                 Wrap(
-                                  spacing: 8,
-                                  runSpacing: 8,
+                                  spacing: 6, // Espace horizontal réduit
+                                  runSpacing: 6, // Espace vertical réduit
                                   children: mangaInfo.genres
                                       .where((g) => g != Genres.None)
                                       .map(
-                                        (g) => Chip(
-                                          avatar: CircleAvatar(
-                                            backgroundColor: Colors.black12,
-                                            child: Text(
-                                              g.name[0],
-                                              style: const TextStyle(
-                                                fontSize: 10,
-                                                color: Colors.black,
+                                        (g) => Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 5,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            // Fond léger au lieu de transparent pour mieux définir
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .surfaceContainerHighest
+                                                .withValues(alpha: 0.5),
+                                            borderRadius: BorderRadius.circular(
+                                              20,
+                                            ),
+                                            border: Border.all(
+                                              color: Colors.grey.withValues(
+                                                alpha: 0.3,
                                               ),
+                                              width: 1,
                                             ),
                                           ),
-                                          label: Text(g.toReadableString()),
-                                          backgroundColor: Colors.transparent,
-                                          shape: const StadiumBorder(
-                                            side: BorderSide(
-                                              color: Colors.grey,
+                                          child: Text(
+                                            g.toReadableString(),
+                                            style: TextStyle(
+                                              fontSize:
+                                                  11, // Police plus petite
+                                              fontWeight: FontWeight.w500,
+                                              color: Theme.of(
+                                                context,
+                                              ).textTheme.bodyMedium?.color,
                                             ),
-                                          ),
-                                          labelStyle: TextStyle(
-                                            color: Theme.of(
-                                              context,
-                                            ).textTheme.bodyMedium?.color,
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 12,
                                           ),
                                         ),
                                       )
@@ -376,13 +405,13 @@ class _MangaInfoViewState extends State<MangaInfoView> {
                                 const Divider(),
                                 const SizedBox(height: 16),
 
-                                // 3. Synopsis (Titre Style Chapitre)
+                                // 3. Synopsis
                                 Text(
                                   "Résumé",
                                   style: Theme.of(context).textTheme.titleLarge
                                       ?.copyWith(
                                         fontWeight: FontWeight.bold,
-                                        fontFamily: 'Serif', // Rappel du livre
+                                        fontFamily: 'Serif',
                                       ),
                                 ),
                                 const SizedBox(height: 12),
@@ -391,14 +420,12 @@ class _MangaInfoViewState extends State<MangaInfoView> {
                                   child: vm.translatedSynopsis != "error"
                                       ? Text(
                                           vm.translatedSynopsis,
-                                          textAlign: TextAlign
-                                              .justify, // Texte justifié comme un livre
+                                          textAlign: TextAlign.justify,
                                           style: Theme.of(context)
                                               .textTheme
                                               .bodyLarge
                                               ?.copyWith(
-                                                height:
-                                                    1.8, // Interlignage large pour la lecture
+                                                height: 1.8,
                                                 fontSize: 15,
                                                 color: Colors.grey[800],
                                               ),
@@ -449,6 +476,30 @@ class _MangaInfoViewState extends State<MangaInfoView> {
     return Container(color: Colors.grey[800]);
   }
 
+  // Petit tag pour Type et Démographie
+  Widget _buildTag(String text, {Color? color}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: (color ?? Colors.white).withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(
+          color: (color ?? Colors.white).withValues(alpha: 0.3),
+        ),
+      ),
+      child: Text(
+        text.toUpperCase(),
+        style: TextStyle(
+          color: color ?? Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+
+  // Indicateur de statut (rond coloré + texte)
   Widget _buildStatusIndicator(MediaStatus status) {
     Color color = Colors.grey;
     String text = status.key;
@@ -477,6 +528,20 @@ class _MangaInfoViewState extends State<MangaInfoView> {
             fontSize: 12,
           ),
         ),
+      ],
+    );
+  }
+
+  // Widget pour "12 VOLS", "102 CHAPS"
+  Widget _buildTechInfo(String value, String label) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Text(
+          value,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+        ),
+        Text(label, style: TextStyle(fontSize: 9, color: Colors.grey[600])),
       ],
     );
   }
