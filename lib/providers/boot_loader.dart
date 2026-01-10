@@ -1,9 +1,12 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/models/identifiable.dart';
 import 'package:flutter_application_1/models/manga.dart';
 import 'package:flutter_application_1/providers/anime_cache_provider.dart';
+import 'package:flutter_application_1/providers/anime_repository_provider.dart';
 import 'package:flutter_application_1/providers/database_provider.dart';
 import 'package:flutter_application_1/providers/like_storage_provider.dart';
 import 'package:flutter_application_1/providers/manga_cache_provider.dart';
@@ -15,6 +18,7 @@ import 'package:flutter_application_1/providers/user_stats_provider.dart';
 import 'package:flutter_application_1/services/image_sync_service.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:flutter_application_1/services/network_service.dart';
+import 'package:flutter_application_1/services/notification_service.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class BootLoader {
@@ -56,6 +60,29 @@ class BootLoader {
     if (!hasConnection) {
       throw const SocketException("Connexion perdue pendant le téléchargement");
     }
+  }
+
+  static Future<void> scheduleForTomorrow(
+    Identifiable identifiable,
+    TimeOfDay time,
+  ) async {
+    String title = "";
+    String body = "";
+    if (identifiable is Anime) {
+      title = "Anime du jour 📺";
+      body = "Découvre ${identifiable.title}";
+    } else {
+      title = "Lecture du jour 📚";
+      body = "Plonge dans ${identifiable.title}";
+    }
+
+    await NotificationService().scheduleDailyRecommendations(
+      id: 0,
+      title: title,
+      body: body,
+      identifiable: identifiable,
+      time: time,
+    );
   }
 
   static Future<void> onAppStart({
