@@ -1,12 +1,9 @@
 import 'dart:io';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/models/identifiable.dart';
 import 'package:flutter_application_1/models/manga.dart';
 import 'package:flutter_application_1/providers/anime_cache_provider.dart';
-import 'package:flutter_application_1/providers/anime_repository_provider.dart';
 import 'package:flutter_application_1/providers/database_provider.dart';
 import 'package:flutter_application_1/providers/like_storage_provider.dart';
 import 'package:flutter_application_1/providers/manga_cache_provider.dart';

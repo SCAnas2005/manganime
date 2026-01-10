@@ -8,10 +8,8 @@ import 'package:flutter_application_1/models/identifiable_enums.dart';
 import 'package:flutter_application_1/models/rank_info.dart';
 import 'package:flutter_application_1/models/achievement.dart';
 import 'package:flutter/material.dart';
-
 import 'dart:async';
 import 'dart:math';
-import 'package:flutter/foundation.dart';
 
 class AnimeStatModel extends ChangeNotifier {
   int viewsNumber = 0;
@@ -269,7 +267,7 @@ class AnimeStatModel extends ChangeNotifier {
         color: const Color(0xFF51D95F),
         condition: (model) => model.totalSecondsWatched >= 86400,
       ),
-       Achievement(
+      Achievement(
         id: 'explorer',
         title: 'Explorateur',
         description: 'Avoir un rang au-dessus de 10',
@@ -316,7 +314,7 @@ class AnimeStatModel extends ChangeNotifier {
         icon: Icons.rate_review,
         color: Colors.purpleAccent,
         condition: (model) => model.likesNumber >= 50,
-      )
+      ),
     ];
   }
 
@@ -325,7 +323,7 @@ class AnimeStatModel extends ChangeNotifier {
     for (var achievement in allAchievements) {
       if (!achievement.isUnlocked && achievement.condition(this)) {
         achievement.isUnlocked = true;
-        achievement.unlockedAt = DateTime.now(); 
+        achievement.unlockedAt = DateTime.now();
         hasChanged = true;
       }
     }
