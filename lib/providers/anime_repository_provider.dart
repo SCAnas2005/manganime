@@ -288,4 +288,9 @@ class AnimeRepository {
       animeRating: animeRating,
     );
   }
+
+  Future<Anime?> getAnimeOfTheDay() async {
+    final animes = await getPopularAnimes();
+    return animes.isNotEmpty ? animes.first : null;
+  }
 }

@@ -29,6 +29,7 @@ class SettingsStorage {
         _box.get(AppSettingsKey.notificationTime.key) ?? 0,
       ),
       dataVersion: _box.get(AppSettingsKey.dataVersion.key) ?? 0,
+      lastNotificationSent: _box.get(AppSettingsKey.lastNotificationSent.key),
     );
   }
 
@@ -53,5 +54,9 @@ class SettingsStorage {
     }
 
     await _box.put(AppSettingsKey.dataVersion.key, settings.dataVersion);
+    await _box.put(
+      AppSettingsKey.lastNotificationSent.key,
+      settings.lastNotificationSent,
+    );
   }
 }

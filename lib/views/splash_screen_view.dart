@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/home.dart';
+import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/models/identifiable.dart';
 import 'package:flutter_application_1/providers/boot_loader.dart';
 import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_application_1/providers/settings_repository_provider.dart';
 import 'package:flutter_application_1/providers/settings_storage_provider.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  final Identifiable? identifiableToOpen;
+  const SplashScreen({this.identifiableToOpen, super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -76,9 +79,18 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void _navigateToHome() {
     if (mounted) {
+      int? indexPageToOpen = widget.identifiableToOpen == null
+          ? null
+          : widget.identifiableToOpen is Anime
+          ? 0
+          : 1;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => const HomePage(title: "MangAnime"),
+          builder: (context) => HomePage(
+            title: "MangAnime",
+            indexPage: indexPageToOpen,
+            identifiableToOpen: widget.identifiableToOpen,
+          ),
         ),
       );
     }

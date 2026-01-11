@@ -254,4 +254,12 @@ class MangaRepository {
 
     return [];
   }
+
+  Future<Manga?> getMangaOfTheDay() async {
+    final mangas = await getPopularMangas();
+    if (mangas.isNotEmpty) {
+      return mangas.first;
+    }
+    return null;
+  }
 }
