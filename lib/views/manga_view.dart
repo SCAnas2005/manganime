@@ -9,7 +9,8 @@ import 'package:provider/provider.dart';
 import 'package:flutter_application_1/widgets/search_widget/search_button.dart';
 
 class MangaView extends StatefulWidget {
-  const MangaView({super.key});
+  Manga? mangaToOpen;
+  MangaView({this.mangaToOpen, super.key});
 
   @override
   State<MangaView> createState() => _MangaViewState();
@@ -39,6 +40,10 @@ class _MangaViewState extends State<MangaView> {
 
       await vm.fetchForYou(context.read<GlobalMangaFavoritesProvider>());
 
+      if (widget.mangaToOpen != null) {
+        autoOpenManga(widget.mangaToOpen as Manga);
+      }
+
       _forYouController.addListener(() {
         if (_forYouController.position.pixels >=
             _forYouController.position.maxScrollExtent - 200) {
@@ -67,6 +72,11 @@ class _MangaViewState extends State<MangaView> {
         }
       });
     });
+  }
+
+  void autoOpenManga(Manga manga) {
+    final vm = context.read<MangaViewModel>();
+    vm.openMangaPage(context, manga);
   }
 
   @override
