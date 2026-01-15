@@ -101,7 +101,7 @@ class _MangaViewState extends State<MangaView> {
                       fit: BoxFit.cover,
                     ),
                   ),
-                  miniSearchBar(context),
+                  miniSearchBarManga(context),
                 ],
               ),
             ),

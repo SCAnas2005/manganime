@@ -327,8 +327,8 @@ class JikanService extends ApiService {
     return Anime(
       id: json["mal_id"],
       title: (json['title_english'] ?? json['title'] ?? '').toString(),
-      synopsis: json['synopsis'] ?? '',
-      imageUrl: json['images']?['jpg']?['image_url']?.toString() ?? '',
+      synopsis: (json['synopsis'] ?? '').toString(),
+      imageUrl: (json['images']?['jpg']?['image_url'] ?? '').toString(),
       status: MediaStatusX.fromJikan(json["status"]),
       score: (json["score"] ?? 0).toDouble(),
       genres:
@@ -344,9 +344,9 @@ class JikanService extends ApiService {
           ? DateTime.tryParse(json["aired"]["to"])
           : null,
       studio:
-          studios != null && studios.isNotEmpty && studios.first["name"] != null
-          ? studios.first["name"]
-          : null,
+          (studios != null && studios.isNotEmpty 
+          ? studios.first["name"] as String?
+          : null) ?? "Inconnu",
       type: AnimeTypeX.fromJikan(json["type"]),
       rating: AnimeRatingX.fromJikan(json["rating"]),
       episodes: json["episodes"] as int?,
