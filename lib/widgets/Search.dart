@@ -1,11 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/models/manga.dart';
+import 'package:flutter_application_1/models/identifiable.dart';
 import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
+import 'package:flutter_application_1/providers/global_manga_favorites_provider.dart';
 import 'package:flutter_application_1/viewmodels/anime_view_model.dart';
+import 'package:flutter_application_1/viewmodels/manga_view_model.dart';
 import 'package:flutter_application_1/viewmodels/search_view_model.dart';
+import 'package:flutter_application_1/viewmodels/manga_search_view_model.dart';
 import 'package:flutter_application_1/widgets/anime_card.dart';
+import 'package:flutter_application_1/widgets/manga_card.dart';
 import 'package:provider/provider.dart';
 
 class Search extends StatefulWidget {
+  /// true = recherche anime, false = recherche manga
+  final bool isAnime;
+
+  const Search({super.key, this.isAnime = true});
+
   @override
   State<Search> createState() => _SearchState();
 }
@@ -34,38 +46,65 @@ class _SearchState extends State<Search> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      final searchViewModel = context.read<SearchViewModel>();
-      searchViewModel.searchEmpty(filter: _selectedFilter);
+      if (widget.isAnime) {
+        context.read<SearchViewModel>().searchEmpty(filter: _selectedFilter);
+      } else {
+        context.read<MangaSearchViewModel>().searchEmpty(filter: _selectedFilter);
+      }
     });
+  }
+
+  void _onSearchTextChanged(String text) {
+    if (widget.isAnime) {
+      context.read<SearchViewModel>().onSearchTextChanged(text, _selectedFilter);
+    } else {
+      context.read<MangaSearchViewModel>().onSearchTextChanged(text, _selectedFilter);
+    }
+  }
+
+  void _onFilterChanged() {
+    if (widget.isAnime) {
+      context.read<SearchViewModel>().onFilterChanged(_selectedFilter);
+    } else {
+      context.read<MangaSearchViewModel>().onFilterChanged(_selectedFilter);
+    }
+  }
+
+  void _updateSelectedGenres() {
+    if (widget.isAnime) {
+      context.read<SearchViewModel>().updateSelectedGenres(selectedGenres);
+    } else {
+      context.read<MangaSearchViewModel>().updateSelectedGenres(selectedGenres);
+    }
+  }
+
+  List<Identifiable> _getResults() {
+    if (widget.isAnime) {
+      return context.watch<SearchViewModel>().results;
+    } else {
+      return context.watch<MangaSearchViewModel>().results;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<AnimeViewModel>();
-    final searchViewModel = context.watch<SearchViewModel>();
-    final suggestions = searchViewModel.results;
+    final suggestions = _getResults();
 
     if (suggestions.isNotEmpty) {
       index = index % suggestions.length;
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text("Recherche")),
+      appBar: AppBar(
+        title: Text(widget.isAnime ? "Recherche Anime" : "Recherche Manga"),
+      ),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             child: SearchBar(
-              hintText: "Rechercher un anime",
-
-              onChanged: (text) async {
-                //  if (text.isNotEmpty) {
-                //    await searchViewModel.search(text);
-                //}            // else {
-                // await searchViewModel.searchEmpty("", filter: _selectedFilter);
-                //}
-                searchViewModel.onSearchTextChanged(text, _selectedFilter);
-              },
+              hintText: widget.isAnime ? "Rechercher un anime" : "Rechercher un manga",
+              onChanged: (text) => _onSearchTextChanged(text),
             ),
           ),
 
@@ -108,9 +147,7 @@ class _SearchState extends State<Search> {
                       } else {
                         selectedGenres.add(genre);
                       }
-                      context.read<SearchViewModel>().updateSelectedGenres(
-                        selectedGenres,
-                      );
+                      _updateSelectedGenres();
                     });
                   },
                 ),
@@ -129,7 +166,7 @@ class _SearchState extends State<Search> {
                       setState(() {
                         _selectedFilter = newValue;
                       });
-                      searchViewModel.onFilterChanged(_selectedFilter);
+                      _onFilterChanged();
                     }
                   },
                 ),
@@ -149,22 +186,37 @@ class _SearchState extends State<Search> {
                   crossAxisSpacing: 10,
                   childAspectRatio: 1,
                 ),
-
                 itemCount: suggestions.length,
                 itemBuilder: (context, i) {
-                  final anime = suggestions[i];
-                  return AnimeCard(
-                    anime: anime,
-                    onTap: (anime) => vm.openAnimePage(context, anime),
-                    onLikeDoubleTap: (anime) => {
-                      context
+                  final item = suggestions[i];
+
+                  if (widget.isAnime && item is Anime) {
+                    final vm = context.read<AnimeViewModel>();
+                    return AnimeCard(
+                      anime: item,
+                      onTap: (anime) => vm.openAnimePage(context, anime),
+                      onLikeDoubleTap: (anime) => {
+                        context
+                            .read<GlobalAnimeFavoritesProvider>()
+                            .toggleFavorite(anime),
+                      },
+                      isLiked: context
                           .read<GlobalAnimeFavoritesProvider>()
-                          .toggleFavorite(anime),
-                    },
-                    isLiked: context
-                        .read<GlobalAnimeFavoritesProvider>()
-                        .isAnimeLiked(anime.id),
-                  );
+                          .isAnimeLiked(item.id),
+                    );
+                  } else if (!widget.isAnime && item is Manga) {
+                    final vm = context.read<MangaViewModel>();
+                    return MangaCard(
+                      manga: item,
+                      onTap: (manga) => vm.openMangaPage(context, manga),
+                      onLikeDoubleTap: (manga) => {
+                        context
+                            .read<GlobalMangaFavoritesProvider>()
+                            .toggleFavorite(manga),
+                      },
+                    );
+                  }
+                  return const SizedBox.shrink();
                 },
               ),
             ),
