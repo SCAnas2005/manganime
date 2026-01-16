@@ -132,7 +132,7 @@ class NotificationService {
     required String title,
     required String body,
     required Identifiable identifiable,
-    required TimeOfDay time,
+    required DateTime date,
   }) async {
     String payload =
         "${identifiable is Anime ? "anime" : "manga"}:${identifiable.id}";
@@ -141,11 +141,11 @@ class NotificationService {
       title: title,
       body: body,
       payload: payload,
-      time: time,
+      time: TimeOfDay.fromDateTime(date),
     );
 
     debugPrint(
-      "Notification scheduled for time : $time, identifiable : $identifiable",
+      "Notification scheduled for date : $date, identifiable : $identifiable",
     );
   }
 }
