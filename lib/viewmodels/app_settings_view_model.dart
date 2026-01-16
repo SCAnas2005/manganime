@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/app_settings.dart';
+import 'package:flutter_application_1/models/identifiable_enums.dart';
 import 'package:flutter_application_1/providers/anime_cache_provider.dart';
 import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
 import 'package:flutter_application_1/providers/global_manga_favorites_provider.dart';
@@ -26,9 +27,7 @@ class AppSettingsViewModel extends ChangeNotifier {
   }
 
   Future<void> toggleDarkMode({bool? value}) async {
-    settings = settings = settings.copyWith(
-      darkMode: value ?? !settings.darkMode,
-    );
+    settings = settings.copyWith(darkMode: value ?? !settings.darkMode);
     notifyListeners();
     await _settingsRepository.updateSettings(
       settings.copyWith(darkMode: value ?? !settings.darkMode),
@@ -38,6 +37,20 @@ class AppSettingsViewModel extends ChangeNotifier {
   Future<void> onToggleNotification({bool? value}) async {}
   Future<void> onToggleSuggestions({bool? value}) async {}
   Future<void> onNotificationTimeChanged(TimeOfDay time) async {}
+
+  Future<void> toggleFavoriteGenre(Genres genre) async {
+    final currentList = List<Genres>.from(settings.favoriteGenres ?? []);
+
+    if (currentList.contains(genre)) {
+      currentList.remove(genre);
+    } else {
+      currentList.add(genre);
+    }
+
+    settings = settings.copyWith(favoriteGenres: currentList);
+    notifyListeners(); // Dit à la vue de se redessiner
+    await _settingsRepository.updateSettings(settings);
+  }
 
   Future<void> onExportData() async {}
   Future<void> deleteMyData(BuildContext context) async {

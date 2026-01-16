@@ -7,6 +7,7 @@ enum AppSettingsKey {
   notificationTime,
   dataVersion,
   lastNotificationSent,
+  favoriteGenres,
 }
 
 extension AppSettingsKeyX on AppSettingsKey {

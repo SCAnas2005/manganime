@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/identifiable_enums.dart';
 
 class AppSettings {
   bool isFirstLaunch;
@@ -11,6 +12,8 @@ class AppSettings {
 
   final int dataVersion;
 
+  List<Genres>? favoriteGenres = [];
+
   AppSettings({
     this.isFirstLaunch = true,
     this.autoSync = false,
@@ -20,6 +23,7 @@ class AppSettings {
     this.dataVersion = 0,
     this.notificationTime,
     this.lastNotificationSent,
+    this.favoriteGenres,
   }) {
     notificationTime = isNotificationAllowed
         ? TimeOfDay(hour: 9, minute: 0)
@@ -35,6 +39,7 @@ class AppSettings {
     TimeOfDay? notificationTime,
     int? dataVersion,
     DateTime? lastNotificationSent,
+    List<Genres>? favoriteGenres,
   }) {
     return AppSettings(
       isFirstLaunch: isFirstLaunch ?? this.isFirstLaunch,
@@ -48,6 +53,7 @@ class AppSettings {
       notificationTime: notificationTime ?? this.notificationTime,
       dataVersion: dataVersion ?? this.dataVersion,
       lastNotificationSent: lastNotificationSent ?? this.lastNotificationSent,
+      favoriteGenres: favoriteGenres ?? this.favoriteGenres,
     );
   }
 }
