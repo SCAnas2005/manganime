@@ -56,6 +56,10 @@ class ScreenTimeProvider with WidgetsBindingObserver {
     _timer = null;
   }
 
+  static Future<void> reset() async {
+    await _box.clear();
+  }
+
   Future<void> _saveTime() async {
     if (_sessionSeconds > 0) {
       final currentTotal = getTotalScreenTime();

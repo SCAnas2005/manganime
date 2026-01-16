@@ -92,6 +92,12 @@ class GlobalAnimeFavoritesProvider extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  Future<void> reset() async {
+    _likedIds.clear();
+    _loadedFavoriteAnimes.clear();
+    // await loadFullAnimeObjects();
+  }
 }
 
 // // generic_favorites_provider.dart

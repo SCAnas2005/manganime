@@ -12,6 +12,7 @@ import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:flutter_application_1/viewmodels/app_settings_view_model.dart';
 import 'package:flutter_application_1/viewmodels/search_view_model.dart';
 import 'package:flutter_application_1/views/splash_screen_view.dart';
+import 'package:flutter_application_1/widgets/restart_widget.dart';
 import 'package:provider/provider.dart';
 
 GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -31,7 +32,7 @@ Future<void> main() async {
           )..init(),
         ),
       ],
-      child: const App(),
+      child: RestartWidget(child: const App()),
     ),
   );
 }

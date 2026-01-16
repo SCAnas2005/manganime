@@ -35,6 +35,10 @@ class LikeStorage {
     return _getIds(key).contains(id);
   }
 
+  static Future<void> clearAll() async {
+    await _box.clear();
+  }
+
   static List<int> getIdAnimeLiked() => _getIds(LIKED_ANIMES_KEY);
 
   static Future<void> toggleAnimeLike(int animeId) =>

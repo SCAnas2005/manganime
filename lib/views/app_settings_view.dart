@@ -156,7 +156,9 @@ class AppSettingsViewState extends State<AppSettingsView> {
                   style: TextStyle(color: Colors.red),
                 ),
                 description: const Text('Effacer toutes vos données locales'),
-                onPressed: (_) {},
+                onPressed: (_) async {
+                  await vm.deleteMyData(context);
+                },
               ),
               SettingsTile.navigation(
                 leading: const Icon(Icons.refresh),
