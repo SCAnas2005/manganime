@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/app.dart';
-import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/models/identifiable.dart';
-import 'package:flutter_application_1/models/manga.dart';
 import 'package:flutter_application_1/providers/anime_repository_provider.dart';
 import 'package:flutter_application_1/providers/boot_loader.dart';
 import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';

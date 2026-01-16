@@ -87,12 +87,21 @@ class BootLoader {
       body = "Plonge dans ${identifiable.title}";
     }
 
+    final now = DateTime.now();
+    final date = DateTime(
+      now.year,
+      now.month,
+      now.day + 1,
+      time.hour,
+      time.minute,
+    );
+
     await NotificationService().scheduleDailyRecommendations(
       id: 0,
       title: title,
       body: body,
       identifiable: identifiable,
-      time: time,
+      date: date,
     );
   }
 
@@ -110,17 +119,17 @@ class BootLoader {
       body = "Plonge dans ${identifiable.title}";
     }
 
-    final now = TimeOfDay.now();
-    final time = TimeOfDay(
-      hour: now.hour + addedTime.hour,
-      minute: now.minute + addedTime.minute,
+    final now = DateTime.now();
+    final date = now.add(
+      Duration(hours: addedTime.hour, minutes: addedTime.minute),
     );
+
     await NotificationService().scheduleDailyRecommendations(
       id: 0,
       title: title,
       body: body,
       identifiable: identifiable,
-      time: time,
+      date: date,
     );
   }
 
