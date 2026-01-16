@@ -9,7 +9,8 @@ import 'package:provider/provider.dart';
 import 'package:flutter_application_1/widgets/search_widget/search_button.dart';
 
 class AnimeView extends StatefulWidget {
-  const AnimeView({super.key});
+  Anime? animeToOpen;
+  AnimeView({this.animeToOpen, super.key});
 
   @override
   State<AnimeView> createState() => _AnimeViewState();
@@ -38,6 +39,10 @@ class _AnimeViewState extends State<AnimeView> {
       final vm = context.read<AnimeViewModel>();
 
       await vm.fetchForYou(context.read<GlobalAnimeFavoritesProvider>());
+
+      if (widget.animeToOpen != null) {
+        autoOpenAnime(widget.animeToOpen as Anime);
+      }
 
       _forYouController.addListener(() {
         if (_forYouController.position.pixels >=
@@ -76,6 +81,11 @@ class _AnimeViewState extends State<AnimeView> {
     _mostLikedController.dispose();
     _forYouController.dispose();
     super.dispose();
+  }
+
+  void autoOpenAnime(Anime anime) {
+    final vm = context.read<AnimeViewModel>();
+    vm.openAnimePage(context, anime);
   }
 
   @override
