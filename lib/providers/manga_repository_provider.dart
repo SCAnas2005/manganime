@@ -262,4 +262,44 @@ class MangaRepository {
     }
     return null;
   }
+
+  Future<List<Manga>> search({
+    required String query,
+    int page = 1,
+    List<Genres>? genres,
+    MediaStatus? status,
+    MediaOrderBy? orderBy,
+    SortOrder? sort,
+    MangaType? mangaType,
+  }) async {
+    if (await NetworkService.isConnected) {
+      try {
+        final candidates = await RequestQueue.instance.enqueue(
+          () => api.searchManga(
+            page: page,
+            query: query,
+            genres: genres,
+            status: status,
+            orderBy: orderBy,
+            sort: sort,
+            type: mangaType,
+          ),
+        );
+
+        return candidates;
+      } catch (e) {
+        debugPrint("[MangaRepository] search() : Erreur $e");
+      }
+    }
+
+    final results = await DatabaseProvider.instance.search<Manga>(
+      page: page,
+      query: query,
+      genres: genres,
+      status: status,
+      orderBy: orderBy,
+      mangaType: mangaType,
+    );
+    return results;
+  }
 }

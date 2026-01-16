@@ -1,26 +1,46 @@
-import 'package:flutter_application_1/providers/user_stats_provider.dart';
-import 'package:flutter_application_1/providers/like_storage_provider.dart';
-import 'package:flutter_application_1/providers/screen_time_provider.dart';
-import 'package:flutter_application_1/providers/anime_cache_provider.dart';
-import 'package:flutter_application_1/providers/user_profile_provider.dart';
-import 'package:flutter_application_1/models/anime.dart';
-import 'package:flutter_application_1/models/identifiable_enums.dart';
-import 'package:flutter_application_1/models/rank_info.dart';
-import 'package:flutter_application_1/models/achievement.dart';
-import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart'; // Nécessaire pour ValueListenable
+import 'package:flutter/material.dart';
+
+// Assure-toi que ces imports correspondent à ton projet
+import 'package:flutter_application_1/models/achievement.dart';
+import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/models/identifiable_enums.dart';
+import 'package:flutter_application_1/models/rank_info.dart';
+import 'package:flutter_application_1/providers/anime_cache_provider.dart';
+import 'package:flutter_application_1/providers/like_storage_provider.dart';
+import 'package:flutter_application_1/providers/screen_time_provider.dart';
+import 'package:flutter_application_1/providers/user_profile_provider.dart';
+import 'package:flutter_application_1/providers/user_stats_provider.dart';
+
 class AnimeStatModel extends ChangeNotifier {
+  // --- Données ---
   int viewsNumber = 0;
-
   int rankNumber = 0;
-
   double rankProgress = 0.0;
-
   String currentRankTitle = "Otaku-chaaan";
   Color currentRankColor = const Color(0xFFC7F141);
 
+  int likesNumber = 0;
+  int viewNumber = 0;
+  String timeFormatted = "0m";
+  int totalSecondsWatched = 0;
+  Map<String, int> categoryPercentage = {};
+
+  // --- Gestion des Achievements ---
+  List<Achievement> allAchievements = [];
+  List<Achievement> get recentAchievements =>
+      allAchievements.where((a) => a.isUnlocked).toList();
+
+  // --- Sécurité et Listeners (CORRECTION CRASH) ---
+  bool _isDisposed = false; // Drapeau de sécurité
+  StreamSubscription? _timeSubscription;
+  ValueListenable? _likesListenable; // Référence stockée
+  ValueListenable? _viewsListenable; // Référence stockée
+
+  // --- Rangs ---
   final List<RankInfo> _ranks = [
     const RankInfo(
       name: "Otaku-chaaan",
@@ -71,51 +91,52 @@ class AnimeStatModel extends ChangeNotifier {
     ),
   ];
 
-  int likesNumber = 0;
-
-  int viewNumber = 0;
-
-  String timeFormatted = "0m";
-
-  Map<String, int> categoryPercentage = {};
-
-  StreamSubscription? _timeSubscription;
-
   void init() {
     rankNumber = 12;
     categoryPercentage = {};
 
-    // valeurs initiales
+    // Initialisation des données
     _updateLikes();
     _updateViews();
     _updateTime(ScreenTimeProvider.getTotalScreenTime());
     _updateGenreStats();
     _updateRank();
 
-    LikeStorage.getLikesListenable().addListener(_updateLikes);
-    LikeStorage.getLikesListenable().addListener(_updateGenreStats);
+    // --- CORRECTION : On capture les listenables ici ---
+    _likesListenable = LikeStorage.getLikesListenable();
+    _viewsListenable = UserStatsProvider.getViewsListenable();
 
-    UserStatsProvider.getViewsListenable().addListener(_updateViews);
-    UserStatsProvider.getViewsListenable().addListener(_updateRank);
+    // On attache les listeners sur NOS variables locales
+    _likesListenable?.addListener(_updateLikes);
+    _likesListenable?.addListener(_updateGenreStats);
+
+    _viewsListenable?.addListener(_updateViews);
+    _viewsListenable?.addListener(_updateRank);
 
     _timeSubscription = ScreenTimeProvider().timeStream.listen(_updateTime);
     _initAchievements();
     _checkAchievements();
   }
 
+  // --- Méthodes de mise à jour sécurisées ---
+
   void _updateLikes() {
+    if (_isDisposed) return; // Sécurité
     likesNumber = LikeStorage.getIdAnimeLiked().length;
     _checkAchievements();
     notifyListeners();
   }
 
   void _updateViews() {
+    if (_isDisposed) return; // Sécurité
     viewNumber = UserStatsProvider.getAnimeViewsCount();
     _checkAchievements();
     notifyListeners();
   }
 
   void _updateRank() {
+    if (_isDisposed) return; // Sécurité
+
     final double divisor = ((1 + sqrt(5)) / 2) * 1000;
     final int totalScore =
         ScreenTimeProvider.getTotalScreenTime() +
@@ -125,7 +146,6 @@ class AnimeStatModel extends ChangeNotifier {
     rankNumber = totalScore ~/ divisor;
     rankProgress = (totalScore % divisor) / divisor;
 
-    // Mis à jour des informations du rang actuel
     RankInfo currentRank = _ranks.first;
     for (final rank in _ranks) {
       if (rankNumber >= rank.threshold) {
@@ -142,15 +162,20 @@ class AnimeStatModel extends ChangeNotifier {
   }
 
   Future<void> _updateGenreStats() async {
+    if (_isDisposed) return; // Sécurité avant l'async
+
     final likedIds = LikeStorage.getIdAnimeLiked();
     final List<Anime> likedAnimes = [];
 
     for (final id in likedIds) {
+      if (_isDisposed) return; // Sécurité pendant la boucle
       final anime = await AnimeCache.instance.get(id);
       if (anime != null) {
         likedAnimes.add(anime);
       }
     }
+
+    if (_isDisposed) return; // Sécurité après l'async
 
     if (likedAnimes.isEmpty) {
       categoryPercentage = {};
@@ -162,8 +187,6 @@ class AnimeStatModel extends ChangeNotifier {
     final topGenres = userProfile.getTopGenres<Anime>(5);
 
     final Map<String, int> newStats = {};
-
-    // calcule total des occurrences des genres pour le top 5 pour normaliser le pourcentage pour le pie chart
     int sumTop5 = 0;
     for (final genre in topGenres) {
       sumTop5 += userProfile.animeGenreTagFrenquencies[genre] ?? 0;
@@ -183,6 +206,7 @@ class AnimeStatModel extends ChangeNotifier {
   }
 
   void _updateTime(int totalSeconds) {
+    if (_isDisposed) return; // Sécurité
     totalSecondsWatched = totalSeconds;
     final int hours = totalSeconds ~/ 3600;
     final int minutes = (totalSeconds % 3600) ~/ 60;
@@ -195,9 +219,7 @@ class AnimeStatModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<Achievement> allAchievements = [];
-  List<Achievement> get recentAchievements =>
-      allAchievements.where((a) => a.isUnlocked).toList();
+  // --- Achievements ---
 
   void _initAchievements() {
     allAchievements = [
@@ -255,9 +277,7 @@ class AnimeStatModel extends ChangeNotifier {
         description: 'Passer 10 heures sur l\'app',
         icon: Icons.timer,
         color: const Color(0xFFC7F141),
-        condition: (model) {
-          return model.totalSecondsWatched >= 36000;
-        },
+        condition: (model) => model.totalSecondsWatched >= 36000,
       ),
       Achievement(
         id: 'time_traveler',
@@ -319,6 +339,8 @@ class AnimeStatModel extends ChangeNotifier {
   }
 
   void _checkAchievements() {
+    if (_isDisposed) return; // Sécurité
+
     bool hasChanged = false;
     for (var achievement in allAchievements) {
       if (!achievement.isUnlocked && achievement.condition(this)) {
@@ -332,14 +354,23 @@ class AnimeStatModel extends ChangeNotifier {
     }
   }
 
-  int totalSecondsWatched = 0;
-
   @override
   void dispose() {
-    LikeStorage.getLikesListenable().removeListener(_updateLikes);
-    LikeStorage.getLikesListenable().removeListener(_updateGenreStats);
-    UserStatsProvider.getViewsListenable().removeListener(_updateViews);
+    // 1. On coupe tout immédiatement
+    _isDisposed = true;
+
+    // 2. On retire les listeners sur les références stockées
+    _likesListenable?.removeListener(_updateLikes);
+    _likesListenable?.removeListener(_updateGenreStats);
+
+    _viewsListenable?.removeListener(_updateViews);
+    _viewsListenable?.removeListener(
+      _updateRank,
+    ); // Important de retirer les deux
+
+    // 3. On coupe le stream
     _timeSubscription?.cancel();
+
     super.dispose();
   }
 }
