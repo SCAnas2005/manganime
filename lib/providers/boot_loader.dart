@@ -1,12 +1,16 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/models/identifiable.dart';
 import 'package:flutter_application_1/models/manga.dart';
 import 'package:flutter_application_1/providers/anime_cache_provider.dart';
+import 'package:flutter_application_1/providers/anime_repository_provider.dart';
 import 'package:flutter_application_1/providers/database_provider.dart';
 import 'package:flutter_application_1/providers/like_storage_provider.dart';
 import 'package:flutter_application_1/providers/manga_cache_provider.dart';
+import 'package:flutter_application_1/providers/manga_repository_provider.dart';
 import 'package:flutter_application_1/providers/media_sections_provider.dart';
 import 'package:flutter_application_1/providers/screen_time_provider.dart';
 import 'package:flutter_application_1/providers/settings_repository_provider.dart';
@@ -16,6 +20,7 @@ import 'package:flutter_application_1/services/image_sync_service.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_application_1/services/notification_service.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class BootLoader {
@@ -24,6 +29,7 @@ class BootLoader {
   static Future<void> initAll() async {
     WidgetsFlutterBinding.ensureInitialized();
 
+    // Initialisation de la base de donnée locale HIVE
     await Hive.initFlutter();
 
     // Ouvre une box pour la base de donnée
@@ -44,15 +50,23 @@ class BootLoader {
     // Ouvre une box pour les sections anime/manga
     await MediaSectionsProvider.instance.init(JikanService());
 
-    // Initialisation et démarrage du suivi du temps d'écran
+    // Initialisation du suivi du temps d'écran
     await ScreenTimeProvider.init();
 
+    // Initialisation des paramètres de l'app
     await SettingsStorage.instance.init();
+
+    // Initialisation du service de notif
+    void f(NotificationResponse response) {
+      onNotificationClick(response.payload ?? "");
+    }
+
+    await NotificationService.instance.init(
+      onDidReceiveNotificationResponse: f,
+    );
   }
 
   static Future<void> _requireInternet() async {
-    // Si tu as une classe NetworkService, utilise-la ici
-    // Exemple basique :
     bool hasConnection = await NetworkService.isConnected;
     if (!hasConnection) {
       throw const SocketException("Connexion perdue pendant le téléchargement");
@@ -73,12 +87,49 @@ class BootLoader {
       body = "Plonge dans ${identifiable.title}";
     }
 
+    final now = DateTime.now();
+    final date = DateTime(
+      now.year,
+      now.month,
+      now.day + 1,
+      time.hour,
+      time.minute,
+    );
+
     await NotificationService().scheduleDailyRecommendations(
       id: 0,
       title: title,
       body: body,
       identifiable: identifiable,
-      time: time,
+      date: date,
+    );
+  }
+
+  static Future<void> scheduleFromNow(
+    Identifiable identifiable,
+    TimeOfDay addedTime,
+  ) async {
+    String title = "";
+    String body = "";
+    if (identifiable is Anime) {
+      title = "Anime du jour 📺";
+      body = "Découvre ${identifiable.title}";
+    } else {
+      title = "Lecture du jour 📚";
+      body = "Plonge dans ${identifiable.title}";
+    }
+
+    final now = DateTime.now();
+    final date = now.add(
+      Duration(hours: addedTime.hour, minutes: addedTime.minute),
+    );
+
+    await NotificationService().scheduleDailyRecommendations(
+      id: 0,
+      title: title,
+      body: body,
+      identifiable: identifiable,
+      date: date,
     );
   }
 
@@ -106,9 +157,8 @@ class BootLoader {
 
     if (needUpdate) {
       await _performFullUpdate(onStatusChanged, provider);
-    } else {
-      await _performQuickStartup(onStatusChanged, provider);
     }
+    await _performQuickStartup(onStatusChanged, provider);
   }
 
   static Future<void> _performFullUpdate(
@@ -153,6 +203,28 @@ class BootLoader {
     Function(String)? onStatusChanged,
     SettingsRepositoryProvider provider,
   ) async {
+    final lastNotificationDate = provider.getSettings().lastNotificationSent;
+    // isSameDay gère le fait que les dates soit null ou pas.
+    if (!provider.isSameDay(lastNotificationDate, DateTime.now())) {
+      Identifiable? identifiable;
+      bool isAnime = Random().nextBool();
+
+      if (isAnime) {
+        identifiable = await AnimeRepository(
+          api: JikanService(),
+        ).getAnimeOfTheDay();
+      } else {
+        identifiable = await MangaRepository(
+          api: JikanService(),
+        ).getMangaOfTheDay();
+      }
+
+      if (identifiable != null) {
+        await scheduleFromNow(identifiable, TimeOfDay(hour: 0, minute: 1));
+      }
+    } else {
+      debugPrint("No notification for today, already has one");
+    }
     await Future.delayed(const Duration(milliseconds: 200));
   }
 }

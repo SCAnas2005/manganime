@@ -54,57 +54,59 @@ class StatCard extends StatelessWidget {
       builder: (context, value, child) {
         return Transform.translate(
           offset: Offset(0, 20 * (1 - value)),
-          child: Opacity(
-            opacity: value,
-            child: child,
-          ),
+          child: Opacity(opacity: value, child: child),
         );
       },
       child: BlurCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 20),
-              const SizedBox(width: 8),
-              Text(label,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: color, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  label,
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.white.withValues(alpha: 0.7),
-                  )),
-            ],
-          ),
-          const SizedBox(height: 8),
-          AnimatedCounter(
-            value: value,
-            style: const TextStyle(
-              fontSize: 36,
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          if (subtitle != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(subtitle!,
-                  style: TextStyle(fontSize: 12, color: color)),
-            ),
-          if (progress != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  backgroundColor: color.withValues(alpha: 0.2),
-                  valueColor: AlwaysStoppedAnimation<Color>(color),
-                  minHeight: 4,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            AnimatedCounter(
+              value: value,
+              style: const TextStyle(
+                fontSize: 36,
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
               ),
             ),
-        ],
-      ),
+            if (subtitle != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  subtitle!,
+                  style: TextStyle(fontSize: 12, color: color),
+                ),
+              ),
+            if (progress != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    backgroundColor: color.withValues(alpha: 0.2),
+                    valueColor: AlwaysStoppedAnimation<Color>(color),
+                    minHeight: 4,
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -187,15 +189,18 @@ class AchievementCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title,
-                  style: const TextStyle(color: Colors.white, fontSize: 14)),
-              Text(desc,
-                  style: const TextStyle(color: Colors.white54, fontSize: 12)),
+              Text(
+                title,
+                style: const TextStyle(color: Colors.white, fontSize: 14),
+              ),
+              Text(
+                desc,
+                style: const TextStyle(color: Colors.white54, fontSize: 12),
+              ),
             ],
           ),
         ),
-        Text(time,
-            style: const TextStyle(color: Colors.white54, fontSize: 12)),
+        Text(time, style: const TextStyle(color: Colors.white54, fontSize: 12)),
       ],
     );
   }

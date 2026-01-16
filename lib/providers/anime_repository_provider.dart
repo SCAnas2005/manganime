@@ -277,8 +277,7 @@ class AnimeRepository {
         debugPrint("[AnimeRepository] search() : Erreur $e");
       }
     }
-
-    return await DatabaseProvider.instance.search<Anime>(
+    final results = await DatabaseProvider.instance.search<Anime>(
       page: page,
       query: query,
       genres: genres,
@@ -287,5 +286,11 @@ class AnimeRepository {
       animeType: animeType,
       animeRating: animeRating,
     );
+    return results;
+  }
+
+  Future<Anime?> getAnimeOfTheDay() async {
+    final animes = await getPopularAnimes();
+    return animes.isNotEmpty ? animes.first : null;
   }
 }

@@ -39,6 +39,10 @@ class UserStatsProvider {
     return _box.listenable();
   }
 
+  static Future<void> clearAll() async {
+    await _box.clear();
+  }
+
   // SETTERS
   static void _addView(String key, int id) {
     final list = List<int>.from(_box.get(key, defaultValue: [])!);
