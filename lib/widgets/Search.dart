@@ -14,17 +14,25 @@ class Search extends StatefulWidget {
 
 class _SearchState extends State<Search> {
   int index = 0;
+  String _selectedFilter = 'Note'; // Filtre par défaut
+  final List<String> filters = ['Popularité', 'Note', 'date de sortie'];
+  final List<String> mainGenres = [
+    'Action', 'Adventure', 'Comedy', 'Drama',
+    'Fantasy', 'Horror', 'Mecha', 'Music',
+    'Romance', 'SciFi', 'SliceOfLife', 'Sports',
+  ];
+   Set<String> selectedGenres = {};
 
   @override
   void initState() {
     super.initState();
     Future.microtask(() {
       final searchViewModel = context.read<SearchViewModel>();
-      searchViewModel.searchEmpty();
+      searchViewModel.searchEmpty(filter: _selectedFilter);
     });
   }
-
-  @override
+  
+@override
   Widget build(BuildContext context) {
     final vm = context.watch<AnimeViewModel>();
     final searchViewModel = context.watch<SearchViewModel>();
@@ -35,57 +43,123 @@ class _SearchState extends State<Search> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text("Recheche")),
+      appBar: AppBar(title: Text("Recherche")),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             child: SearchBar(
               hintText: "Rechercher un anime",
-              onChanged: (text) {
-                // if (text.isNotEmpty) {
-                //   searchViewModel.search(text);
-                // } else {
-                //   searchViewModel.searchEmpty(text);
-                // }
-                searchViewModel.onSearchTextChanged(text);
+
+              onChanged: (text) async {
+               //  if (text.isNotEmpty) {
+                 //    await searchViewModel.search(text);
+                 //}            // else {
+                   // await searchViewModel.searchEmpty("", filter: _selectedFilter);
+                //}
+                searchViewModel.onSearchTextChanged(text, _selectedFilter);
+        
               },
             ),
           ),
 
-          const SizedBox(height: 10),
-
-          if (suggestions.isNotEmpty)
-            Expanded(
-              child: GridView.builder(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                  childAspectRatio: 1,
-                ),
-
-                itemCount: suggestions.length,
-                itemBuilder: (context, i) {
-                  final anime = suggestions[i];
-                  return AnimeCard(
-                    anime: anime,
-                    onTap: (anime) => vm.openAnimePage(context, anime),
-                    onLikeDoubleTap: (anime) => {
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                PopupMenuButton<String>(
+                  child: SizedBox(
+                    width: 170,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        selectedGenres.isEmpty
+                            ? "Choisir les genres"
+                            : selectedGenres.join(", "),
+                      ),
+                    ),
+                  ),
+                  itemBuilder: (context) => mainGenres.map((genre) {
+                    final isSelected = selectedGenres.contains(genre);
+                    return CheckedPopupMenuItem<String>(
+                      value: genre,
+                      checked: isSelected,
+                      child: Text(genre),
+                    );
+                  }).toList(),
+                  onSelected: (genre) {
+                    setState(() {
+                      if (selectedGenres.contains(genre)) {
+                        selectedGenres.remove(genre);
+                      } else {
+                        selectedGenres.add(genre);
+                      }
                       context
-                          .read<GlobalAnimeFavoritesProvider>()
-                          .toggleFavorite(anime),
-                    },
-                    isLiked: context
-                        .read<GlobalAnimeFavoritesProvider>()
-                        .isAnimeLiked(anime.id),
-                  );
-                },
-              ),
+                          .read<SearchViewModel>()
+                          .updateSelectedGenres(selectedGenres);
+                    });
+                  },
+                ),
+                DropdownButton<String>(
+                  value: _selectedFilter,
+                  items: filters
+                      .map((filters) => DropdownMenuItem(
+                            value: filters,
+                            child: Text(filters),
+                          ))
+                      .toList(),
+                  onChanged: (newValue) async {
+                    if (newValue != null) {
+                      setState(() {
+                        _selectedFilter = newValue;
+                      });
+                      searchViewModel.onFilterChanged(_selectedFilter);
+                    }
+                  },
+                ),
+              ],
             ),
-        ],
-      ),
-    );
+          ),
+        
+            
+            const SizedBox(height: 10),
+
+            if (suggestions.isNotEmpty)
+              Expanded(
+                child: GridView.builder(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 10,
+                    childAspectRatio: 1,
+                  ),
+
+                  itemCount: suggestions.length,
+                  itemBuilder: (context, i) {
+                    final anime = suggestions[i];
+                    return AnimeCard(
+                      anime: anime,
+                      onTap: (anime) => vm.openAnimePage(context, anime),
+                      onLikeDoubleTap: (anime) => {
+                        context
+                            .read<GlobalAnimeFavoritesProvider>()
+                            .toggleFavorite(anime),
+                      },
+                      isLiked: context
+                          .read<GlobalAnimeFavoritesProvider>()
+                          .isAnimeLiked(anime.id),
+                    );
+                  },
+                ),
+              ),
+          ],
+        ),
+      );
+    }
   }
-}
