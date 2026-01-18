@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/providers/anime_repository_provider.dart';
 import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
+import 'package:flutter_application_1/providers/user_profile_provider.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:flutter_application_1/views/anime_info_view.dart';
 
@@ -192,11 +193,12 @@ class AnimeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void refreshForYou(GlobalAnimeFavoritesProvider provider) {
+  Future<void> refreshForYou(GlobalAnimeFavoritesProvider provider) async {
     forYou.clear();
+    notifyListeners();
     _forYouPage = 1;
     _hasMoreForYou = true;
-    fetchForYou(provider);
+    await fetchForYou(provider);
   }
 
   // ---------------- NAVIGATION ----------------

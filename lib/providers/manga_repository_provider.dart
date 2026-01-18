@@ -8,6 +8,8 @@ import 'package:flutter_application_1/providers/manga_cache_provider.dart';
 import 'package:flutter_application_1/providers/media_path_provider.dart';
 import 'package:flutter_application_1/providers/media_sections_provider.dart';
 import 'package:flutter_application_1/providers/request_queue_provider.dart';
+import 'package:flutter_application_1/providers/settings_repository_provider.dart';
+import 'package:flutter_application_1/providers/settings_storage_provider.dart';
 import 'package:flutter_application_1/providers/user_profile_provider.dart';
 import 'package:flutter_application_1/services/api_service.dart';
 import 'package:flutter_application_1/services/network_service.dart';
@@ -201,55 +203,84 @@ class MangaRepository {
   }) async {
     final liked = provider.loadedFavoriteMangas;
 
-    // Calcul du profil utilisateur
-    final userProfile = UserprofileProvider.create(likedMangas: liked);
-    debugPrint("User profil built: $userProfile");
+    // 1. Récupération des préférences
+    var settingsProvider = SettingsRepositoryProvider(SettingsStorage.instance);
+    final preferredGenres = settingsProvider.getSettings().favoriteGenres ?? [];
 
-    // Le top genres
-    final topGenres = userProfile.getTopGenres<Manga>(3);
-    if (topGenres.length >= 3) {
-      debugPrint(
-        "Manga Top genres: ${topGenres.first}, ${topGenres[1]}, ${topGenres[2]}",
-      );
-    }
+    // 2. Création du profil utilisateur
+    final userProfile = UserprofileProvider.create(
+      likedMangas: liked,
+      preferredGenres: preferredGenres,
+    );
 
+    // 3. On récupère le Top 2 (Principal + Nuance)
+    final topGenres = userProfile.getTopGenres<Manga>(2);
+
+    // Fallback : Si pas de préférences, on renvoie les populaires
     if (topGenres.isEmpty) {
-      return await getPopularMangas();
+      return await getPopularMangas(page: page);
     }
 
-    List<Manga> candidates = [];
+    List<Manga> mixedCandidates = [];
 
     try {
-      // 1. API
+      // --- MODE ONLINE : STRATÉGIE COCKTAIL ---
       if (await NetworkService.isConnected) {
-        candidates = await RequestQueue.instance.enqueue(
-          () => api.searchManga(page: page, query: "", genres: topGenres),
+        // A. L'Ingrédient Principal (Genre N°1)
+        final listA = await RequestQueue.instance.enqueue(
+          () => api.searchManga(page: page, query: "", genres: [topGenres[0]]),
         );
-        debugPrint("fetchForYou mangas count : ${candidates.length}");
+
+        // B. La Nuance (Genre N°2)
+        List<Manga> listB = [];
+        if (topGenres.length > 1) {
+          listB = await RequestQueue.instance.enqueue(
+            () =>
+                api.searchManga(page: page, query: "", genres: [topGenres[1]]),
+          );
+        }
+
+        // C. L'Épice (Découverte)
+        // On injecte quelques mangas populaires du moment pour varier
+        final listDiscovery = await getPopularMangas(page: page);
+
+        // D. Le Mélange (Set pour éviter les doublons)
+        final Set<Manga> uniqueSet = {};
+        uniqueSet.addAll(listA); // Majorité de Genre 1
+        uniqueSet.addAll(listB); // Un peu de Genre 2
+        uniqueSet.addAll(
+          listDiscovery.take(5),
+        ); // 5 Mangas populaires "au hasard"
+
+        mixedCandidates = uniqueSet.toList();
       } else {
-        candidates = await DatabaseProvider.instance.search<Manga>(
+        // --- MODE OFFLINE : RECHERCHE CLASSIQUE ---
+        mixedCandidates = await DatabaseProvider.instance.search<Manga>(
           page: page,
           query: "",
           genres: topGenres,
         );
       }
 
-      debugPrint("Removing liked mangas from suggestions");
+      // 4. NETTOYAGE
+      // On retire les mangas qu'on a DÉJÀ likés
       final likedIds = liked.map((e) => e.id).toSet();
-      candidates = candidates.where((a) => !likedIds.contains(a.id)).toList();
+      mixedCandidates.removeWhere((m) => likedIds.contains(m.id));
 
-      candidates.sort((a, b) {
+      // 5. CLASSEMENT INTELLIGENT
+      // On trie par score pour que les plus pertinents remontent
+      mixedCandidates.sort((a, b) {
         final scoreA = userProfile.calculateScoreFor<Manga>(a);
         final scoreB = userProfile.calculateScoreFor<Manga>(b);
-
-        // compareTo inversé (B vers A) pour avoir l'ordre Décroissant (Plus grand score en haut)
-        return scoreB.compareTo(scoreA);
+        return scoreB.compareTo(scoreA); // Décroissant
       });
 
-      debugPrint("fetchForYou mangas count : ${candidates.length}");
-      return candidates;
+      debugPrint(
+        "🍹 Cocktail Manga servi : ${mixedCandidates.length} titres (Top: ${topGenres.first.toReadableString()})",
+      );
+      return mixedCandidates;
     } catch (e) {
-      debugPrint("[MangaRepository] getForYouManga: $e");
+      debugPrint("[MangaRepository] getForYouManga Error: $e");
     }
 
     return [];
