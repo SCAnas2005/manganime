@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter/foundation.dart';
 
@@ -35,6 +37,10 @@ class UserStatsProvider {
 
   static ValueListenable<Box<List>> getViewsListenable() {
     return _box.listenable();
+  }
+
+  static Future<void> clearAll() async {
+    await _box.clear();
   }
 
   // SETTERS

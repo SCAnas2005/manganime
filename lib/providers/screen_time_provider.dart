@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -7,7 +9,7 @@ class ScreenTimeProvider with WidgetsBindingObserver {
   static const String TOTAL_TIME_KEY = "total_time_seconds";
 
   static final Box _box = Hive.box(BOX_NAME);
-  
+
   Timer? _timer;
   int _sessionSeconds = 0;
 
@@ -38,7 +40,7 @@ class ScreenTimeProvider with WidgetsBindingObserver {
     _stopTimer(); // on s'assure qu'aucun minuteur existant n'est en cours
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       _sessionSeconds++;
-      
+
       // on met à jour le temps total actuel (enregistré + session)
       _timeController.add(getTotalScreenTime() + _sessionSeconds);
 
@@ -54,11 +56,16 @@ class ScreenTimeProvider with WidgetsBindingObserver {
     _timer = null;
   }
 
+  static Future<void> reset() async {
+    await _box.clear();
+  }
+
   Future<void> _saveTime() async {
     if (_sessionSeconds > 0) {
       final currentTotal = getTotalScreenTime();
       await _box.put(TOTAL_TIME_KEY, currentTotal + _sessionSeconds);
-      _sessionSeconds = 0; // on réinitialise le compteur de session après l'enregistrement
+      _sessionSeconds =
+          0; // on réinitialise le compteur de session après l'enregistrement
     }
   }
 
@@ -70,12 +77,13 @@ class ScreenTimeProvider with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _startTimer();
-    } else if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
       _stopTimer();
       _saveTime();
     }
   }
-  
+
   void dispose() {
     _timeController.close();
     WidgetsBinding.instance.removeObserver(this);

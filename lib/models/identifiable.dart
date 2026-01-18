@@ -9,5 +9,8 @@ abstract class Identifiable {
   double? get score;
   List<Genres> get genres;
 
+  DateTime? get startDate;
+  DateTime? get endDate;
+
   Map<String, dynamic> toJson();
 }

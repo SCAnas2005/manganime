@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/models/author.dart';
 import 'package:flutter_application_1/models/identifiable_enums.dart';
 import 'package:flutter_application_1/models/manga.dart';
 import 'package:flutter_application_1/models/year_seasons_enum.dart';
@@ -280,41 +281,6 @@ class JikanService extends ApiService {
     return await fetchAnimeList(url);
   }
 
-  // =======
-  //   Future<List<Anime>> searchAnime({
-  //     String query =""
-  //     }) async {
-
-  //       final queryParameters = <String, String>{
-  //         'q': query,
-  //          };
-
-  //        final url = Uri.parse(
-  //         '$baseUrl/anime',
-  //       ).replace(queryParameters: queryParameters);
-
-  //       final response = await http.get(url);
-
-  //       if (response.statusCode == 200) {
-  //         final jsonData = json.decode(response.body);
-  //         final List<dynamic> animeList = jsonData['data'];
-
-  //         // Conversion du JSON en liste d’objets Anime
-  //         final List<Anime> animes = animeList
-  //             .map<Anime>((anime) {
-  //               return jsonToAnime(anime);
-  //             })
-  //             .where((anime) => anime.title.isNotEmpty)
-  //             .toList();
-
-  //         return animes;
-  //       } else {
-  //         throw Exception('Erreur ${response.statusCode}');
-  //       }
-  //     }
-
-  // >>>>>>> d736284cb48dda01c35ea0580f4e23f912b35d19
-
   /// Récupère les informations détaillées d’un anime via son [id MAL].
   ///
   /// Retourne un objet [AnimeDetail].
@@ -355,26 +321,43 @@ class JikanService extends ApiService {
   /// Convertit un objet JSON (anime basique) en instance de [Anime].
   @override
   Anime jsonToAnime(Map<String, dynamic> json) {
+    final aired = json["aired"];
+    final studios = json["studios"] as List?;
+    final genresList = json["genres"] as List?;
     return Anime(
       id: json["mal_id"],
-      title: json['title_english']?.toString() ?? '',
-      synopsis: json['synopsis'] ?? '',
-      imageUrl: json['images']?['jpg']?['image_url']?.toString() ?? '',
+      title: (json['title_english'] ?? json['title'] ?? '').toString(),
+      synopsis: (json['synopsis'] ?? '').toString(),
+      imageUrl: (json['images']?['jpg']?['image_url'] ?? '').toString(),
       status: MediaStatusX.fromJikan(json["status"]),
       score: (json["score"] ?? 0).toDouble(),
-      genres: (json["genres"] != null)
-          ? (json["genres"] as List)
-                .map((genreJson) => GenreX.fromString(genreJson["name"]))
-                .where((g) => g != null)
-                .map((g) => g!)
-                .toList()
-          : [],
+      genres:
+          genresList
+              ?.map((g) => GenreX.fromString(g["name"]))
+              .whereType<Genres>()
+              .toList() ??
+          [],
+      startDate: aired != null && aired["from"] != null
+          ? DateTime.tryParse(json["aired"]["from"])
+          : null,
+      endDate: aired != null && aired["to"] != null
+          ? DateTime.tryParse(json["aired"]["to"])
+          : null,
+      studio:
+          (studios != null && studios.isNotEmpty 
+          ? studios.first["name"] as String?
+          : null) ?? "Inconnu",
+      type: AnimeTypeX.fromJikan(json["type"]),
+      rating: AnimeRatingX.fromJikan(json["rating"]),
+      episodes: json["episodes"] as int?,
     );
   }
 
   /// Convertit un objet JSON (manga basique) en instance de [Manga].
   @override
   Manga jsonToManga(Map<String, dynamic> json) {
+    final demographics = json["demographics"] as List?;
+    final serializations = json["serializations"] as List?;
     return Manga(
       id: json["mal_id"],
       title:
@@ -383,7 +366,7 @@ class JikanService extends ApiService {
       imageUrl: json['images']?['jpg']?['image_url']?.toString() ?? '',
       status: MediaStatusX.fromJikan(json["status"]),
       score: (json["score"] ?? 0).toDouble(),
-      type: json["type"],
+      type: MangaTypeX.fromJikan(json["type"]),
       genres: (json["genres"] != null)
           ? (json["genres"] as List)
                 .map((genreJson) => GenreX.fromString(genreJson["name"]))
@@ -391,33 +374,29 @@ class JikanService extends ApiService {
                 .map((g) => g!)
                 .toList()
           : [],
+      startDate: json["published"] == null
+          ? null
+          : json["published"]["from"] == null
+          ? null
+          : DateTime.tryParse(json["published"]["from"]),
+      endDate: json["published"] == null
+          ? null
+          : json["published"]["to"] == null || json["published"]["to"] == "null"
+          ? null
+          : DateTime.tryParse(json["published"]["to"]),
+      authors:
+          (json["authors"] as List?)
+              ?.map((a) => Author.fromJikan(a))
+              .toList() ??
+          [],
+      chapters: json["chapters"] as int?,
+      volumes: json["volumes"] as int?,
+      demographic: (demographics != null && demographics.isNotEmpty)
+          ? demographics.first["name"]
+          : null,
+      serialization: serializations != null && serializations.isNotEmpty
+          ? serializations.first["name"]
+          : null,
     );
   }
-
-  // Future<List<Anime>> searchAnime({String query = ""}) async {
-  //   final queryParameters = <String, String>{'q': query};
-
-  //   final url = Uri.parse(
-  //     '$baseUrl/anime',
-  //   ).replace(queryParameters: queryParameters);
-
-  //   final response = await http.get(url);
-
-  //   if (response.statusCode == 200) {
-  //     final jsonData = json.decode(response.body);
-  //     final List<dynamic> animeList = jsonData['data'];
-
-  //     // Conversion du JSON en liste d’objets Anime
-  //     final List<Anime> animes = animeList
-  //         .map<Anime>((anime) {
-  //           return jsonToAnime(anime);
-  //         })
-  //         .where((anime) => anime.title.isNotEmpty)
-  //         .toList();
-
-  //     return animes;
-  //   } else {
-  //     throw Exception('Erreur ${response.statusCode}');
-  //   }
-  // }
 }

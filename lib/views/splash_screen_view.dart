@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/home.dart';
+import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/models/identifiable.dart';
 import 'package:flutter_application_1/providers/boot_loader.dart';
 import 'package:flutter_application_1/services/network_service.dart';
 import 'package:flutter_application_1/providers/settings_repository_provider.dart';
 import 'package:flutter_application_1/providers/settings_storage_provider.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  final Identifiable? identifiableToOpen;
+  const SplashScreen({this.identifiableToOpen, super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -24,60 +27,70 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _checkAndStart() async {
     await Future.delayed(const Duration(milliseconds: 500));
-    // 0. Reset état
-    setState(() {
-      _hasError = false;
-      _loadingText = "Vérification...";
-    });
+    if (mounted) setState(() => _loadingText = "Analyse...");
 
     var settingsRepo = SettingsRepositoryProvider(SettingsStorage.instance);
-    bool isFirstLaunch = settingsRepo.getSettings().isFirstLaunch;
+    final settings = settingsRepo.getSettings();
 
-    if (!isFirstLaunch) {
-      debugPrint("Lancement rapide (Mode hors-ligne supporté)");
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _navigateToHome();
-      });
-      return;
+    bool needUpdate =
+        settings.isFirstLaunch ||
+        (settings.dataVersion < BootLoader.CURRENT_DATA_VERSION);
+
+    if (needUpdate) {
+      if (mounted) setState(() => _loadingText = "Vérification connexion...");
+
+      bool isConnected = await NetworkService.isConnected;
+
+      if (!isConnected) {
+        if (mounted) {
+          setState(() {
+            _hasError = true;
+            _loadingText = "Mise à jour requise : Internet nécessaire.";
+          });
+        }
+      }
+    } else {
+      debugPrint("Mode Hors-Ligne supporté");
     }
 
-    _loadingText = "Vérification de la connexion...";
-    bool isConnected = await NetworkService.isConnected;
-
-    if (!isConnected) {
-      setState(() {
-        _hasError = true;
-        _loadingText =
-            "Première installation : Connexion internet requise pour télécharger les données.";
-      });
-      return;
-    }
-
-    // Si on a internet, on lance le gros téléchargement
     try {
       await BootLoader.onAppStart(
+        forceUpdate: needUpdate,
         onStatusChanged: (message) {
-          setState(() {
-            _loadingText = message;
-          });
+          if (mounted) {
+            setState(() {
+              _loadingText = message;
+            });
+          }
         },
       );
-      // Une fois fini, on va à l'accueil
+      // 4. NAVIGATION FINALE
       _navigateToHome();
     } catch (e) {
-      debugPrint("Erreur init: $e");
-      setState(() {
-        _hasError = true;
-        _loadingText = "Erreur lors du téléchargement. Veuillez réessayer.";
-      });
+      debugPrint("Erreur critique au démarrage: $e");
+      if (mounted) {
+        setState(() {
+          _hasError = true;
+          _loadingText = "Erreur : ${e.toString()}";
+        });
+      }
     }
   }
 
   void _navigateToHome() {
     if (mounted) {
+      int? indexPageToOpen = widget.identifiableToOpen == null
+          ? null
+          : widget.identifiableToOpen is Anime
+          ? 0
+          : 1;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => const HomePage(title: "MangAnime"),
+          builder: (context) => HomePage(
+            title: "MangAnime",
+            indexPage: indexPageToOpen,
+            identifiableToOpen: widget.identifiableToOpen,
+          ),
         ),
       );
     }
