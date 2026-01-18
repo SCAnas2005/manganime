@@ -33,7 +33,9 @@ class GlobalAnimeFavoritesProvider extends ChangeNotifier {
     _likedIds.addAll(ids);
 
     // 2. On lance le chargement des objets complets en arrière-plan
-    loadFullAnimeObjects();
+    if (_likedIds.isNotEmpty) {
+      loadFullAnimeObjects();
+    }
 
     isLoading = false;
     notifyListeners();

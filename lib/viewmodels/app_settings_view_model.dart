@@ -48,7 +48,7 @@ class AppSettingsViewModel extends ChangeNotifier {
     }
 
     settings = settings.copyWith(favoriteGenres: currentList);
-    notifyListeners(); // Dit à la vue de se redessiner
+    notifyListeners();
     await _settingsRepository.updateSettings(settings);
   }
 
