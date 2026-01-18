@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/models/anime.dart';
-import 'package:flutter_application_1/providers/anime_repository_provider.dart';
+import 'package:flutter_application_1/models/manga.dart';
+import 'package:flutter_application_1/providers/manga_repository_provider.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:flutter_application_1/models/identifiable_enums.dart';
 
-class SearchViewModel extends ChangeNotifier {
-  List<Anime> results = [];
-  List<Anime> _allResults = [];
+class MangaSearchViewModel extends ChangeNotifier {
+  List<Manga> results = [];
+  List<Manga> _allResults = [];
   String _lastQuery = "";
   Set<String> _currentSelectedGenres = {};
 
@@ -65,7 +65,7 @@ class SearchViewModel extends ChangeNotifier {
         sortOrder = SortOrder.desc;
       }
 
-      final newResults = await AnimeRepository(
+      final newResults = await MangaRepository(
         api: JikanService(),
       ).search(query: query, orderBy: orderBy, sort: sortOrder);
 
@@ -82,9 +82,9 @@ class SearchViewModel extends ChangeNotifier {
     if (_currentSelectedGenres.isEmpty) {
       results = List.from(_allResults);
     } else {
-      results = _allResults.where((anime) {
-        final animeGenres = anime.genres.map((g) => g.name).toSet();
-        return _currentSelectedGenres.every((g) => animeGenres.contains(g));
+      results = _allResults.where((manga) {
+        final mangaGenres = manga.genres.map((g) => g.name).toSet();
+        return _currentSelectedGenres.every((g) => mangaGenres.contains(g));
       }).toList();
     }
     notifyListeners();
@@ -112,7 +112,7 @@ class SearchViewModel extends ChangeNotifier {
         sortOrder = SortOrder.desc;
       }
       // Recherche avec query vide mais avec tri
-      results = await AnimeRepository(
+      results = await MangaRepository(
         api: JikanService(),
       ).search(query: "", orderBy: orderBy, sort: sortOrder);
 

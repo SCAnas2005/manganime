@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/identifiable_enums.dart';
 
 class AppSettings {
   bool isFirstLaunch;
@@ -7,6 +8,11 @@ class AppSettings {
   bool isNotificationAllowed;
   bool isPersonalizedRecommendationAllowed;
   TimeOfDay? notificationTime;
+  DateTime? lastNotificationSent;
+
+  final int dataVersion;
+
+  List<Genres>? favoriteGenres = [];
 
   AppSettings({
     this.isFirstLaunch = true,
@@ -14,7 +20,10 @@ class AppSettings {
     this.darkMode = false,
     this.isNotificationAllowed = false,
     this.isPersonalizedRecommendationAllowed = false,
+    this.dataVersion = 0,
     this.notificationTime,
+    this.lastNotificationSent,
+    this.favoriteGenres,
   }) {
     notificationTime = isNotificationAllowed
         ? TimeOfDay(hour: 9, minute: 0)
@@ -28,6 +37,9 @@ class AppSettings {
     bool? isNotificationAllowed,
     bool? isPersonalizedRecommendationAllowed,
     TimeOfDay? notificationTime,
+    int? dataVersion,
+    DateTime? lastNotificationSent,
+    List<Genres>? favoriteGenres,
   }) {
     return AppSettings(
       isFirstLaunch: isFirstLaunch ?? this.isFirstLaunch,
@@ -39,6 +51,9 @@ class AppSettings {
           isPersonalizedRecommendationAllowed ??
           this.isPersonalizedRecommendationAllowed,
       notificationTime: notificationTime ?? this.notificationTime,
+      dataVersion: dataVersion ?? this.dataVersion,
+      lastNotificationSent: lastNotificationSent ?? this.lastNotificationSent,
+      favoriteGenres: favoriteGenres ?? this.favoriteGenres,
     );
   }
 }

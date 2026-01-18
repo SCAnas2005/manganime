@@ -34,14 +34,16 @@ class GlobalMangaFavoritesProvider extends ChangeNotifier {
 
     // 2. On lance le chargement des objets complets en arrière-plan
     // On n'attend pas forcément la fin pour rendre l'UI interactive
-    loadFullAnimeObjects();
+    if (_likedIds.isNotEmpty) {
+      loadFullMangaObjects();
+    }
 
     isLoading = false;
     notifyListeners();
   }
 
   // Méthode séparée pour charger les détails (pour la page favoris)
-  Future<void> loadFullAnimeObjects() async {
+  Future<void> loadFullMangaObjects() async {
     if (_loadedFavoriteMangas.length == _likedIds.length) return; // Déjà chargé
 
     final List<Manga> loaded = [];
@@ -93,5 +95,11 @@ class GlobalMangaFavoritesProvider extends ChangeNotifier {
 
     // Notification : Tout le monde se met à jour !
     notifyListeners();
+  }
+
+  Future<void> reset() async {
+    _likedIds.clear();
+    _loadedFavoriteMangas.clear();
+    // await loadFullMangaObjects();
   }
 }

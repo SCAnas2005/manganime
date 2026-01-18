@@ -1,8 +1,19 @@
 // ignore_for_file: constant_identifier_names
 
-enum AnimeType { tv, movie, ova, special, ona, music, cm, pv, tv_special }
+import 'package:flutter/material.dart';
 
-enum MangaType { manga, novel, lightnovel, oneshot, doujin, manhwa, manhua }
+enum AnimeType { tv, movie, ova, special, ona, music, cm, pv, tv_special, none }
+
+enum MangaType {
+  manga,
+  novel,
+  lightnovel,
+  oneshot,
+  doujin,
+  manhwa,
+  manhua,
+  oel,
+}
 
 enum MediaStatus {
   airing, // anime
@@ -13,8 +24,128 @@ enum MediaStatus {
   discontinued,
 }
 
+extension MangaTypeX on MangaType {
+  String get key => name;
+
+  static MangaType fromString(String? type) {
+    if (type == null) return MangaType.manga;
+
+    try {
+      return MangaType.values.firstWhere((e) => e.name == type);
+    } catch (e) {
+      debugPrint("EXT [MangaTypeX] fromString($type) : $e");
+      return MangaType.manga;
+    }
+  }
+
+  static MangaType fromJikan(String? type) {
+    if (type == null) return MangaType.manga; // Valeur par défaut
+    final normalized = type
+        .toLowerCase()
+        .replaceAll("-", "")
+        .replaceAll(" ", "");
+
+    switch (normalized) {
+      case "manga":
+        return MangaType.manga;
+      case "novel":
+        return MangaType.novel;
+      case "lightnovel":
+        return MangaType.lightnovel;
+      case "oneshot":
+        return MangaType.oneshot;
+      case "doujinshi":
+        return MangaType.doujin;
+      case "manhwa":
+        return MangaType.manhwa;
+      case "manhua":
+        return MangaType.manhua;
+      case "oel":
+        return MangaType.oel;
+      default:
+        return MangaType.manga;
+    }
+  }
+
+  String get label {
+    switch (this) {
+      case MangaType.manga:
+        return "Manga";
+      case MangaType.novel:
+        return "Roman";
+      case MangaType.lightnovel:
+        return "Light Novel";
+      case MangaType.oneshot:
+        return "One-shot";
+      case MangaType.doujin:
+        return "Doujin";
+      case MangaType.manhwa:
+        return "Manhwa";
+      case MangaType.manhua:
+        return "Manhua";
+      case MangaType.oel:
+        return "OEL";
+    }
+  }
+}
+
+extension AnimeTypeX on AnimeType {
+  String get key => name;
+
+  static AnimeType fromString(String? type) {
+    if (type == null || type.isEmpty) AnimeType.none;
+    try {
+      return AnimeType.values.firstWhere((e) => e.name == type);
+    } catch (e) {
+      debugPrint("EXT [AnimeTypeX] fromString($type) : $e");
+      return AnimeType.none;
+    }
+  }
+
+  static AnimeType fromJikan(String? type) {
+    if (type == null || type.isEmpty) return AnimeType.none;
+
+    final normalized = type
+        .toLowerCase()
+        .replaceAll(" ", "_")
+        .replaceAll("-", "_");
+
+    try {
+      return AnimeType.values.firstWhere((e) => e.name == normalized);
+    } catch (e) {
+      debugPrint("EXT [AnimeTypeX] fromJikan($type) : $e");
+      return AnimeType.none;
+    }
+  }
+
+  String get label {
+    switch (this) {
+      case AnimeType.tv:
+        return "Série TV";
+      case AnimeType.movie:
+        return "Film";
+      case AnimeType.ova:
+        return "OVA";
+      case AnimeType.ona:
+        return "ONA (Web)";
+      case AnimeType.special:
+        return "Spécial";
+      case AnimeType.tv_special:
+        return "TV Spécial";
+      case AnimeType.music:
+        return "Musique";
+      case AnimeType.cm:
+        return "Pub (CM)";
+      case AnimeType.pv:
+        return "Promo (PV)";
+      case AnimeType.none:
+        return "None";
+    }
+  }
+}
+
 extension MediaStatusX on MediaStatus {
-  String get key => toString().split(".").last;
+  String get key => name;
   static MediaStatus fromString(String raw) {
     return MediaStatus.values.firstWhere(
       (s) => s.name == raw,
@@ -59,6 +190,82 @@ enum AnimeRating {
   r17, // 17+ (violance)
   r, // R+ Nudité
   rx, // Hentai
+  none,
+}
+
+extension AnimeRatingX on AnimeRating {
+  String get key => name;
+
+  static AnimeRating fromString(String? rating) {
+    if (rating == null || rating.isEmpty) return AnimeRating.none;
+
+    try {
+      return AnimeRating.values.firstWhere((e) => e.name == rating);
+    } catch (e) {
+      debugPrint("EXT [AnimeRatingX] fromString($rating) : $e");
+      return AnimeRating.none;
+    }
+  }
+
+  static AnimeRating fromJikan(String? rating) {
+    if (rating == null || rating.isEmpty) return AnimeRating.none;
+
+    final code = rating.split(" - ").first.trim().toUpperCase();
+
+    switch (code) {
+      case "G":
+        return AnimeRating.g;
+      case "PG":
+        return AnimeRating.pg;
+      case "PG-13":
+        return AnimeRating.pg13;
+      case "R":
+        return AnimeRating.r17;
+      case "R+":
+        return AnimeRating.r;
+      case "RX":
+        return AnimeRating.rx;
+    }
+    return AnimeRating.none;
+  }
+
+  String get label {
+    switch (this) {
+      case AnimeRating.g:
+        return "Tout public";
+      case AnimeRating.pg:
+        return "Enfants";
+      case AnimeRating.pg13:
+        return "Ados (13+)";
+      case AnimeRating.r17:
+        return "Violence (17+)";
+      case AnimeRating.r:
+        return "Nudité (R+)";
+      case AnimeRating.rx:
+        return "Hentai (Rx)";
+      case AnimeRating.none:
+        return "None";
+    }
+  }
+
+  Color get color {
+    switch (this) {
+      case AnimeRating.g:
+        return Colors.green;
+      case AnimeRating.pg:
+        return Colors.lightGreen;
+      case AnimeRating.pg13:
+        return Colors.orange;
+      case AnimeRating.r17:
+        return Colors.redAccent;
+      case AnimeRating.r:
+        return Colors.pinkAccent;
+      case AnimeRating.rx:
+        return Colors.black;
+      case AnimeRating.none:
+        return Colors.black;
+    }
+  }
 }
 
 enum MediaOrderBy {
@@ -78,13 +285,17 @@ enum SortOrder { desc, asc }
 enum Genres {
   Action,
   Adventure,
+  Fantasy,
+  Comedy,
+  Shounen,
+  Drama,
+  Sports,
+  Romance,
+  SciFi,
   AvantGarde,
   AwardWinning,
   BoysLove,
-  Comedy,
-  Drama,
   Ecchi,
-  Fantasy,
   GirlsLove,
   Gourmet,
   Horror,
@@ -93,13 +304,9 @@ enum Genres {
   Music,
   Parody,
   Samurai,
-  Romance,
   School,
-  SciFi,
   Shoujo,
-  Shounen,
   SliceOfLife,
-  Sports,
   Supernatural,
   SuperPower,
   Vampire,

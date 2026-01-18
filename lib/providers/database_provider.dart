@@ -1,5 +1,6 @@
+// ignore_for_file: constant_identifier_names
+
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/models/identifiable.dart';
@@ -13,9 +14,7 @@ import 'package:flutter_application_1/services/network_service.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class DatabaseProvider {
-  // ignore: constant_identifier_names
   static const String ANIMES_KEY = "animes_key";
-  // ignore: constant_identifier_names
   static const String MANGAS_KEY = "mangas_key";
 
   static late final Box _animeBox;
@@ -270,14 +269,29 @@ class DatabaseProvider {
       result.add(item);
     }
 
-    if (orderBy != null && T == Anime) {
+    if (orderBy != null) {
       switch (orderBy) {
         case MediaOrderBy.score:
           result.sort((a, b) {
-            final sa = (a as Anime).score ?? 0.0;
-            final sb = (b as Anime).score ?? 0.0;
+            // Utilise le score de Identifiable (commun à Anime et Manga)
+            final sa = a.score ?? 0.0;
+            final sb = b.score ?? 0.0;
             return sb.compareTo(sa);
           });
+          break;
+        case MediaOrderBy.start_date:
+          result.sort((a, b) {
+            final da = a.startDate;
+            final db = b.startDate;
+            // Les items sans date vont à la fin
+            if (da == null && db == null) return 0;
+            if (da == null) return 1;
+            if (db == null) return -1;
+            return db.compareTo(da); // Plus récent en premier
+          });
+          break;
+        case MediaOrderBy.popularity:
+          // Popularité = déjà trié par défaut dans la base
           break;
         default:
           break;
