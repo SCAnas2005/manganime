@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/models/identifiable_enums.dart';
 import 'package:flutter_application_1/viewmodels/app_settings_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
@@ -17,19 +16,18 @@ class AppSettingsViewState extends State<AppSettingsView> {
 
   TimeOfDay notificationTime = const TimeOfDay(hour: 9, minute: 0);
 
-  final Set<Genres> selectedGenres = {};
+  final Set<String> selectedGenres = {'Action', 'Shōnen'};
 
-  // final List<String> allGenres = [
-  //   'Action',
-  //   'Shōnen',
-  //   'Romance',
-  //   'Fantaisie',
-  //   'Seinen',
-  //   'Thriller',
-  //   'Comédie',
-  //   'Horreur',
-  // ];
-  final List<Genres> allGenres = Genres.values.take(9).toList();
+  final List<String> allGenres = [
+    'Action',
+    'Shōnen',
+    'Romance',
+    'Fantaisie',
+    'Seinen',
+    'Thriller',
+    'Comédie',
+    'Horreur',
+  ];
 
   Future<void> _pickNotificationTime() async {
     final picked = await showTimePicker(
@@ -58,13 +56,9 @@ class AppSettingsViewState extends State<AppSettingsView> {
     return Scaffold(
       appBar: AppBar(title: const Text('Paramètres')),
       body: SettingsList(
-        darkTheme: SettingsThemeData(
-          settingsListBackground: Theme.of(context).scaffoldBackgroundColor,
-        ),
-        lightTheme: SettingsThemeData(
-          settingsListBackground: Theme.of(context).scaffoldBackgroundColor,
-        ),
+        darkTheme: SettingsThemeData(settingsListBackground: Colors.black),
         sections: [
+          /// 🎨 Apparence
           SettingsSection(
             title: const Text('Apparence'),
             tiles: [
@@ -80,6 +74,7 @@ class AppSettingsViewState extends State<AppSettingsView> {
             ],
           ),
 
+          /// 🔔 Notifications
           SettingsSection(
             title: const Text('Notifications'),
             tiles: [
@@ -124,14 +119,16 @@ class AppSettingsViewState extends State<AppSettingsView> {
                   spacing: 8,
                   runSpacing: 8,
                   children: allGenres.map((genre) {
-                    final isSelected = vm.settings.favoriteGenres?.contains(
-                      genre,
-                    ); //selectedGenres.contains(genre);
+                    final selected = selectedGenres.contains(genre);
                     return ChoiceChip(
-                      label: Text(genre.toReadableString()),
-                      selected: isSelected ?? false,
-                      onSelected: (_) async {
-                        await vm.toggleFavoriteGenre(genre);
+                      label: Text(genre),
+                      selected: selected,
+                      onSelected: (_) {
+                        setState(() {
+                          selected
+                              ? selectedGenres.remove(genre)
+                              : selectedGenres.add(genre);
+                        });
                       },
                     );
                   }).toList(),
@@ -140,6 +137,7 @@ class AppSettingsViewState extends State<AppSettingsView> {
             ],
           ),
 
+          /// 🔐 Données
           SettingsSection(
             title: const Text('Données et confidentialité'),
             tiles: [
@@ -156,9 +154,7 @@ class AppSettingsViewState extends State<AppSettingsView> {
                   style: TextStyle(color: Colors.red),
                 ),
                 description: const Text('Effacer toutes vos données locales'),
-                onPressed: (_) async {
-                  await vm.deleteMyData(context);
-                },
+                onPressed: (_) {},
               ),
               SettingsTile.navigation(
                 leading: const Icon(Icons.refresh),
@@ -177,6 +173,7 @@ class AppSettingsViewState extends State<AppSettingsView> {
             ],
           ),
 
+          /// ℹ️ Footer
           SettingsSection(
             tiles: [
               SettingsTile(
