@@ -270,6 +270,20 @@ class DatabaseProvider {
       result.add(item);
     }
 
+    if (orderBy != null && T == Anime) {
+      switch (orderBy) {
+        case MediaOrderBy.score:
+          result.sort((a, b) {
+            final sa = (a as Anime).score ?? 0.0;
+            final sb = (b as Anime).score ?? 0.0;
+            return sb.compareTo(sa);
+          });
+          break;
+        default:
+          break;
+      }
+    }
+
     final int totalResults = result.length;
     final int startIndex = (page - 1) * ITEM_PER_PAGE;
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/models/anime_sections.dart';
+import 'package:flutter_application_1/models/identifiable_enums.dart';
 import 'package:flutter_application_1/providers/anime_cache_provider.dart';
 import 'package:flutter_application_1/providers/database_provider.dart';
 import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
@@ -129,6 +130,7 @@ class AnimeRepository {
       final cachedAnimes = await MediaSectionsProvider.instance.getAnimes(
         section,
       );
+      debugPrint("Airing animes len : ${cachedAnimes.length}");
       if (cachedAnimes.isNotEmpty) return cachedAnimes;
     }
     // Api
@@ -243,5 +245,48 @@ class AnimeRepository {
     }
 
     return [];
+  }
+
+  Future<List<Anime>> search({
+    required String query,
+    int page = 1,
+    List<Genres>? genres,
+    MediaStatus? status,
+    MediaOrderBy? orderBy,
+    SortOrder? sort,
+    AnimeType? animeType,
+    AnimeRating? animeRating,
+  }) async {
+    if (await NetworkService.isConnected) {
+      try {
+        final candidates = await RequestQueue.instance.enqueue(
+          () => api.searchAnime(
+            page: page,
+            query: query,
+            genres: genres,
+            status: status,
+            orderBy: orderBy,
+            sort: sort,
+            type: animeType,
+            rating: animeRating,
+          ),
+        );
+
+        return candidates;
+      } catch (e) {
+        debugPrint("[AnimeRepository] search() : Erreur $e");
+      }
+    }
+
+    return await DatabaseProvider.instance.search<Anime>(
+      page: page,
+      query: query,
+      genres: genres,
+      status: status,
+      orderBy: orderBy,
+      animeType: animeType,
+      animeRating: animeRating,
+    );
+    ;
   }
 }
