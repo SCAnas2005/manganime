@@ -26,7 +26,7 @@ class TabSection<T> extends StatelessWidget {
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            
+            color: Colors.white,
           ),
         ),
         const SizedBox(height: 10),
@@ -48,4 +48,4 @@ class TabSection<T> extends StatelessWidget {
       ],
     );
   }
-  }
+}
