@@ -72,6 +72,7 @@ class HomePageState extends State<HomePage> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AnimeViewModel()),
+        ChangeNotifierProvider(create: (_) => MangaViewModel()),
         ChangeNotifierProvider(create: (_) => SearchViewModel()),
       ],
       child: Scaffold(
