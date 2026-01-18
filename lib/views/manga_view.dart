@@ -132,7 +132,7 @@ class _MangaViewState extends State<MangaView> {
                   // L'onglet 0 scrolle tout seul (GridView)
                   ? _buildForYou(vm)
                   // L'onglet 1 a besoin d'être dans un SingleChildScrollView
-                  : SingleChildScrollView(child: _buildTendences(vm)),
+                  : SingleChildScrollView(child: _buildTendances(vm)),
             ),
           ],
         ),
@@ -206,7 +206,7 @@ class _MangaViewState extends State<MangaView> {
   }
 
   // Onglet 2 : Tendences
-  Widget _buildTendences(MangaViewModel vm) {
+  Widget _buildTendances(MangaViewModel vm) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
