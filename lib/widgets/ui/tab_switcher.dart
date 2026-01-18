@@ -16,9 +16,6 @@ class TabSwitcher extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-   
-    final Color textColor = Theme.of(context).colorScheme.onSurface;
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(tabs.length, (index) {
@@ -35,11 +32,12 @@ class TabSwitcher extends StatelessWidget {
                   tabs[index],
                   style: TextStyle(
                     fontSize: isSelected ? 20 : 18,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                   
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                     color: enabled
-                        ? (isSelected ? textColor : textColor.withOpacity(0.7))
-                        : textColor.withOpacity(0.3),
+                        ? (isSelected ? Colors.white : Colors.white70)
+                        : Colors.white30,
                   ),
                 ),
                 if (isSelected)
