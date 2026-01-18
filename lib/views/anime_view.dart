@@ -38,7 +38,7 @@ class _AnimeViewState extends State<AnimeView> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final vm = context.read<AnimeViewModel>();
 
-      await vm.fetchForYou(context.read<GlobalAnimeFavoritesProvider>());
+      //await vm.fetchForYou(context.read<GlobalAnimeFavoritesProvider>());
 
       if (widget.animeToOpen != null) {
         autoOpenAnime(widget.animeToOpen as Anime);
@@ -80,6 +80,7 @@ class _AnimeViewState extends State<AnimeView> {
     _airingController.dispose();
     _mostLikedController.dispose();
     _forYouController.dispose();
+
     super.dispose();
   }
 
@@ -153,35 +154,70 @@ class _AnimeViewState extends State<AnimeView> {
 
   // Onglet 1 : Pour toi (GridView qui scrolle)
   Widget _buildForYou(AnimeViewModel vm) {
-    return GridView.builder(
-      controller: _forYouController, // Ajout du controller
-      // --- CHANGEMENT 3 : shrinkWrap et physics RETIRÉS ---
-      // shrinkWrap: true, (retiré)
-      // physics: const NeverScrollableScrollPhysics(), (retiré)
-      padding: const EdgeInsets.only(
-        top: 12,
-        bottom: 16,
-      ), // Petit padding utile
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.62,
-      ),
-      itemBuilder: (context, index) {
-        final anime = vm.forYou[index];
-        return AnimeCard(
-          anime: anime,
-          onTap: (a) => vm.openAnimePage(context, a),
-          onLikeDoubleTap: (a) {
-            context.read<GlobalAnimeFavoritesProvider>().toggleFavorite(anime);
-          },
-          isLiked: context.watch<GlobalAnimeFavoritesProvider>().isAnimeLiked(
-            anime.id,
-          ),
-        );
+    // 1. On écoute le provider de favoris
+    final favoritesProvider = context.watch<GlobalAnimeFavoritesProvider>();
+
+    // 🛑 CAS 1 : Le provider est encore en train de charger les likes depuis Hive/API
+    if (favoritesProvider.isLoading) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 10),
+            Text("Chargement de vos préférences..."),
+          ],
+        ),
+      );
+    }
+
+    // 🚀 CAS 2 : Le provider est PRÊT, mais la liste "For You" est encore vide
+    // On doit lancer le fetch maintenant !
+    if (vm.forYou.isEmpty && !vm.isLoadingForYou) {
+      // On utilise addPostFrameCallback pour ne pas déclencher un fetch pendant le build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        vm.fetchForYou(favoritesProvider);
+      });
+
+      // On affiche un loader le temps que fetchForYou fasse son travail
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // ✅ CAS 3 : Tout est prêt, on affiche la liste
+    return RefreshIndicator(
+      color: Theme.of(context).primaryColor,
+      backgroundColor: Colors.white,
+
+      onRefresh: () async {
+        // On appelle la nouvelle version async du VM
+        await vm.refreshForYou(favoritesProvider);
       },
-      itemCount: vm.forYou.length,
+
+      child: GridView.builder(
+        controller: _forYouController,
+        // ⚠️ INDISPENSABLE : Permet de tirer vers le bas même si la liste est courte
+        physics: const AlwaysScrollableScrollPhysics(),
+
+        padding: const EdgeInsets.only(top: 12, bottom: 16),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 0.62,
+        ),
+        itemBuilder: (context, index) {
+          final anime = vm.forYou[index];
+          return AnimeCard(
+            anime: anime,
+            onTap: (a) => vm.openAnimePage(context, a),
+            onLikeDoubleTap: (a) {
+              favoritesProvider.toggleFavorite(anime);
+            },
+            isLiked: favoritesProvider.isAnimeLiked(anime.id),
+          );
+        },
+        itemCount: vm.forYou.length,
+      ),
     );
   }
 
