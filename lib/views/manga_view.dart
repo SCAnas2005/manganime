@@ -38,7 +38,7 @@ class _MangaViewState extends State<MangaView> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final vm = context.read<MangaViewModel>();
 
-      await vm.fetchForYou(context.read<GlobalMangaFavoritesProvider>());
+      //await vm.fetchForYou(context.read<GlobalMangaFavoritesProvider>());
 
       if (widget.mangaToOpen != null) {
         autoOpenManga(widget.mangaToOpen as Manga);
@@ -140,37 +140,68 @@ class _MangaViewState extends State<MangaView> {
     );
   }
 
-  // Onglet 1 : Pour toi
+  // Onglet 1 : Pour toi (Manga)
   Widget _buildForYou(MangaViewModel vm) {
-    return GridView.builder(
-      controller: _forYouController, // Ajout du controller
-      // --- CHANGEMENT 3 : shrinkWrap et physics RETIRÉS ---
-      // shrinkWrap: true, (retiré)
-      // physics: const NeverScrollableScrollPhysics(), (retiré)
-      padding: const EdgeInsets.only(
-        top: 12,
-        bottom: 16,
-      ), // Petit padding utile
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.62,
-      ),
-      itemBuilder: (context, index) {
-        final manga = vm.forYou[index];
-        return MangaCard(
-          manga: manga,
-          onTap: (a) => vm.openMangaPage(context, a),
-          onLikeDoubleTap: (a) {
-            context.read<GlobalMangaFavoritesProvider>().toggleFavorite(manga);
-          },
-          // isLiked: context.watch<GlobalAnimeFavoritesProvider>().isAnimeLiked(
-          //   manga.id,
-          // ),
-        );
+    // On récupère le provider de favoris spécifique aux mangas
+    final favoritesProvider = context.watch<GlobalMangaFavoritesProvider>();
+
+    // 🛑 CAS 1 : Le provider est en train de charger les likes au démarrage
+    if (favoritesProvider.isLoading) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 12),
+            Text("Chargement de vos préférences..."),
+          ],
+        ),
+      );
+    }
+
+    // 🚀 CAS 2 : Liste vide au début (Premier lancement)
+    if (vm.forYou.isEmpty && !vm.isLoadingForYou && vm.hasMoreForYou) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        vm.fetchForYou(favoritesProvider);
+      });
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // ✅ CAS 3 : Affichage avec Pull-to-Refresh
+    return RefreshIndicator(
+      color: Theme.of(context).primaryColor,
+      backgroundColor: Colors.white,
+      onRefresh: () async {
+        // Appel asynchrone pour rafraîchir la liste
+        await vm.refreshForYou(favoritesProvider);
       },
-      itemCount: vm.forYou.length,
+      child: GridView.builder(
+        controller: _forYouController,
+        // physics indispensable pour pouvoir "tirer" même si la liste est courte
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.only(top: 12, bottom: 16),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 0.62,
+        ),
+        itemCount: vm.forYou.length,
+        itemBuilder: (context, index) {
+          // Sécurité contre les erreurs d'index pendant le refresh
+          if (index >= vm.forYou.length) return const SizedBox();
+
+          final manga = vm.forYou[index];
+          return MangaCard(
+            manga: manga,
+            onTap: (m) => vm.openMangaPage(context, m),
+            onLikeDoubleTap: (m) {
+              favoritesProvider.toggleFavorite(manga);
+            },
+            // Vérifie bien que cette méthode existe dans ton provider
+          );
+        },
+      ),
     );
   }
 

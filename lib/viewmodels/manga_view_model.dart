@@ -163,6 +163,14 @@ class MangaViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> refreshForYou(GlobalMangaFavoritesProvider provider) async {
+    forYou.clear();
+    notifyListeners();
+    _forYouPage = 1;
+    _hasMoreForYou = true;
+    await fetchForYou(provider);
+  }
+
   void openMangaPage(BuildContext context, Manga manga) {
     Navigator.push(
       context,

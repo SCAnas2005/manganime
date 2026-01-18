@@ -34,7 +34,9 @@ class GlobalMangaFavoritesProvider extends ChangeNotifier {
 
     // 2. On lance le chargement des objets complets en arrière-plan
     // On n'attend pas forcément la fin pour rendre l'UI interactive
-    loadFullMangaObjects();
+    if (_likedIds.isNotEmpty) {
+      loadFullMangaObjects();
+    }
 
     isLoading = false;
     notifyListeners();

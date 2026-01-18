@@ -8,6 +8,8 @@ import 'package:flutter_application_1/providers/global_anime_favorites_provider.
 import 'package:flutter_application_1/providers/media_path_provider.dart';
 import 'package:flutter_application_1/providers/media_sections_provider.dart';
 import 'package:flutter_application_1/providers/request_queue_provider.dart';
+import 'package:flutter_application_1/providers/settings_repository_provider.dart';
+import 'package:flutter_application_1/providers/settings_storage_provider.dart';
 import 'package:flutter_application_1/providers/user_profile_provider.dart';
 import 'package:flutter_application_1/services/api_service.dart';
 import 'package:flutter_application_1/services/network_service.dart';
@@ -187,64 +189,166 @@ class AnimeRepository {
     return [];
   }
 
+  // Future<List<Anime>> getForYouAnimes(
+  //   GlobalAnimeFavoritesProvider provider, {
+  //   int page = 1,
+  // }) async {
+  //   final liked = provider.loadedFavoriteAnimes;
+
+  //   var settingsProvider = SettingsRepositoryProvider(SettingsStorage.instance);
+
+  //   final preferredGenres = settingsProvider.getSettings().favoriteGenres ?? [];
+  //   // Calcul du profil utilisateur
+  //   final userProfile = UserprofileProvider.create(
+  //     likedAnimes: liked,
+  //     preferredGenres: preferredGenres,
+  //   );
+  //   debugPrint("User profil built: $userProfile");
+
+  //   // Le top genres
+  //   final topGenres = userProfile.getTopGenres<Anime>(2);
+
+  //   List<Anime> mixedCandidates = [];
+
+  //   if (topGenres.length >= 3) {
+  //     debugPrint("Top genres: ${topGenres.first}, ${topGenres[1]}");
+  //   }
+
+  //   if (topGenres.isEmpty) {
+  //     debugPrint("Aucune top genres, retour des popular animes");
+  //     return await getPopularAnimes(page: page);
+  //   }
+
+  //   List<Anime> candidates = [];
+
+  //   try {
+  //     // 1. API
+  //     if (await NetworkService.isConnected) {
+  //       candidates = await RequestQueue.instance.enqueue(
+  //         () => api.searchAnime(page: page, query: "", genres: topGenres),
+  //       );
+  //       debugPrint("fetchForYou animes count : ${candidates.length}");
+  //     } else {
+  //       candidates = await DatabaseProvider.instance.search<Anime>(
+  //         page: page,
+  //         query: "",
+  //         genres: topGenres,
+  //       );
+  //     }
+
+  //     debugPrint("Removing liked animes from suggestions");
+  //     final likedIds = liked.map((e) => e.id).toSet();
+  //     candidates = candidates.where((a) => !likedIds.contains(a.id)).toList();
+
+  //     candidates.sort((a, b) {
+  //       final scoreA = userProfile.calculateScoreFor<Anime>(a);
+  //       final scoreB = userProfile.calculateScoreFor<Anime>(b);
+
+  //       // compareTo inversé (B vers A) pour avoir l'ordre Décroissant (Plus grand score en haut)
+  //       return scoreB.compareTo(scoreA);
+  //     });
+
+  //     debugPrint("fetchForYou animes count : ${candidates.length}");
+  //     return candidates;
+  //   } catch (e) {
+  //     debugPrint("[AnimeRepository] getForYouAnimes: $e");
+  //   }
+
+  //   return [];
+  // }
+
   Future<List<Anime>> getForYouAnimes(
     GlobalAnimeFavoritesProvider provider, {
     int page = 1,
   }) async {
     final liked = provider.loadedFavoriteAnimes;
 
-    // Calcul du profil utilisateur
-    final userProfile = UserprofileProvider.create(likedAnimes: liked);
-    debugPrint("User profil built: $userProfile");
+    var settingsProvider = SettingsRepositoryProvider(SettingsStorage.instance);
 
-    // Le top genres
-    final topGenres = userProfile.getTopGenres<Anime>(3);
-    if (topGenres.length >= 3) {
-      debugPrint(
-        "Top genres: ${topGenres.first}, ${topGenres[1]}, ${topGenres[2]}",
-      );
-    }
+    final preferredGenres = settingsProvider.getSettings().favoriteGenres ?? [];
 
+    // Récupérer les settings ici si possible
+    final userProfile = UserprofileProvider.create(
+      likedAnimes: liked,
+      preferredGenres: preferredGenres,
+    );
+
+    // On prend le Top 2 au lieu du Top 3
+    final topGenres = userProfile.getTopGenres<Anime>(2);
+
+    List<Anime> mixedCandidates = [];
+
+    // SI PAS ASSEZ DE DONNÉES -> POPULAIRE
     if (topGenres.isEmpty) {
-      return await getPopularAnimes();
+      return await getPopularAnimes(page: page); // Fallback
     }
-
-    List<Anime> candidates = [];
 
     try {
-      // 1. API
       if (await NetworkService.isConnected) {
-        candidates = await RequestQueue.instance.enqueue(
-          () => api.searchAnime(page: page, query: "", genres: topGenres),
+        // --- LA STRATÉGIE COCKTAIL ---
+
+        // 1. Le genre Principal (ex: Aventure) - On en demande le plus
+        final listA = await RequestQueue.instance.enqueue(
+          () => api.searchAnime(query: "", page: page, genres: [topGenres[0]]),
         );
-        debugPrint("fetchForYou animes count : ${candidates.length}");
+
+        // 2. Le genre Secondaire (ex: Fantasy) - On en demande aussi
+        List<Anime> listB = [];
+        if (topGenres.length > 1) {
+          listB = await RequestQueue.instance.enqueue(
+            () =>
+                api.searchAnime(query: "", page: page, genres: [topGenres[1]]),
+          );
+        }
+
+        // 3. L'Épice (Découverte) - Une page "Top Airing" ou un genre au hasard
+        // Pour casser la routine, on injecte un peu de "Airing"
+        final listDiscovery = await getAiringAnimes(page: page);
+
+        // --- LE MÉLANGE ---
+
+        // On combine tout (Set pour éviter les doublons si un anime est Aventure ET Fantasy)
+        final Set<Anime> uniqueSet = {};
+        uniqueSet.addAll(listA); // Beaucoup de genre 1
+        uniqueSet.addAll(listB); // Un peu de genre 2
+        uniqueSet.addAll(
+          listDiscovery.take(5),
+        ); // Un peu de nouveauté (limité à 5)
+
+        mixedCandidates = uniqueSet.toList();
       } else {
-        candidates = await DatabaseProvider.instance.search<Anime>(
+        // Mode Hors ligne (DB)
+        mixedCandidates = await DatabaseProvider.instance.search<Anime>(
           page: page,
-          query: "",
-          genres: topGenres,
+          genres: topGenres, // En local on reste simple
         );
       }
 
-      debugPrint("Removing liked animes from suggestions");
-      final likedIds = liked.map((e) => e.id).toSet();
-      candidates = candidates.where((a) => !likedIds.contains(a.id)).toList();
+      // --- FILTRAGE ET TRI ---
 
-      candidates.sort((a, b) {
+      // 1. On retire ce qu'on a déjà vu/liké
+      final likedIds = liked.map((e) => e.id).toSet();
+      mixedCandidates.removeWhere((a) => likedIds.contains(a.id));
+
+      // 2. On trie par score pour mettre le plus pertinent en haut
+      mixedCandidates.sort((a, b) {
         final scoreA = userProfile.calculateScoreFor<Anime>(a);
         final scoreB = userProfile.calculateScoreFor<Anime>(b);
-
-        // compareTo inversé (B vers A) pour avoir l'ordre Décroissant (Plus grand score en haut)
         return scoreB.compareTo(scoreA);
       });
 
-      debugPrint("fetchForYou animes count : ${candidates.length}");
-      return candidates;
-    } catch (e) {
-      debugPrint("[AnimeRepository] getForYouAnimes: $e");
-    }
+      // 3. PETITE TOUCHE FINALE : Le Shuffle partiel
+      // Si les scores sont très proches (ex: plein d'animes on le même score),
+      // on veut que ça bouge un peu. On ne shuffle pas tout (sinon le score sert à rien),
+      // mais on peut mélanger des petits groupes.
+      // OU plus simple : On prend le top 20 trié, et on le mélange pour l'affichage
+      // return mixedCandidates; // Version triée stricte
 
-    return [];
+      return mixedCandidates;
+    } catch (e) {
+      debugPrint("Error strategy cocktail: $e");
+      return [];
+    }
   }
 
   Future<List<Anime>> search({
