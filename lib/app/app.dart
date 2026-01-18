@@ -15,16 +15,16 @@ class AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
     final settingsVM = context.watch<AppSettingsViewModel>();
-    
     return MaterialApp(
       title: "MangAnime",
-      debugShowCheckedModeBanner: false, // Enlève le bandeau debug
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: settingsVM.loaded
-          ? (settingsVM.settings.darkMode ? ThemeMode.dark : ThemeMode.light)
+          ? settingsVM.settings.darkMode
+                ? ThemeMode.dark
+                : ThemeMode.light
           : ThemeMode.system,
-      home: const SplashScreen(),
+      home: SplashScreen(),
     );
   }
 }
