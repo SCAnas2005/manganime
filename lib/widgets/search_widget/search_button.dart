@@ -25,7 +25,12 @@ Widget miniSearchBar(BuildContext context) {
         ),
       );
     },
-    child: Icon(Icons.search, color: Colors.grey[600]),
+    child: Icon(
+      Icons.search,
+      color: Theme.of(context).brightness == Brightness.light
+          ? Colors.black
+          : Colors.white,
+    ),
   );
 }
 
@@ -48,6 +53,11 @@ Widget miniSearchBarManga(BuildContext context) {
         ),
       );
     },
-    child: Icon(Icons.search, color: Colors.grey[600]),
+    child: Icon(
+      Icons.search,
+      color: Theme.of(context).brightness == Brightness.light
+          ? Colors.black
+          : Colors.white,
+    ),
   );
 }

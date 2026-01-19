@@ -105,7 +105,9 @@ class _MangaViewState extends State<MangaView> {
                 children: [
                   ClipOval(
                     child: Image.asset(
-                      'assets/icons/app_icon.png',
+                      Theme.of(context).brightness == Brightness.light
+                          ? 'assets/icons/logo_manganime.png'
+                          : 'assets/icons/app_icon.png',
                       height: 60,
                       width: 60,
                       fit: BoxFit.cover,

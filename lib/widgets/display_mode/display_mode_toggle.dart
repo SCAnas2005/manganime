@@ -18,12 +18,20 @@ class DisplayModeToggle extends StatelessWidget {
       children: [
         IconButton(
           icon: const Icon(Icons.grid_view),
-          color: mode == DisplayMode.grid ? Colors.white : Colors.grey,
+          color: mode == DisplayMode.grid
+              ? (Theme.of(context).brightness == Brightness.light
+                  ? Colors.black
+                  : Colors.white)
+              : Colors.grey,
           onPressed: () => onChanged(DisplayMode.grid),
         ),
         IconButton(
           icon: const Icon(Icons.list),
-          color: mode == DisplayMode.list ? Colors.white : Colors.grey,
+          color: mode == DisplayMode.list
+              ? (Theme.of(context).brightness == Brightness.light
+                  ? Colors.black
+                  : Colors.white)
+              : Colors.grey,
           onPressed: () => onChanged(DisplayMode.list),
         ),
       ],

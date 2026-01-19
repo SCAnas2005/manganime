@@ -6,8 +6,8 @@ class AppColors {
 
   // --- THÈME LIGHT ---
   static const backgroundLight = Color(
-    0xFFF5F5F5,
-  ); // Un gris très clair pour le fond
+    0xFFFFFFFF,
+  ); // Blanc pur pour le fond
   static const cardLight = Color(0xFFFFFFFF); // Blanc pur pour les cartes
   static const textLight = Color(0xFF121212); // Noir profond pour le texte
 
