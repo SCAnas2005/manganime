@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+/// Change de couleur selon qu'il est activé ou non et déclenche une action au clic
 class LikeButton extends StatelessWidget {
   final bool isLiked;
   final VoidCallback onTap;
