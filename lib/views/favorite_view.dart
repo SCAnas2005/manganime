@@ -52,6 +52,7 @@ class _FavoriteViewState extends State<FavoriteView> {
 
           const SizedBox(height: 16),
 
+          // Onglets pour choisir entre Animes et Mangas
           TabSwitcher(
             tabs: const ["Animes", "Mangas"],
             selectedIndex: selectedTab,
