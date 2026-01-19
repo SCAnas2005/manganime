@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// Widget qui affiche une rangée d’onglets cliquables
 class TabSwitcher extends StatelessWidget {
   final List<String> tabs;
   final int selectedIndex;
