@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/widgets/display_mode/display_mode.dart';
-
+/// Widget qui affiche une liste d'éléments de manière adaptative
+/// selon le mode choisi : grille ou liste
 class AdaptativeDisplay<T> extends StatelessWidget {
   final List<T> items;
   final DisplayMode mode;
