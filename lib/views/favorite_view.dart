@@ -15,6 +15,7 @@ import 'package:flutter_application_1/widgets/manga_list_tile.dart';
 import 'package:flutter_application_1/widgets/ui/tab_switcher.dart';
 import 'package:provider/provider.dart';
 
+// pour définir le mode d'affichage des favoris
 enum FavoriteDisplayMode { grid, list }
 
 class FavoriteView extends StatefulWidget {
