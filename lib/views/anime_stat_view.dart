@@ -124,7 +124,7 @@ class AnimeStatViewState extends State<AnimeStatView> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
-                            children: const [
+                            children: [
                               Icon(
                                 Icons.trending_up,
                                 color: Color(0xFFC7F141),
@@ -134,7 +134,10 @@ class AnimeStatViewState extends State<AnimeStatView> {
                               Text(
                                 'Genres préférés',
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.light
+                                      ? Colors.black
+                                      : Colors.white,
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -201,17 +204,24 @@ class AnimeStatViewState extends State<AnimeStatView> {
                           Text(
                             'Succès récents',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Theme.of(context).brightness ==
+                                      Brightness.light
+                                  ? Colors.black
+                                  : Colors.white,
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           SizedBox(height: 16),
                           if (_animeStatModel.recentAchievements.isEmpty)
-                            const Text(
+                            Text(
                               "Continuez d'explorer pour débloquer des succès !",
                               style: TextStyle(
-                                color: Colors.white70,
+                                color:
+                                    Theme.of(context).brightness ==
+                                            Brightness.light
+                                        ? Colors.black54
+                                        : Colors.white70,
                                 fontSize: 14,
                                 fontStyle: FontStyle.italic,
                               ),
