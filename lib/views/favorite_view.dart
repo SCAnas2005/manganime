@@ -59,6 +59,7 @@ class _FavoriteViewState extends State<FavoriteView> {
             onChanged: (index) => setState(() => selectedTab = index),
           ),
 
+          // mode d'affichage (grille ou liste)
           Padding(
             padding: const EdgeInsets.only(right: 12, top: 8, bottom: 8),
             child: Align(
