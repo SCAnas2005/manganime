@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+/// Change de couleur selon qu'il est activé ou non et déclenche une action au clic
 class LikeButton extends StatelessWidget {
   final bool isLiked;
   final VoidCallback onTap;
@@ -14,6 +14,9 @@ class LikeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Bouton interactif avec icône de cœur
+    // Sa couleur dépend de l'état isLiked
+    // Appelle la fonction onTap quand on appuie dessus
     return IconButton(
       iconSize: iconSize,
       icon: Icon(Icons.favorite, color: isLiked ? Colors.red : Colors.grey),

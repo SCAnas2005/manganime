@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+/// Widget qui affiche une animation de "like" (cœur)
+/// L’animation apparaît ou disparaît selon la valeur de "show"
 class LikeAnimation extends StatelessWidget {
   final bool show;
   final double size;
