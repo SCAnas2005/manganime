@@ -14,6 +14,7 @@ class LikeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Bouton interactif avec icône de cœur
     return IconButton(
       iconSize: iconSize,
       icon: Icon(Icons.favorite, color: isLiked ? Colors.red : Colors.grey),
