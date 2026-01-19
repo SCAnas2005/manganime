@@ -32,10 +32,20 @@ class TabSwitcher extends StatelessWidget {
                   tabs[index],
                   style: TextStyle(
                     fontSize: isSelected ? 20 : 18,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                     color: enabled
-                        ? (isSelected ? Colors.white : Colors.white70)
-                        : Colors.white30,
+                        ? (isSelected
+                            ? (Theme.of(context).brightness == Brightness.light
+                                ? Colors.black
+                                : Colors.white)
+                            : (Theme.of(context).brightness == Brightness.light
+                                ? Colors.black54
+                                : Colors.white70))
+                        : (Theme.of(context).brightness == Brightness.light
+                            ? Colors.black26
+                            : Colors.white30),
                   ),
                 ),
                 if (isSelected)
