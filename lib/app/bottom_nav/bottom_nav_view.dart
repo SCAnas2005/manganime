@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
 
+/// Barre de navigation inférieure de l'application.
+///
+/// Ce widget affiche les différentes sections principales
+/// (Anime, Manga, Favoris, Statistiques, Paramètres)
+/// et notifie le widget parent lorsque l'onglet sélectionné change.
 class BottomNavView extends StatefulWidget {
+  /// Index de l'onglet actuellement sélectionné.
   final int currentIndex;
+
+  /// Callback appelé lorsqu'un onglet est sélectionné.
+  ///
+  /// L'index de l'onglet sélectionné est passé en paramètre.
   final Function(int) onTap;
 
   const BottomNavView({
@@ -20,7 +30,7 @@ class _BottomNavigationBarState extends State<BottomNavView> {
     return BottomNavigationBar(
       currentIndex: widget.currentIndex,
       onTap: (index) {
-        widget.onTap(index); // 🔹 Notifie le parent du nouvel index
+        widget.onTap(index); // Notifie le parent du nouvel index
       },
       type: BottomNavigationBarType.fixed,
       items: const [

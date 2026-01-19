@@ -12,15 +12,22 @@ import 'package:http/http.dart' as http;
 /// Fournit des méthodes pour :
 /// — Récupérer la liste des animes populaires.
 /// — Obtenir les détails complets d’un anime.
+/// — Rechercher des animes
 ///
 /// Cette classe implémente [ApiService].
 class JikanService extends ApiService {
   /// URL de base de l’API Jikan.
   @override
   final String baseUrl = "https://api.jikan.moe/v4";
+
+  /// Limite de débit de l'API (Rate Limit) : 2 requêtes par seconde.
   @override
   final int reqPerSec = 2;
 
+  /// Récupère une liste d'Animes à partir d'une URI spécifique.
+  ///
+  /// Décode le JSON, extrait la clé 'data' et convertit chaque élément en objet [Anime].
+  /// Filtre les résultats sans titre pour garantir l'intégrité de la donnée.
   @override
   Future<List<Anime>> fetchAnimeList(Uri uri) async {
     final response = await http.get(uri);
@@ -43,6 +50,9 @@ class JikanService extends ApiService {
     }
   }
 
+  /// Récupère une liste de Mangas à partir d'une URI spécifique.
+  ///
+  /// Fonctionne de manière identique à [fetchAnimeList] mais pour le modèle [Manga].
   @override
   Future<List<Manga>> fetchMangaList(Uri uri) async {
     final response = await http.get(uri);
@@ -65,6 +75,10 @@ class JikanService extends ApiService {
     }
   }
 
+  /// Recherche des Animes via l'API avec des filtres complexes.
+  ///
+  /// Construit une URL avec les paramètres de recherche (query parameters)
+  /// tels que les genres, le score minimum, le statut de diffusion, etc.
   @override
   Future<List<Anime>> searchAnime({
     int page = 1,
@@ -112,6 +126,9 @@ class JikanService extends ApiService {
     return fetchAnimeList(url);
   }
 
+  /// Recherche des Mangas via l'API avec des filtres complexes.
+  ///
+  /// Similaire à [searchAnime], utilisant le endpoint `/manga` de Jikan.
   @override
   Future<List<Manga>> searchManga({
     int page = 1,
@@ -162,7 +179,6 @@ class JikanService extends ApiService {
   /// Récupère une liste d’animes les plus populaires depuis Jikan.
   ///
   /// [page] : numéro de page à charger (par défaut `1`).
-  ///
   /// Retourne une liste d’objets [Anime].
   @override
   Future<List<Anime>> getTopAnime({
@@ -213,7 +229,6 @@ class JikanService extends ApiService {
   /// Récupère une liste de mangas les plus populaires depuis Jikan.
   ///
   /// [page] : numéro de page à charger (par défaut `1`).
-  ///
   /// Retourne une liste d’objets [Manga].
   @override
   Future<List<Manga>> getTopManga({
@@ -258,6 +273,7 @@ class JikanService extends ApiService {
     }
   }
 
+  /// Récupère les animes pour une saison précise (actuelle ou passée).
   @override
   Future<List<Anime>> getSeasonAnimes({
     int page = 1,
@@ -282,8 +298,6 @@ class JikanService extends ApiService {
   }
 
   /// Récupère les informations détaillées d’un anime via son [id MAL].
-  ///
-  /// Retourne un objet [AnimeDetail].
   @override
   Future<Anime> getFullDetailAnime(int id) async {
     final url = Uri.parse('$baseUrl/anime/$id');
@@ -300,8 +314,6 @@ class JikanService extends ApiService {
   }
 
   /// Récupère les informations détaillées d’un manga via son [id MAL].
-  ///
-  /// Retourne un objet [MangaDetail].
   @override
   Future<Manga> getFullDetailManga(int id) async {
     final url = Uri.parse('$baseUrl/manga/$id');
@@ -318,7 +330,10 @@ class JikanService extends ApiService {
     }
   }
 
-  /// Convertit un objet JSON (anime basique) en instance de [Anime].
+  /// Parseur JSON vers modèle [Anime].
+  ///
+  /// Extrait et convertit les types imbriqués (images, dates, studios, genres)
+  /// pour créer une instance d'Anime propre à l'application.
   @override
   Anime jsonToAnime(Map<String, dynamic> json) {
     final aired = json["aired"];
@@ -344,16 +359,19 @@ class JikanService extends ApiService {
           ? DateTime.tryParse(json["aired"]["to"])
           : null,
       studio:
-          (studios != null && studios.isNotEmpty 
-          ? studios.first["name"] as String?
-          : null) ?? "Inconnu",
+          (studios != null && studios.isNotEmpty
+              ? studios.first["name"] as String?
+              : null) ??
+          "Inconnu",
       type: AnimeTypeX.fromJikan(json["type"]),
       rating: AnimeRatingX.fromJikan(json["rating"]),
       episodes: json["episodes"] as int?,
     );
   }
 
-  /// Convertit un objet JSON (manga basique) en instance de [Manga].
+  /// Parseur JSON vers modèle [Manga].
+  ///
+  /// Similaire à [jsonToAnime], incluant les spécificités manga (chapitres, volumes, auteurs).
   @override
   Manga jsonToManga(Map<String, dynamic> json) {
     final demographics = json["demographics"] as List?;

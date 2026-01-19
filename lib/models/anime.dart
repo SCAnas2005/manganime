@@ -34,23 +34,27 @@ class Anime extends Identifiable {
   @override
   final List<Genres> genres;
 
+  /// Date de sortie de l'anime
   @override
   DateTime? startDate;
 
+  /// Date de fin s'il y en a une
   @override
   DateTime? endDate;
 
+  /// Studio qui a crée l'anime
   final String studio;
 
+  /// Le type d'anime (série, film, ova, ect)
   final AnimeType type;
 
+  /// L'anime rating
   final AnimeRating rating;
 
+  /// Le nombre d'épisode s'il est fini
   final int? episodes;
 
   /// Constructeur de la classe Anime.
-  ///
-  /// Tous les champs sauf [score] sont obligatoires.
   Anime({
     required this.id,
     required this.title,
@@ -67,6 +71,10 @@ class Anime extends Identifiable {
     this.episodes,
   });
 
+  /// Crée une instance de [Anime] à partir d'un objet JSON.
+  ///
+  /// Utilisé principalement pour la désérialisation
+  /// des données provenant de l'API
   factory Anime.fromJson(Map<String, dynamic> json) {
     return Anime(
       id: json['id'] as int,
@@ -94,6 +102,9 @@ class Anime extends Identifiable {
     );
   }
 
+  /// Convertit l'instance courante en un objet JSON.
+  ///
+  /// Utilisé pour la sérialisation (cache local, favoris, etc.).
   @override
   Map<String, dynamic> toJson() {
     return {
@@ -113,6 +124,10 @@ class Anime extends Identifiable {
     };
   }
 
+  /// Crée une copie de l'anime avec certaines propriétés modifiées.
+  ///
+  /// Pratique pour les mises à jour immuables
+  /// sans modifier l'instance originale.
   Anime copyWith({
     int? id,
     String? title,
@@ -145,6 +160,7 @@ class Anime extends Identifiable {
     );
   }
 
+  /// Compare deux animes sur la base de leur identifiant unique.
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;

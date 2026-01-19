@@ -55,7 +55,7 @@ class MediaSectionsProvider {
       MangaSections.popular: ({int page = 1}) async => await RequestQueue
           .instance
           .enqueue(() => api.getTopManga(page: page, filter: "bypopularity")),
-      MangaSections.airing: ({int page = 1}) async =>
+      MangaSections.publishing: ({int page = 1}) async =>
           await RequestQueue.instance.enqueue(
             () => api.getTopManga(page: page, status: MediaStatus.publishing),
           ),

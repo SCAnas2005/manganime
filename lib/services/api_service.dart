@@ -24,11 +24,21 @@ import 'package:flutter_application_1/models/year_seasons_enum.dart';
 abstract class ApiService {
   /// URL de base de l’API (exemple : `https://api.jikan.moe/v4`).
   String get baseUrl;
+
+  /// Nombre maximal de requêtes autorisées par seconde pour respecter le Rate Limit de l'API.
   int get reqPerSec;
 
+  /// Effectue une requête HTTP GET sur l'URI fournie et convertit la réponse en liste d'Animes.
   Future<List<Anime>> fetchAnimeList(Uri uri);
+
+  /// Effectue une requête HTTP GET sur l'URI fournie et convertit la réponse en liste de Mangas.
   Future<List<Manga>> fetchMangaList(Uri uri);
 
+  /// Effectue une recherche avancée d'Animes selon plusieurs critères de filtrage.
+  ///
+  /// [query] : Le texte de recherche.
+  /// [genres] : Liste des genres à inclure.
+  /// [sfw] : Si true, filtre les contenus adultes.
   Future<List<Anime>> searchAnime({
     int page = 1,
     required String query,
@@ -50,6 +60,10 @@ abstract class ApiService {
     String? endDate,
   });
 
+  /// Effectue une recherche avancée de Mangas selon plusieurs critères de filtrage.
+  ///
+  /// [query] : Le texte de recherche.
+  /// [type] : Format (Manga, Novel, Doujin, etc.).
   Future<List<Manga>> searchManga({
     int page = 1,
     required String query,
@@ -85,6 +99,7 @@ abstract class ApiService {
     bool sfw = true,
   });
 
+  /// Récupère le classement des meilleurs Mangas selon différents filtres de l'API.
   Future<List<Manga>> getTopManga({
     int page = 1,
     String? filter, // popular, favorite, etc.
@@ -95,6 +110,9 @@ abstract class ApiService {
     bool sfw = true,
   });
 
+  /// Récupère les animes diffusés lors d'une saison spécifique (ex: Été 2024).
+  ///
+  /// [airingOnly] : Si true, ne récupère que les animes en cours de diffusion.
   Future<List<Anime>> getSeasonAnimes({
     int page = 1,
     int? year,
@@ -109,6 +127,7 @@ abstract class ApiService {
   /// Retourne un objet [AnimeDetail] contenant les informations complètes.
   Future<Anime> getFullDetailAnime(int id);
 
+  /// Récupère les informations complètes d'un manga via son identifiant unique.
   Future<Manga> getFullDetailManga(int id);
 
   /// Convertit une réponse JSON d’un anime basique (liste, recherche, top, etc.)

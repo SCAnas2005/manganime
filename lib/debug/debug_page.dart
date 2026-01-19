@@ -16,7 +16,6 @@ class DebugPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // NIVEAU 1 : DATABASE vs CACHE vs SECTIONS
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -50,9 +49,6 @@ class DebugPage extends StatelessWidget {
   }
 }
 
-// =============================================================================
-// ONGLET 1 : DATABASE (SQL/HIVE DB BRUTE)
-// =============================================================================
 class _DatabaseTab extends StatelessWidget {
   const _DatabaseTab();
 
@@ -146,9 +142,6 @@ class _DebugDatabaseList<I extends Identifiable> extends StatelessWidget {
   }
 }
 
-// =============================================================================
-// ONGLET 2 : CACHE (RAM vs HIVE STOCKAGE)
-// =============================================================================
 class _CacheTab extends StatelessWidget {
   const _CacheTab();
 
@@ -244,7 +237,6 @@ class _GenericCacheView<T extends Identifiable> extends StatelessWidget {
           ),
         ),
         const VerticalDivider(width: 1, color: Colors.grey),
-        // --- HIVE ---
         Expanded(
           child: Column(
             children: [
@@ -302,9 +294,6 @@ class _GenericCacheView<T extends Identifiable> extends StatelessWidget {
   }
 }
 
-// =============================================================================
-// ONGLET 3 : SECTIONS (Ce qui s'affiche sur la Home)
-// =============================================================================
 class _SectionsTab extends StatelessWidget {
   const _SectionsTab();
 
@@ -405,7 +394,6 @@ class _SectionViewerState<E, T extends Identifiable>
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // SÉLECTEUR (CHIPS)
         Container(
           height: 60,
           padding: const EdgeInsets.symmetric(vertical: 8),
@@ -431,7 +419,6 @@ class _SectionViewerState<E, T extends Identifiable>
           ),
         ),
         const Divider(height: 1),
-        // LISTE RÉSULTATS
         Expanded(
           child: _isLoading
               ? const Center(child: CircularProgressIndicator())
