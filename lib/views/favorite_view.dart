@@ -30,6 +30,7 @@ class _FavoriteViewState extends State<FavoriteView> {
   DisplayMode displayMode = DisplayMode.grid;
   @override
   Widget build(BuildContext context) {
+    // Providers pour accéder aux favoris d'animes et mangas
     final animeVM = context.watch<GlobalAnimeFavoritesProvider>();
     final mangaVM = context.watch<GlobalMangaFavoritesProvider>();
 
