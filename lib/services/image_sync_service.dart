@@ -10,21 +10,31 @@ import 'package:flutter_application_1/providers/media_path_provider.dart';
 import 'package:flutter_application_1/services/network_service.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+/// Service responsable de la synchronisation et du téléchargement des images de couverture.
+///
+/// Il utilise une file d'attente persistante (Hive) pour garantir que les images
+/// sont téléchargées même si la connexion est perdue puis retrouvée.
 class ImageSyncService {
+  /// Nom de la boîte Hive stockant les téléchargements en attente.
   static const String BOX_NAME = "pending_download_queue";
   static final ImageSyncService instance = ImageSyncService._();
   ImageSyncService._();
 
+  /// Verrou de sécurité pour éviter de traiter deux fois le même item simultanément.
   final Set<String> _processingKeys = {};
 
   late Box _queueBox;
+
+  /// État du service pour éviter de lancer plusieurs boucles de traitement en parallèle.
   bool _isDownloading = false;
 
+  /// Initialise le service et ouvre la boîte de stockage de la file d'attente.
   Future<void> init() async {
     _queueBox = await Hive.openBox(BOX_NAME);
     if (_queueBox.isNotEmpty) processQueue();
   }
 
+  /// Ajoute un élément ([Anime] ou [Manga]) à la file d'attente de téléchargement.
   Future<void> addToQueue(Identifiable item) async {
     String typeStr;
     if (item is Anime) {
@@ -39,6 +49,7 @@ class ImageSyncService {
     await _queueBox.put(key, {"type": typeStr, "data": item.toJson()});
   }
 
+  /// Tente de télécharger l'image immédiatement ou l'ajoute à la file en cas d'échec/absence de réseau.
   Future<void> scheduleDownload<T extends Identifiable>(T item) async {
     if (await NetworkService.isConnected) {
       final file = await MediaPathProvider.downloadFileImage<T>(item);
@@ -47,6 +58,10 @@ class ImageSyncService {
     await addToQueue(item);
   }
 
+  /// Parcourt la file d'attente et tente de télécharger les images stockées.
+  ///
+  /// Cette méthode s'arrête si la connexion est perdue et gère le nettoyage
+  /// des fichiers corrompus ou vides.
   Future<void> processQueue() async {
     // 1. Verrouillage de la méthode elle-même
     if (_isDownloading) return;
@@ -88,7 +103,7 @@ class ImageSyncService {
           continue;
         }
 
-        // Check Local
+        // Vérification de l'existence locale pour éviter les téléchargements inutiles
         if (await localFile.exists()) {
           if (await localFile.length() > 0) {
             await _queueBox.delete(key);
@@ -101,9 +116,7 @@ class ImageSyncService {
         // Check Internet (avant chaque download)
         if (!await NetworkService.isConnected) break;
 
-        // 3. TÉLÉCHARGEMENT
         File? downloadedFile;
-        // ⚡️ OPTIMISATION : On utilise 'item' directement au lieu de refaire fromJson
         if (item is Anime) {
           downloadedFile = await MediaPathProvider.downloadFileImage<Anime>(
             item,
@@ -114,27 +127,24 @@ class ImageSyncService {
           );
         }
 
-        // 4. VÉRIFICATION FINALE
         if (downloadedFile != null && await downloadedFile.exists()) {
           final len = await downloadedFile.length();
           if (len > 0) {
             await _queueBox.delete(key);
-            // debugPrint("✅ Succès : ${item.id}");
           }
         } else {
-          debugPrint("❌ Échec : ${item.id} reste en queue.");
+          debugPrint("[ImageSync] Echec : ${item.id} reste en queue.");
         }
       } catch (e) {
         debugPrint("[ImageSync] Erreur sur $key: $e");
       } finally {
-        _processingKeys.remove(key); // Libération du verrou pour cet item
+        _processingKeys.remove(key);
       }
 
-      // Petit délai pour laisser le CPU respirer
+      // Petit délai pour laisser le CPU respirer et éviter de bloquer l'UI thread
       await Future.delayed(const Duration(milliseconds: 50));
     }
 
     _isDownloading = false;
-    debugPrint("🏁 Session terminée. Reste : ${_queueBox.length}");
   }
 }

@@ -38,23 +38,30 @@ class Manga extends Identifiable {
   @override
   final List<Genres> genres;
 
+  /// Date de parution du manga
   @override
   DateTime? startDate;
 
+  /// Date de fin de parution du manga
   @override
   DateTime? endDate;
 
+  /// Liste des autheurs du manga
   final List<Author> authors;
 
+  /// Nombre de chapitre, si le manga terminé
   final int? chapters;
+
+  /// Nombre de volume du manga, si temriné
   final int? volumes;
 
+  /// Démographique ciblé par le manga (Shonen, Seinen, Shojo, ect)
   final String? demographic;
+
+  /// Magazine ou support de prépublication du manga
   final String? serialization;
 
   /// Constructeur de la classe Manga.
-  ///
-  /// Tous les champs sauf [score] et [genres] sont obligatoires.
   Manga({
     required this.id,
     required this.title,
@@ -73,6 +80,9 @@ class Manga extends Identifiable {
     this.serialization,
   });
 
+  /// Crée une instance de [Manga] à partir d'un objet JSON.
+  ///
+  /// Utilisé pour désérialiser les données provenant de la base de donnée.
   factory Manga.fromJson(Map<String, dynamic> json) {
     return Manga(
       id: json['id'] as int,
@@ -107,6 +117,10 @@ class Manga extends Identifiable {
     );
   }
 
+  /// Crée une copie du manga avec certaines propriétés modifiées.
+  ///
+  /// Permet de travailler de manière immuable
+  /// sans altérer l'instance originale.
   Manga copyWith({
     int? id,
     String? title,
@@ -143,6 +157,9 @@ class Manga extends Identifiable {
     );
   }
 
+  /// Convertit l'instance courante en un objet JSON.
+  ///
+  /// Utilisé pour la sérialisation (cache, favoris, persistance locale).
   @override
   Map<String, dynamic> toJson() {
     return {

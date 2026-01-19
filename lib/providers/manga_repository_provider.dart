@@ -135,7 +135,7 @@ class MangaRepository {
   }
 
   Future<List<Manga>> getPublishingMangas({int page = 1}) async {
-    final section = MangaSections.airing;
+    final section = MangaSections.publishing;
     if (page == 1) {
       // Database
       final cachedMangas = await MediaSectionsProvider.instance.getMangas(
