@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/widgets/display_mode/display_mode.dart';
-
+/// Widget qui permet de basculer entre les modes d'affichage : grille ou liste
 class DisplayModeToggle extends StatelessWidget {
   final DisplayMode mode;
   final ValueChanged<DisplayMode> onChanged;
