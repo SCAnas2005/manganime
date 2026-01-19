@@ -16,6 +16,7 @@ class LikeButton extends StatelessWidget {
   Widget build(BuildContext context) {
     // Bouton interactif avec icône de cœur
     // Sa couleur dépend de l'état isLiked
+    // Appelle la fonction onTap quand on appuie dessus
     return IconButton(
       iconSize: iconSize,
       icon: Icon(Icons.favorite, color: isLiked ? Colors.red : Colors.grey),
