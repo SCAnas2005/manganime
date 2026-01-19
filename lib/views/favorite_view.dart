@@ -40,9 +40,11 @@ class _FavoriteViewState extends State<FavoriteView> {
 
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 12),
-            child: Text(
-              "Mes favoris",
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            child: Center(
+              child: Text(
+                "Mes favoris",
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              ),
             ),
           ),
 
