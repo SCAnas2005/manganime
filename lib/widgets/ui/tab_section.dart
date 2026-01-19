@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+/// Widget représentant une section avec un titre et une liste horizontale d'éléments
 class TabSection<T> extends StatelessWidget {
   final String title;
   final List<T> items;
