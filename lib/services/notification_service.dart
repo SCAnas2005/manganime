@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/models/identifiable.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/standalone.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -14,6 +17,7 @@ import 'package:flutter/material.dart';
 class NotificationService {
   /// Instance unique (Singleton) du service de notification.
   static final NotificationService instance = NotificationService._internal();
+  final enableNotifications = Platform.isAndroid;
   factory NotificationService() => instance;
   NotificationService._internal();
 
@@ -27,6 +31,7 @@ class NotificationService {
   Future<void> init({
     Function(NotificationResponse reponse)? onDidReceiveNotificationResponse,
   }) async {
+    if (!enableNotifications) return;
     // 1. Initialise les bases de données de fuseaux horaires
     tz.initializeTimeZones();
 
@@ -44,7 +49,7 @@ class NotificationService {
 
     // Configuration spécifique à Android (icône de notification)
     const AndroidInitializationSettings androidInitializationSettings =
-        AndroidInitializationSettings("@drawable/app_icon");
+        AndroidInitializationSettings("@mipmap/ic_launcher");
 
     const InitializationSettings initializationSettings =
         InitializationSettings(android: androidInitializationSettings);
@@ -69,17 +74,63 @@ class NotificationService {
     }
   }
 
-  /// Demande les permissions nécessaires sur Android (Notifications et Alarmes exactes).
-  Future<void> requestPermission() async {
-    final androidImplementation = flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >();
+  /// Demande la permission intelligemment.
+  /// Retourne TRUE si c'est bon, FALSE si c'est bloqué.
+  Future<bool> checkAndRequestPermission(BuildContext context) async {
+    if (!enableNotifications) return false;
+    PermissionStatus status = await Permission.notification.status;
 
-    if (androidImplementation != null) {
-      await androidImplementation.requestNotificationsPermission();
-      await androidImplementation.requestExactAlarmsPermission();
+    if (status.isGranted) {
+      return true;
     }
+
+    if (status.isDenied) {
+      // Cas 1 : C'est la première fois, ou l'utilisateur a dit "Non" une fois.
+      // On affiche la pop-up système Android.
+      status = await Permission.notification.request();
+    }
+
+    if (status.isPermanentlyDenied || status.isDenied) {
+      // Cas 2 : L'utilisateur a bloqué les notifs dans les réglages (ton cas actuel).
+      // La pop-up système ne s'affichera PLUS. Il faut guider l'utilisateur.
+
+      if (context.mounted) {
+        _showSettingsDialog(context);
+      }
+      return false;
+    }
+
+    return status.isGranted;
+  }
+
+  /// Affiche une alerte pour expliquer pourquoi on a besoin des notifs
+  /// et propose un bouton pour ouvrir les réglages.
+  void _showSettingsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Notifications bloquées"),
+        content: const Text(
+          "Pour recevoir les recommandations quotidiennes, vous devez autoriser les notifications dans les paramètres.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text("Annuler"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              openAppSettings();
+            },
+            child: const Text(
+              "Ouvrir les réglages",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   /// Planifie une notification unique à une heure précise de la journée.
@@ -92,6 +143,7 @@ class NotificationService {
     required String payload,
     required TimeOfDay time,
   }) async {
+    if (!enableNotifications) return;
     await flutterLocalNotificationsPlugin.zonedSchedule(
       id,
       title,
@@ -99,7 +151,7 @@ class NotificationService {
       _nextInstanceOfTime(time),
       const NotificationDetails(
         android: AndroidNotificationDetails(
-          "daily_recommendation_channel", // Identifiant unique du canal
+          "daily_recommendation_channel_v2", // Identifiant unique du canal
           "Recommendations quotidiennes", // Nom du canal visible par l'utilisateur
           channelDescription:
               "Reçoit une recommandation d'anime/manga par jour",
@@ -108,7 +160,7 @@ class NotificationService {
         ),
       ),
       matchDateTimeComponents: DateTimeComponents.time,
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       payload: payload,
     );
   }
@@ -157,6 +209,7 @@ class NotificationService {
     required Identifiable identifiable,
     required DateTime date,
   }) async {
+    if (!enableNotifications) return;
     // Le payload permet de transmettre le type et l'ID du média pour la navigation au clic
     String payload =
         "${identifiable is Anime ? "anime" : "manga"}:${identifiable.id}";

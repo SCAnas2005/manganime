@@ -220,7 +220,7 @@ class BootLoader {
       }
 
       if (identifiable != null) {
-        await scheduleFromNow(identifiable, TimeOfDay(hour: 0, minute: 1));
+        await scheduleFromNow(identifiable, TimeOfDay(hour: 0, minute: 2));
       }
     } else {
       debugPrint("No notification for today, already has one");

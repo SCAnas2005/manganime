@@ -5,6 +5,15 @@ import 'package:flutter_application_1/providers/manga_repository_provider.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:flutter_application_1/views/manga_info_view.dart';
 
+/// ViewModel principal pour la gestion des listes de mangas.
+///
+/// Il centralise l'état de 4 catégories principales :
+/// 1. [popular] : Les mangas les plus populaires (tous temps confondus).
+/// 2. [publishing] : Les mangas actuellement en cours de publication.
+/// 3. [mostLiked] : Les mangas les mieux notés par la communauté.
+/// 4. [forYou] : Recommandations personnalisées basées sur les likes.
+///
+/// Il gère la pagination automatique (infinite scroll) pour chaque catégorie.
 class MangaViewModel extends ChangeNotifier {
   List<Manga> popular = [];
   List<Manga> publishing = [];
@@ -24,6 +33,7 @@ class MangaViewModel extends ChangeNotifier {
 
   bool _isLoadingForYou = false;
 
+  /// Getters d'état de chargement pour l'UI (Spinners).
   bool get isLoadingPopular => _isLoadingPopular;
   bool get isLoadingPublishing => _isLoadingPublishing;
   bool get isLoadingMostLiked => _isLoadingMostLiked;
@@ -36,6 +46,7 @@ class MangaViewModel extends ChangeNotifier {
 
   bool _hasMoreForYou = true;
 
+  /// Getters de pagination : true s'il reste des pages à charger.
   bool get hasMorePopular => _hasMorePopular;
   bool get hasMorePublishing => _hasMorePublishing;
   bool get hasMoreMostLiked => _hasMoreMostLiked;
@@ -46,12 +57,16 @@ class MangaViewModel extends ChangeNotifier {
     _init();
   }
 
+  /// Initialise le ViewModel en lançant les requêtes pour les 3 onglets principaux.
   void _init() async {
     await fetchPopular();
     await fetchPublishing();
     await fetchMostLiked();
   }
 
+  /// Récupère la page suivante des mangas les plus populaires.
+  ///
+  /// Utilise un mécanisme de [retries] pour réessayer jusqu'à 3 fois en cas d'erreur réseau.
   Future<void> fetchPopular({int retries = 3}) async {
     if (_isLoadingPopular || !_hasMorePopular) return;
 
@@ -82,6 +97,7 @@ class MangaViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Récupère la page suivante des mangas en cours de publication.
   Future<void> fetchPublishing({int retries = 3}) async {
     if (_isLoadingPublishing || !_hasMorePublishing) return;
 
@@ -112,6 +128,7 @@ class MangaViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Récupère la page suivante des mangas les mieux notés.
   Future<void> fetchMostLiked({int retries = 3}) async {
     if (_isLoadingMostLiked || !_hasMoreMostLiked) return;
 
@@ -142,7 +159,11 @@ class MangaViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ---------------- FOR YOU    ----------------
+  // ---------------- FOR YOU ----------------
+
+  /// Charge les recommandations personnalisées.
+  ///
+  /// Nécessite [GlobalMangaFavoritesProvider] pour analyser les goûts de l'utilisateur.
   Future<void> fetchForYou(GlobalMangaFavoritesProvider provider) async {
     try {
       var mangas = await MangaRepository(
@@ -163,6 +184,10 @@ class MangaViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Rafraîchit manuellement l'onglet "Pour toi".
+  ///
+  /// Vide la liste et notifie l'UI immédiatement pour éviter les erreurs d'index,
+  /// puis relance la recherche depuis la page 1.
   Future<void> refreshForYou(GlobalMangaFavoritesProvider provider) async {
     forYou.clear();
     notifyListeners();
@@ -171,6 +196,7 @@ class MangaViewModel extends ChangeNotifier {
     await fetchForYou(provider);
   }
 
+  /// Helper de navigation vers la page de détails d'un manga.
   void openMangaPage(BuildContext context, Manga manga) {
     Navigator.push(
       context,

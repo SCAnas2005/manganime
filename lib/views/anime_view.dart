@@ -8,6 +8,7 @@ import 'package:flutter_application_1/widgets/ui/tab_switcher.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_application_1/widgets/search_widget/search_button.dart';
 
+// ignore: must_be_immutable
 class AnimeView extends StatefulWidget {
   Anime? animeToOpen;
   AnimeView({this.animeToOpen, super.key});

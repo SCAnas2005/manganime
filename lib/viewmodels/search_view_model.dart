@@ -6,6 +6,7 @@ import 'package:flutter_application_1/providers/anime_repository_provider.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:flutter_application_1/models/identifiable_enums.dart';
 
+/// ViewModel gérant la recherche d'Animes avec système de "Debounce" et filtres.
 class SearchViewModel extends ChangeNotifier {
   List<Anime> results = [];
   List<Anime> _allResults = [];
@@ -39,6 +40,7 @@ class SearchViewModel extends ChangeNotifier {
     });
   }
 
+  /// Appelé lors du changement de filtre de tri (Note, Popularité, etc.).
   void onFilterChanged(String newFilter) {
     // Si on a une recherche en cours, on la relance avec le nouveau filtre
     if (_lastQuery.isNotEmpty) {
@@ -49,6 +51,7 @@ class SearchViewModel extends ChangeNotifier {
     }
   }
 
+  /// Exécute la recherche asynchrone via l'API.
   Future<void> _performSearch(String query, String filter) async {
     try {
       MediaOrderBy? orderBy;
@@ -78,6 +81,7 @@ class SearchViewModel extends ChangeNotifier {
     }
   }
 
+  /// Filtre les résultats stockés en mémoire selon les genres sélectionnés.
   void _applyGenreFilter() {
     if (_currentSelectedGenres.isEmpty) {
       results = List.from(_allResults);
@@ -90,11 +94,13 @@ class SearchViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Met à jour la liste des genres et applique le filtre.
   void updateSelectedGenres(Set<String> genres) {
     _currentSelectedGenres = genres;
     _applyGenreFilter();
   }
 
+  /// Gère l'état où le champ de recherche est vide (affiche les tendances).
   Future<void> searchEmpty({required String filter}) async {
     try {
       MediaOrderBy? orderBy;

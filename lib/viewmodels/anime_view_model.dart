@@ -2,10 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/providers/anime_repository_provider.dart';
 import 'package:flutter_application_1/providers/global_anime_favorites_provider.dart';
-import 'package:flutter_application_1/providers/user_profile_provider.dart';
 import 'package:flutter_application_1/services/jikan_service.dart';
 import 'package:flutter_application_1/views/anime_info_view.dart';
 
+/// ViewModel principal pour la gestion des listes d'animes.
+///
+/// Il centralise l'état de 4 catégories principales :
+/// 1. [popular] : Les animes populaires du moment.
+/// 2. [airing] : Les animes en cours de diffusion.
+/// 3. [mostLiked] : Les classiques les mieux notés.
+/// 4. [forYou] : Recommandations personnalisées (Cocktail).
+///
+/// Il gère également la pagination infinie et les états de chargement pour chaque liste.
 class AnimeViewModel extends ChangeNotifier {
   List<Anime> popular = [];
   List<Anime> airing = [];
@@ -25,6 +33,7 @@ class AnimeViewModel extends ChangeNotifier {
 
   bool _isLoadingForYou = false;
 
+  /// Getters pour savoir si une section spécifique est en train de charger.
   bool get isLoadingPopular => _isLoadingPopular;
   bool get isLoadingAiring => _isLoadingAiring;
   bool get isLoadingMostLiked => _isLoadingMostLiked;
@@ -37,6 +46,7 @@ class AnimeViewModel extends ChangeNotifier {
 
   bool _hasMoreForYou = true;
 
+  /// Getters pour savoir s'il reste des pages à charger (Pagination).
   bool get hasMorePopular => _hasMorePopular;
   bool get hasMoreAiring => _hasMoreAiring;
   bool get hasMoreMostLiked => _hasMoreMostLiked;
@@ -47,6 +57,7 @@ class AnimeViewModel extends ChangeNotifier {
     _init();
   }
 
+  /// Initialise le ViewModel en lançant les requêtes pour les 3 onglets principaux.
   Future<void> _init() async {
     await fetchPopular();
     await fetchAiring();
@@ -54,6 +65,10 @@ class AnimeViewModel extends ChangeNotifier {
   }
 
   // ---------------- POPULAR ----------------
+
+  /// Récupère la page suivante des animes populaires.
+  ///
+  /// Inclut un mécanisme de [retries] en cas d'échec réseau.
   Future<void> fetchPopular({int retries = 3}) async {
     if (_isLoadingPopular || !_hasMorePopular) return;
 
@@ -85,6 +100,7 @@ class AnimeViewModel extends ChangeNotifier {
     if (hasNewItems) notifyListeners();
   }
 
+  /// Réinitialise et recharge la liste des populaires (Pull-to-refresh).
   void refreshPopular() {
     popular.clear();
     _popularPage = 1;
@@ -93,6 +109,8 @@ class AnimeViewModel extends ChangeNotifier {
   }
 
   // ---------------- AIRING ----------------
+
+  /// Récupère la page suivante des animes en cours de diffusion.
   Future<void> fetchAiring({int retries = 3}) async {
     if (_isLoadingAiring || !_hasMoreAiring) return;
 
@@ -125,6 +143,7 @@ class AnimeViewModel extends ChangeNotifier {
     if (hasNewItems) notifyListeners();
   }
 
+  /// Réinitialise et recharge la liste des animes en cours.
   void refreshAiring() {
     airing.clear();
     _airingPage = 1;
@@ -133,6 +152,8 @@ class AnimeViewModel extends ChangeNotifier {
   }
 
   // ---------------- MOST LIKED ----------------
+
+  /// Récupère la page suivante des animes les mieux notés.
   Future<void> fetchMostLiked({int retries = 3}) async {
     if (_isLoadingMostLiked || !_hasMoreMostLiked) return;
 
@@ -164,6 +185,7 @@ class AnimeViewModel extends ChangeNotifier {
     if (hasNewItems) notifyListeners();
   }
 
+  /// Réinitialise et recharge la liste des mieux notés.
   void refreshMostLiked() {
     mostLiked.clear();
     _mostLikedPage = 1;
@@ -171,7 +193,11 @@ class AnimeViewModel extends ChangeNotifier {
     fetchMostLiked();
   }
 
-  // ---------------- FOR YOU    ----------------
+  // ---------------- FOR YOU ----------------
+
+  /// Charge les recommandations personnalisées (Algorithme Cocktail).
+  ///
+  /// Nécessite [GlobalAnimeFavoritesProvider] pour analyser les goûts de l'utilisateur.
   Future<void> fetchForYou(GlobalAnimeFavoritesProvider provider) async {
     // Recherche Api
     try {
@@ -193,6 +219,8 @@ class AnimeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Rafraîchit manuellement l'onglet "Pour toi".
+  /// Vide la liste et notifie l'UI immédiatement pour éviter les erreurs d'index.
   Future<void> refreshForYou(GlobalAnimeFavoritesProvider provider) async {
     forYou.clear();
     notifyListeners();
@@ -202,6 +230,8 @@ class AnimeViewModel extends ChangeNotifier {
   }
 
   // ---------------- NAVIGATION ----------------
+
+  /// Helper pour naviguer vers la page de détails d'un anime.
   void openAnimePage(BuildContext context, Anime anime) {
     Navigator.push(
       context,
