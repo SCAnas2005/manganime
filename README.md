@@ -1,5 +1,6 @@
 # MangAnime – Application Mobile de Recommandation Adaptative
 
+
 **Membres de l’équipe :**
 
 - AKHTAR Danyaal
@@ -11,13 +12,15 @@
 
 ## Description du projet
 
-**Manganime** est une application mobile développée en Flutter dont l’objectif est d’offrir une **recommandation intelligente et évolutive** de mangas et d’animes.  
-Elle s’adresse à deux types d’utilisateurs :
+**Manganime** est une application mobile développée en Flutter dont l’objectif est d’offrir une **recommandation adaptative de mangas et d’animes fonctionnant en mode hors connexion**.
+
+L’application repose sur une **base de données locale embarquée**, contenant environ **300 animes et 300 mangas**, permettant une utilisation complète **sans accès à Internet**.
 
 - **Débutants** : découvrir facilement des œuvres populaires, accessibles et bien notées
 - **Connaisseurs** : obtenir des suggestions plus ciblées en fonction des interactions et préférences personnelles
 
-L’application **n’exige aucun compte**, et se base sur un système d’apprentissage **local**, stocké directement sur l'appareil, pour adapter progressivement les recommandations selon les likes, les genres les plus consultés et les comportements utilisateur.
+L’application **n’exige aucun compte utilisateur**.  
+L’ensemble des données (likes, favoris, préférences, historique) est stocké localement sur l’appareil, permettant un apprentissage progressif et autonome du système de recommandation.
 
 ## Fonctionnalités principales
 
@@ -52,35 +55,37 @@ L’application **n’exige aucun compte**, et se base sur un système d’appre
   - Les types d’œuvres consultées
   - L'historique des préférences de l’utilisateur
 
+Le système fonctionne **entièrement hors connexion**
+
 ### Page Détail (Anime / Manga)
 
 Chaque fiche contient :
 
-- Image HD
+- Image 
 - Titre
 - Genres
-- Synopsis traduit automatiquement en français (API de traduction)
+- Synopsis (présent dans la base locale)
 - Informations additionnelles (score, popularité, épisodes/chapitres…)
 - Bouton Like + animation
-- Navigation fluide vers d’autres œuvres similaires _(si implémenté)_
+- Navigation fluide au sein de l’application
 
 ### Stack technique
 
-| Technologie        | Rôle                                            |
-| ------------------ | ----------------------------------------------- |
-| **Flutter (Dart)** | Développement mobile                            |
-| **Hive**           | Stockage local rapide (likes, favoris)          |
-| **AniList API**    | Métadonnées : titres, synopsis, genres, scores… |
-| **Jikan API**      | Métadonnées : animes et mangas (MyAnimeList)    |
+| Technologie        | Rôle                                         |
+| ------------------ | -------------------------------------------- |
+| **Flutter (Dart)** | Développement mobile                         |
+| **Hive**           | Stockage local rapide (likes, favoris)       |
+| **Provider**       | Gestion de l'état global                     |
 
 ## Sources de données
 
-Les données sont récupérées depuis :
+Les données ont été initialement récupérées via :
 
 - **Jikan API (MyAnimeList)** : [https://jikan.moe](https://jikan.moe)
 - **AniList API** : [https://anilist.co](https://anilist.co)
-
-Ces APIs fournissent : titres, synopsis, genres , notes, images, popularité, nombre d’épisodes
+    
+Ces APIs ont servi **uniquement à constituer la base de données locale** (titres, genres, synopsis, notes, images).  
+**L’application finale ne dépend pas des APIs pour fonctionner.**
 
 ## Architecture du projet
 
