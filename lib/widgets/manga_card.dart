@@ -55,6 +55,28 @@ class _MangaCardState extends State<MangaCard> {
         ),
         child: Stack(
           children: [
+<<<<<<< Updated upstream
+=======
+            // IMAGE : Utilisation de Positioned.fill pour remplir tout l'espace
+            Positioned.fill(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(6), // -2 pour la bordure
+                child: FutureBuilder<Image>(
+                  future: _repository.getMangaImage(widget.manga),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return Image(
+                        image: snapshot.data!.image,
+                        fit: BoxFit.cover, // FORCE LE REMPLISSAGE
+                      );
+                    }
+                    return Container(color: Colors.grey[800]);
+                  },
+                ),
+              ),
+            ),
+
+>>>>>>> Stashed changes
             // Gradient en bas pour améliorer la lisibilité du titre
             Positioned(
               left: 0,
@@ -107,6 +129,7 @@ class _MangaCardState extends State<MangaCard> {
                 ),
               ),
 
+<<<<<<< Updated upstream
             // Indicateur "En publication" (point vert)
             if (isPublishing)
               Positioned(
@@ -131,6 +154,8 @@ class _MangaCardState extends State<MangaCard> {
                 ),
               ),
 
+=======
+>>>>>>> Stashed changes
             // Badge de score (en haut à droite)
             Positioned(
               top: 8,
@@ -159,25 +184,53 @@ class _MangaCardState extends State<MangaCard> {
               ),
             ),
 
-            // Titre en bas (sur le gradient)
+            // Titre avec indicateur de statut (en bas)
             Positioned(
               bottom: 8,
               left: 8,
               right: 8,
-              child: Text(
-                widget.manga.title,
+              child: RichText(
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black,
-                      offset: Offset(0, 1),
-                      blurRadius: 2,
-                    ),
+                text: TextSpan(
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    fontFamily: 'Roboto', // S'assurer de la police par défaut
+                    shadows: [
+                      Shadow(
+                        color: Colors.black,
+                        offset: Offset(0, 1),
+                        blurRadius: 2,
+                      ),
+                    ],
+                  ),
+                  children: [
+                    TextSpan(text: "${widget.manga.title} "),
+                    if (isPublishing)
+                      WidgetSpan(
+                        alignment: PlaceholderAlignment.middle,
+                        child: Container(
+                          margin: const EdgeInsets.only(left: 4),
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: Colors.greenAccent,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 1),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.greenAccent.withValues(
+                                  alpha: 0.5,
+                                ),
+                                blurRadius: 4,
+                                spreadRadius: 1,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
