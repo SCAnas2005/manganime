@@ -20,7 +20,7 @@ L’application repose sur une **base de données locale embarquée**, contenant
 - **Connaisseurs** : obtenir des suggestions plus ciblées en fonction des interactions et préférences personnelles
 
 L’application **n’exige aucun compte utilisateur**.  
-L’ensemble des données (likes, favoris, préférences, historique) est **stocké localement sur l’appareil, permettant un apprentissage progressif et autonome du système de recommandation.
+L’ensemble des données (likes, favoris, préférences, historique) est stocké localement sur l’appareil, permettant un apprentissage progressif et autonome du système de recommandation.
 
 ## Fonctionnalités principales
 
