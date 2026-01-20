@@ -8,6 +8,7 @@ import 'package:flutter_application_1/widgets/ui/tab_switcher.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_application_1/widgets/search_widget/search_button.dart';
 
+// ignore: must_be_immutable
 class MangaView extends StatefulWidget {
   Manga? mangaToOpen;
   MangaView({this.mangaToOpen, super.key});

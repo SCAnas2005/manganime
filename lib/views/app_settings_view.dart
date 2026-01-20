@@ -12,39 +12,32 @@ class AppSettingsView extends StatefulWidget {
 
 class AppSettingsViewState extends State<AppSettingsView> {
   bool darkMode = true;
-  bool notificationsEnabled = true;
   bool dailySuggestions = true;
 
-  TimeOfDay notificationTime = const TimeOfDay(hour: 9, minute: 0);
+  late TimeOfDay notificationTime;
 
   final Set<Genres> selectedGenres = {};
-
-  // final List<String> allGenres = [
-  //   'Action',
-  //   'Shōnen',
-  //   'Romance',
-  //   'Fantaisie',
-  //   'Seinen',
-  //   'Thriller',
-  //   'Comédie',
-  //   'Horreur',
-  // ];
   final List<Genres> allGenres = Genres.values.take(9).toList();
 
-  Future<void> _pickNotificationTime() async {
+  Future<void> _pickNotificationTime(AppSettingsViewModel vm) async {
     final picked = await showTimePicker(
       context: context,
       initialTime: notificationTime,
     );
 
     if (picked != null) {
-      setState(() => notificationTime = picked);
+      notificationTime = picked;
+      await vm.onNotificationTimeChanged(notificationTime);
+      setState(() => {});
     }
   }
 
   @override
   void initState() {
     super.initState();
+    final vm = context.read<AppSettingsViewModel>();
+    notificationTime =
+        vm.settings.notificationTime ?? const TimeOfDay(hour: 9, minute: 0);
   }
 
   @override
@@ -84,9 +77,11 @@ class AppSettingsViewState extends State<AppSettingsView> {
             title: const Text('Notifications'),
             tiles: [
               SettingsTile.switchTile(
-                initialValue: notificationsEnabled,
-                onToggle: (value) =>
-                    setState(() => notificationsEnabled = value),
+                initialValue: vm.settings.isNotificationAllowed,
+                onToggle: (value) async {
+                  await vm.onToggleNotification(context, value: value);
+                  setState(() {});
+                },
                 leading: const Icon(Icons.notifications),
                 title: const Text('Notifications activées'),
                 description: const Text(
@@ -94,8 +89,11 @@ class AppSettingsViewState extends State<AppSettingsView> {
                 ),
               ),
               SettingsTile.switchTile(
-                initialValue: dailySuggestions,
-                onToggle: (value) => setState(() => dailySuggestions = value),
+                initialValue: vm.settings.isPersonalizedRecommendationAllowed,
+                enabled: vm.settings.isNotificationAllowed,
+                onToggle: (value) => setState(
+                  () async => await vm.onToggleSuggestions(value: value),
+                ),
                 leading: const Icon(Icons.recommend),
                 title: const Text('Suggestions quotidiennes'),
                 description: const Text(
@@ -103,11 +101,11 @@ class AppSettingsViewState extends State<AppSettingsView> {
                 ),
               ),
               SettingsTile.navigation(
-                enabled: notificationsEnabled,
+                enabled: vm.settings.isNotificationAllowed,
                 leading: const Icon(Icons.schedule),
                 title: const Text('Heure de notification'),
                 value: Text(notificationTime.format(context)),
-                onPressed: (_) => _pickNotificationTime(),
+                onPressed: (_) => _pickNotificationTime(vm),
               ),
             ],
           ),
@@ -167,7 +165,6 @@ class AppSettingsViewState extends State<AppSettingsView> {
                 onPressed: (_) {
                   setState(() {
                     darkMode = false;
-                    notificationsEnabled = false;
                     dailySuggestions = false;
                     selectedGenres.clear();
                     notificationTime = const TimeOfDay(hour: 9, minute: 0);

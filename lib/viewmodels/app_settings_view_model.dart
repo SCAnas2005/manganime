@@ -13,19 +13,32 @@ import 'package:flutter_application_1/services/notification_service.dart';
 import 'package:flutter_application_1/widgets/restart_widget.dart';
 import 'package:provider/provider.dart';
 
+/// ViewModel gérant la logique métier de l'écran des paramètres de l'application.
+///
+/// Il agit comme un pont entre l'interface utilisateur (View) et le repository de stockage.
+/// Il est responsable de :
+/// - La modification du thème (Dark Mode).
+/// - La gestion des genres favoris pour l'algorithme de recommandation.
+/// - La suppression complète et irréversible des données utilisateur ("Hard Reset").
 class AppSettingsViewModel extends ChangeNotifier {
   final SettingsRepositoryProvider _settingsRepository;
+
+  /// L'état actuel des paramètres (immuable, remplacé à chaque modification).
   late AppSettings settings;
+
+  /// Indique si les paramètres ont fini de charger depuis le disque.
   bool loaded = false;
 
   AppSettingsViewModel(this._settingsRepository);
 
+  /// Initialise le ViewModel en chargeant les paramètres sauvegardés.
   Future<void> init() async {
     settings = _settingsRepository.getSettings();
     loaded = true;
     notifyListeners();
   }
 
+  /// Active ou désactive le mode sombre et persiste le choix.
   Future<void> toggleDarkMode({bool? value}) async {
     settings = settings.copyWith(darkMode: value ?? !settings.darkMode);
     notifyListeners();
@@ -34,10 +47,53 @@ class AppSettingsViewModel extends ChangeNotifier {
     );
   }
 
-  Future<void> onToggleNotification({bool? value}) async {}
-  Future<void> onToggleSuggestions({bool? value}) async {}
-  Future<void> onNotificationTimeChanged(TimeOfDay time) async {}
+  Future<void> onToggleNotification(BuildContext context, {bool? value}) async {
+    bool newValue = value ?? !settings.isNotificationAllowed;
 
+    debugPrint("notification value : $newValue");
+
+    if (newValue == true) {
+      bool authorized = await NotificationService.instance
+          .checkAndRequestPermission(context);
+      debugPrint("checking notification permission");
+
+      if (!authorized) {
+        newValue = false;
+      }
+    }
+
+    settings = settings.copyWith(isNotificationAllowed: newValue);
+    await _settingsRepository.updateSettings(settings);
+    notifyListeners();
+  }
+
+  /// Active ou désactive les suggestions (Algorithme de recommandation)
+  Future<void> onToggleSuggestions({bool? value}) async {
+    // 1. Calcul de la nouvelle valeur
+    // (J'assume que ton modèle AppSettings a un champ 'enableSuggestions', adapte le nom si besoin)
+    final bool newValue =
+        value ?? !settings.isPersonalizedRecommendationAllowed;
+
+    // 2. Mise à jour de l'état et sauvegarde
+    settings = settings.copyWith(isPersonalizedRecommendationAllowed: newValue);
+    notifyListeners();
+    await _settingsRepository.updateSettings(settings);
+
+    debugPrint("Suggestions mises à jour : $newValue");
+  }
+
+  /// Change l'heure de la notification quotidienne
+  Future<void> onNotificationTimeChanged(TimeOfDay time) async {
+    settings = settings.copyWith(notificationTime: time);
+    await _settingsRepository.updateSettings(settings);
+    debugPrint("temps sauvegardé : $time");
+    notifyListeners();
+  }
+
+  /// Ajoute ou retire un genre de la liste des favoris.
+  ///
+  /// Cette liste est utilisée par l'algorithme "Cocktail" pour personnaliser
+  /// les recommandations de l'utilisateur.
   Future<void> toggleFavoriteGenre(Genres genre) async {
     final currentList = List<Genres>.from(settings.favoriteGenres ?? []);
 
@@ -53,6 +109,15 @@ class AppSettingsViewModel extends ChangeNotifier {
   }
 
   Future<void> onExportData() async {}
+
+  /// Lance la procédure de suppression totale des données de l'utilisateur.
+  ///
+  /// Cette méthode suit un processus strict :
+  /// 1. Demande de confirmation via une boîte de dialogue.
+  /// 2. Affichage d'un loader bloquant.
+  /// 3. Nettoyage en cascade de tous les Providers et Caches (Hive, SQL, Preferences).
+  /// 4. Annulation des notifications programmées.
+  /// 5. Redémarrage forcé de l'application via [RestartWidget].
   Future<void> deleteMyData(BuildContext context) async {
     final confirm =
         await showDialog(
