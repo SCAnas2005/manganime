@@ -1,43 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/manga.dart';
+import 'package:flutter_application_1/providers/global_manga_favorites_provider.dart';
 import 'package:flutter_application_1/viewmodels/manga_view_model.dart';
 import 'package:flutter_application_1/widgets/manga_card.dart';
+import 'package:flutter_application_1/widgets/ui/tab_section.dart';
 import 'package:flutter_application_1/widgets/ui/tab_switcher.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_application_1/widgets/search_widget/search_button.dart';
 
 /// Vue principale pour l'affichage des Mangas.
 /// Cette vue gère deux onglets : "Pour toi" (recommandations) et "Tendances" (catégories classiques).
 class MangaView extends StatefulWidget {
-<<<<<<< Updated upstream
-  const MangaView({super.key});
-=======
   final Manga? mangaToOpen;
   const MangaView({this.mangaToOpen, super.key});
->>>>>>> Stashed changes
 
   @override
   State<MangaView> createState() => _MangaViewState();
 }
 
 class _MangaViewState extends State<MangaView> {
-<<<<<<< Updated upstream
-  int selectedTab = 1; // Par défaut sur "Tendances" car algo pas encore fait
-=======
   // Index de l'onglet sélectionné (0: Pour toi, 1: Tendances)
   int selectedTab = 0;
->>>>>>> Stashed changes
 
   // Controllers pour les listes horizontales dans l'onglet Tendances
   late ScrollController _popularController;
   late ScrollController _publishingController;
   late ScrollController _mostLikedController;
 
-<<<<<<< Updated upstream
-=======
   // Controller pour la grille verticale infinie dans l'onglet Pour toi
   late ScrollController _forYouController;
 
->>>>>>> Stashed changes
   @override
   void initState() {
     super.initState();
@@ -46,12 +38,6 @@ class _MangaViewState extends State<MangaView> {
     _popularController = ScrollController();
     _publishingController = ScrollController();
     _mostLikedController = ScrollController();
-<<<<<<< Updated upstream
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final vm = context.read<MangaViewModel>();
-
-=======
     _forYouController = ScrollController();
 
     // Chargement initial des données après le premier build
@@ -73,7 +59,6 @@ class _MangaViewState extends State<MangaView> {
       });
 
       // "Populaires" (Horizontal)
->>>>>>> Stashed changes
       _popularController.addListener(() {
         if (_popularController.position.pixels >=
             _popularController.position.maxScrollExtent - 200) {
@@ -99,15 +84,12 @@ class _MangaViewState extends State<MangaView> {
     });
   }
 
-<<<<<<< Updated upstream
-=======
   /// Ouvre la page de détail d'un manga spécifique.
   void autoOpenManga(Manga manga) {
     final vm = context.read<MangaViewModel>();
     vm.openMangaPage(context, manga);
   }
 
->>>>>>> Stashed changes
   @override
   void dispose() {
     // Nettoyage des controllers pour éviter les fuites de mémoire
@@ -123,34 +105,6 @@ class _MangaViewState extends State<MangaView> {
     final vm = context.watch<MangaViewModel>();
 
     return SafeArea(
-<<<<<<< Updated upstream
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Onglets "Pour toi" et "Tendances"
-              TabSwitcher(
-                tabs: ["Pour toi", "Tendances"],
-                selectedIndex: selectedTab,
-                onChanged: (index) {
-                  setState(() {
-                    selectedTab = index;
-                  });
-                },
-                isEnabled: [false, true], // "Pour toi" désactivé car algo pas encore fait
-              ),
-              const SizedBox(height: 20),
-
-              // Contenu selon l'onglet sélectionné
-              if (selectedTab == 0)
-                _buildForYou(vm)
-              else
-                _buildTendances(vm),
-            ],
-          ),
-=======
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         child: Column(
@@ -199,22 +153,11 @@ class _MangaViewState extends State<MangaView> {
                   : SingleChildScrollView(child: _buildTendances(vm)),
             ),
           ],
->>>>>>> Stashed changes
         ),
       ),
     );
   }
 
-<<<<<<< Updated upstream
-  // Onglet "Pour toi" - À implémenter plus tard
-  Widget _buildForYou(MangaViewModel vm) {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.all(40),
-        child: Text(
-          "Recommandations à venir...",
-          style: TextStyle(color: Colors.white54, fontSize: 16),
-=======
   /// Construit l'onglet "Pour toi" (Grille de recommandations personnalisées).
   Widget _buildForYou(MangaViewModel vm) {
     final favoritesProvider = context.watch<GlobalMangaFavoritesProvider>();
@@ -229,27 +172,10 @@ class _MangaViewState extends State<MangaView> {
             SizedBox(height: 12),
             Text("Chargement de vos préférences..."),
           ],
->>>>>>> Stashed changes
         ),
-      ),
-    );
-  }
+      );
+    }
 
-<<<<<<< Updated upstream
-  // Onglet "Tendances"
-  Widget _buildTendances(MangaViewModel vm) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // SECTION 1 : Les plus populaires
-        const Text(
-          "Les plus populaires",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-=======
     // CAS 2 : Liste vide (premier appel API pas encore fait)
     // On lance le fetch une fois que l'interface est prête
     if (vm.forYou.isEmpty && !vm.isLoadingForYou && vm.hasMoreForYou) {
@@ -276,76 +202,9 @@ class _MangaViewState extends State<MangaView> {
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
           childAspectRatio: 0.62,
->>>>>>> Stashed changes
         ),
-        const SizedBox(height: 10),
-        _buildHorizontalList(
-          vm.popular,
-          controller: _popularController,
-          onTap: vm.openMangaPage,
-        ),
-
-        const SizedBox(height: 20),
-
-        // SECTION 2 : En publication
-        const Text(
-          "En publication",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        const SizedBox(height: 10),
-        _buildHorizontalList(
-          vm.publishing,
-          controller: _publishingController,
-          onTap: vm.openMangaPage,
-        ),
-
-        const SizedBox(height: 20),
-
-        // SECTION 3 : Les plus aimés
-        const Text(
-          "Les plus aimés",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        const SizedBox(height: 10),
-        _buildHorizontalList(
-          vm.mostLiked,
-          controller: _mostLikedController,
-          onTap: vm.openMangaPage,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildHorizontalList(
-    List<Manga> mangas, {
-    Function(BuildContext context, Manga manga)? onTap,
-    ScrollController? controller,
-  }) {
-    return SizedBox(
-      height: 250,
-      child: ListView.builder(
-        controller: controller,
-        scrollDirection: Axis.horizontal,
-        itemCount: mangas.length,
-        cacheExtent: 300, // Optimisation performance
+        itemCount: vm.forYou.length,
         itemBuilder: (context, index) {
-<<<<<<< Updated upstream
-          final manga = mangas[index];
-          return Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: MangaCard(
-              manga: manga,
-              onTap: (item) => onTap?.call(context, item),
-            ),
-=======
           // Protection contre l'index hors limites
           if (index >= vm.forYou.length) return const SizedBox();
 
@@ -356,14 +215,11 @@ class _MangaViewState extends State<MangaView> {
             onLikeDoubleTap: (m) {
               favoritesProvider.toggleFavorite(manga);
             },
->>>>>>> Stashed changes
           );
         },
       ),
     );
   }
-<<<<<<< Updated upstream
-=======
 
   /// Construit l'onglet "Tendances" (Sections horizontales catégorisées).
   Widget _buildTendances(MangaViewModel vm) {
@@ -418,5 +274,4 @@ class _MangaViewState extends State<MangaView> {
       ],
     );
   }
->>>>>>> Stashed changes
 }
