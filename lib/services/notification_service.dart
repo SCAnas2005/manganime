@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 class NotificationService {
   /// Instance unique (Singleton) du service de notification.
   static final NotificationService instance = NotificationService._internal();
+  final enableNotifications = true;
   factory NotificationService() => instance;
   NotificationService._internal();
 
@@ -28,6 +29,7 @@ class NotificationService {
   Future<void> init({
     Function(NotificationResponse reponse)? onDidReceiveNotificationResponse,
   }) async {
+    if (!enableNotifications) return;
     // 1. Initialise les bases de données de fuseaux horaires
     tz.initializeTimeZones();
 
@@ -73,6 +75,7 @@ class NotificationService {
   /// Demande la permission intelligemment.
   /// Retourne TRUE si c'est bon, FALSE si c'est bloqué.
   Future<bool> checkAndRequestPermission(BuildContext context) async {
+    if (!enableNotifications) return false;
     PermissionStatus status = await Permission.notification.status;
 
     if (status.isGranted) {
@@ -138,6 +141,7 @@ class NotificationService {
     required String payload,
     required TimeOfDay time,
   }) async {
+    if (!enableNotifications) return;
     await flutterLocalNotificationsPlugin.zonedSchedule(
       id,
       title,
@@ -203,6 +207,7 @@ class NotificationService {
     required Identifiable identifiable,
     required DateTime date,
   }) async {
+    if (!enableNotifications) return;
     // Le payload permet de transmettre le type et l'ID du média pour la navigation au clic
     String payload =
         "${identifiable is Anime ? "anime" : "manga"}:${identifiable.id}";
