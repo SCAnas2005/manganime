@@ -7,9 +7,11 @@ import 'package:flutter/material.dart';
 // Assure-toi que ces imports correspondent à ton projet
 import 'package:flutter_application_1/models/achievement.dart';
 import 'package:flutter_application_1/models/anime.dart';
+import 'package:flutter_application_1/models/manga.dart';
 import 'package:flutter_application_1/models/identifiable_enums.dart';
 import 'package:flutter_application_1/models/rank_info.dart';
 import 'package:flutter_application_1/providers/anime_cache_provider.dart';
+import 'package:flutter_application_1/providers/manga_cache_provider.dart';
 import 'package:flutter_application_1/providers/like_storage_provider.dart';
 import 'package:flutter_application_1/providers/screen_time_provider.dart';
 import 'package:flutter_application_1/providers/user_profile_provider.dart';
@@ -109,6 +111,7 @@ class AnimeStatModel extends ChangeNotifier {
     // On attache les listeners sur NOS variables locales
     _likesListenable?.addListener(_updateLikes);
     _likesListenable?.addListener(_updateGenreStats);
+    _likesListenable?.addListener(_updateRank);
 
     _viewsListenable?.addListener(_updateViews);
     _viewsListenable?.addListener(_updateRank);
@@ -122,14 +125,14 @@ class AnimeStatModel extends ChangeNotifier {
 
   void _updateLikes() {
     if (_isDisposed) return; // Sécurité
-    likesNumber = LikeStorage.getIdAnimeLiked().length;
+    likesNumber = LikeStorage.getIdAnimeLiked().length + LikeStorage.getIdMangaLiked().length;
     _checkAchievements();
     notifyListeners();
   }
 
   void _updateViews() {
     if (_isDisposed) return; // Sécurité
-    viewNumber = UserStatsProvider.getAnimeViewsCount();
+    viewNumber = UserStatsProvider.getAllViewsCount();
     _checkAchievements();
     notifyListeners();
   }
@@ -140,8 +143,8 @@ class AnimeStatModel extends ChangeNotifier {
     final double divisor = ((1 + sqrt(5)) / 2) * 1000;
     final int totalScore =
         ScreenTimeProvider.getTotalScreenTime() +
-        LikeStorage.getIdAnimeLiked().length +
-        UserStatsProvider.getAnimeViewsCount();
+        likesNumber +
+        viewNumber;
 
     rankNumber = totalScore ~/ divisor;
     rankProgress = (totalScore % divisor) / divisor;
@@ -164,10 +167,11 @@ class AnimeStatModel extends ChangeNotifier {
   Future<void> _updateGenreStats() async {
     if (_isDisposed) return; // Sécurité avant l'async
 
-    final likedIds = LikeStorage.getIdAnimeLiked();
+    // --- Fetch Animes ---
+    final likedAnimeIds = LikeStorage.getIdAnimeLiked();
     final List<Anime> likedAnimes = [];
 
-    for (final id in likedIds) {
+    for (final id in likedAnimeIds) {
       if (_isDisposed) return; // Sécurité pendant la boucle
       final anime = await AnimeCache.instance.get(id);
       if (anime != null) {
@@ -175,25 +179,57 @@ class AnimeStatModel extends ChangeNotifier {
       }
     }
 
+    // --- Fetch Mangas ---
+    final likedMangaIds = LikeStorage.getIdMangaLiked();
+    final List<Manga> likedMangas = [];
+
+    for (final id in likedMangaIds) {
+      if (_isDisposed) return;
+      final manga = MangaCache.instance.get(id);
+      if (manga != null) {
+        likedMangas.add(manga);
+      }
+    }
+
     if (_isDisposed) return; // Sécurité après l'async
 
-    if (likedAnimes.isEmpty) {
+    if (likedAnimes.isEmpty && likedMangas.isEmpty) {
       categoryPercentage = {};
       notifyListeners();
       return;
     }
 
-    final userProfile = UserprofileProvider.create(likedAnimes: likedAnimes);
-    final topGenres = userProfile.getTopGenres<Anime>(5);
+    final userProfile = UserprofileProvider.create(
+      likedAnimes: likedAnimes,
+      likedMangas: likedMangas,
+    );
+    final topGenres = userProfile.getGlobalTopGenres(5);
+
+    // Calcul des fréquences combinées localement
+    final Map<dynamic, int> combinedFrequencies = {};
+    for (var entry in userProfile.animeGenreTagFrenquencies.entries) {
+      combinedFrequencies.update(
+        entry.key,
+        (v) => v + entry.value,
+        ifAbsent: () => entry.value,
+      );
+    }
+    for (var entry in userProfile.mangaGenreTagFrenquencies.entries) {
+      combinedFrequencies.update(
+        entry.key,
+        (v) => v + entry.value,
+        ifAbsent: () => entry.value,
+      );
+    }
 
     final Map<String, int> newStats = {};
     int sumTop5 = 0;
     for (final genre in topGenres) {
-      sumTop5 += userProfile.animeGenreTagFrenquencies[genre] ?? 0;
+      sumTop5 += combinedFrequencies[genre] ?? 0;
     }
 
     for (final genre in topGenres) {
-      final count = userProfile.animeGenreTagFrenquencies[genre] ?? 0;
+      final count = combinedFrequencies[genre] ?? 0;
       if (sumTop5 > 0) {
         final percent = (count * 100) ~/ sumTop5;
         newStats[genre.toReadableString()] = percent;

@@ -69,7 +69,34 @@ class UserprofileProvider {
   /// Obtient les genres les plus pertinents (Likes + Préférences combinés)
   List<Genres> getTopGenres<T extends Identifiable>(int count) {
     final frequencies = _getFrequenciesFromType<T>();
+    return _computeTopGenres(frequencies, count);
+  }
 
+  /// Obtient les genres les plus pertinents globalement (Anime + Manga)
+  List<Genres> getGlobalTopGenres(int count) {
+    final Map<Genres, int> globalFrequencies = {};
+
+    // Fusionner les fréquences Anime
+    for (var entry in animeGenreTagFrenquencies.entries) {
+      globalFrequencies.update(
+        entry.key,
+        (v) => v + entry.value,
+        ifAbsent: () => entry.value,
+      );
+    }
+    // Fusionner les fréquences Manga
+    for (var entry in mangaGenreTagFrenquencies.entries) {
+      globalFrequencies.update(
+        entry.key,
+        (v) => v + entry.value,
+        ifAbsent: () => entry.value,
+      );
+    }
+
+    return _computeTopGenres(globalFrequencies, count);
+  }
+
+  List<Genres> _computeTopGenres(Map<Genres, int> frequencies, int count) {
     // On crée une map temporaire qui fusionne Likes et Préférences
     final Map<Genres, double> globalScores = {};
 
