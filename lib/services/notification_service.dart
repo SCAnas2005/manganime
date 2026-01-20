@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_application_1/models/anime.dart';
 import 'package:flutter_application_1/models/identifiable.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -15,7 +17,7 @@ import 'package:flutter/material.dart';
 class NotificationService {
   /// Instance unique (Singleton) du service de notification.
   static final NotificationService instance = NotificationService._internal();
-  final enableNotifications = true;
+  final enableNotifications = Platform.isAndroid;
   factory NotificationService() => instance;
   NotificationService._internal();
 
